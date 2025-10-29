@@ -1,0 +1,201 @@
+/**
+ * API Endpoints Constants
+ * Centralized configuration for all API endpoints used in the Stock Management application
+ */
+
+import { environment } from './environment.constants';
+
+// Base API Configuration
+export const API_CONFIG = {
+  // Default headers
+  DEFAULT_HEADERS: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+} as const;
+
+// Construct full API base URL using environment configuration
+export const API_BASE_URL = `${environment.apiBaseUrl}/api/${environment.apiVersion}`;
+
+// Company API Endpoints
+export const COMPANY_ENDPOINTS = {
+  // Base company endpoint
+  BASE: `${API_BASE_URL}/companies`,
+  
+  // Specific endpoints
+  CREATE: `${API_BASE_URL}/companies`,
+  GET_ALL: `${API_BASE_URL}/companies`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/companies/${id}`,
+  UPDATE: (id: number) => `${API_BASE_URL}/companies/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/companies/${id}`,
+  
+  // Bulk operations
+  BULK_CREATE: `${API_BASE_URL}/companies/bulk`,
+  BULK_UPDATE: `${API_BASE_URL}/companies/bulk`,
+  BULK_DELETE: `${API_BASE_URL}/companies/bulk`,
+  
+  // Import/Export operations
+  IMPORT: `${API_BASE_URL}/companies/import`,
+  EXPORT: `${API_BASE_URL}/companies/export`,
+  
+  // Search and filter
+  SEARCH: `${API_BASE_URL}/companies/search`,
+  FILTER: `${API_BASE_URL}/companies/filter`
+} as const;
+
+// Stock API Endpoints
+export const STOCK_ENDPOINTS = {
+  // Base stock endpoint
+  BASE: `${API_BASE_URL}/stocks`,
+  
+  // Specific endpoints
+  CREATE: `${API_BASE_URL}/stocks`,
+  GET_ALL: `${API_BASE_URL}/stocks`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/stocks/${id}`,
+  GET_BY_COMPANY: (companyId: number) => `${API_BASE_URL}/stocks/company/${companyId}`,
+  UPDATE: (id: number) => `${API_BASE_URL}/stocks/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/stocks/${id}`,
+  
+  // Stock price operations
+  GET_PRICE: (stockId: number) => `${API_BASE_URL}/stocks/${stockId}/price`,
+  GET_PRICE_HISTORY: (stockId: number) => `${API_BASE_URL}/stocks/${stockId}/price-history`,
+  UPDATE_PRICE: (stockId: number) => `${API_BASE_URL}/stocks/${stockId}/price`,
+  
+  // Market data
+  MARKET_DATA: `${API_BASE_URL}/stocks/market-data`,
+  LIVE_PRICES: `${API_BASE_URL}/stocks/live-prices`,
+  
+  // Portfolio operations
+  PORTFOLIO: `${API_BASE_URL}/stocks/portfolio`,
+  PORTFOLIO_VALUE: `${API_BASE_URL}/stocks/portfolio/value`,
+  
+  // Analytics
+  PERFORMANCE: `${API_BASE_URL}/stocks/performance`,
+  TRENDS: `${API_BASE_URL}/stocks/trends`
+} as const;
+
+// Portfolio API Endpoints
+export const PORTFOLIO_ENDPOINTS = {
+  // Base portfolio endpoint
+  BASE: `${API_BASE_URL}/portfolio`,
+  
+  // Portfolio management
+  CREATE: `${API_BASE_URL}/portfolio`,
+  GET_ALL: `${API_BASE_URL}/portfolio`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/portfolio/${id}`,
+  UPDATE: (id: number) => `${API_BASE_URL}/portfolio/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/portfolio/${id}`,
+  
+  // Portfolio analytics
+  SUMMARY: `${API_BASE_URL}/portfolio/summary`,
+  PERFORMANCE: `${API_BASE_URL}/portfolio/performance`,
+  ALLOCATION: `${API_BASE_URL}/portfolio/allocation`,
+  RISK_ANALYSIS: `${API_BASE_URL}/portfolio/risk-analysis`
+} as const;
+
+// Reports API Endpoints
+export const REPORTS_ENDPOINTS = {
+  // Base reports endpoint
+  BASE: `${API_BASE_URL}/reports`,
+  
+  // Report generation
+  GENERATE: `${API_BASE_URL}/reports/generate`,
+  GET_ALL: `${API_BASE_URL}/reports`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/reports/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/reports/${id}`,
+  
+  // Report types
+  DAILY_SUMMARY: `${API_BASE_URL}/reports/daily-summary`,
+  MONTHLY_SUMMARY: `${API_BASE_URL}/reports/monthly-summary`,
+  QUARTERLY_SUMMARY: `${API_BASE_URL}/reports/quarterly-summary`,
+  ANNUAL_SUMMARY: `${API_BASE_URL}/reports/annual-summary`,
+  
+  // Custom reports
+  CUSTOM: `${API_BASE_URL}/reports/custom`,
+  
+  // Export formats
+  EXPORT_PDF: (reportId: number) => `${API_BASE_URL}/reports/${reportId}/export/pdf`,
+  EXPORT_EXCEL: (reportId: number) => `${API_BASE_URL}/reports/${reportId}/export/excel`,
+  EXPORT_CSV: (reportId: number) => `${API_BASE_URL}/reports/${reportId}/export/csv`
+} as const;
+
+// User Management API Endpoints
+export const USER_ENDPOINTS = {
+  // Base user endpoint
+  BASE: `${API_BASE_URL}/users`,
+  
+  // Authentication
+  LOGIN: `${API_BASE_URL}/auth/login`,
+  LOGOUT: `${API_BASE_URL}/auth/logout`,
+  REGISTER: `${API_BASE_URL}/auth/register`,
+  REFRESH_TOKEN: `${API_BASE_URL}/auth/refresh`,
+  FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
+  RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
+  
+  // User profile
+  PROFILE: `${API_BASE_URL}/users/profile`,
+  UPDATE_PROFILE: `${API_BASE_URL}/users/profile`,
+  CHANGE_PASSWORD: `${API_BASE_URL}/users/change-password`,
+  
+  // User preferences
+  PREFERENCES: `${API_BASE_URL}/users/preferences`,
+  UPDATE_PREFERENCES: `${API_BASE_URL}/users/preferences`
+} as const;
+
+// Dashboard API Endpoints
+export const DASHBOARD_ENDPOINTS = {
+  // Base dashboard endpoint
+  BASE: `${API_BASE_URL}/dashboard`,
+  
+  // Dashboard data
+  SUMMARY: `${API_BASE_URL}/dashboard/summary`,
+  STATISTICS: `${API_BASE_URL}/dashboard/statistics`,
+  RECENT_ACTIVITIES: `${API_BASE_URL}/dashboard/recent-activities`,
+  ALERTS: `${API_BASE_URL}/dashboard/alerts`,
+  
+  // Widgets
+  WIDGETS: `${API_BASE_URL}/dashboard/widgets`,
+  WIDGET_DATA: (widgetId: string) => `${API_BASE_URL}/dashboard/widgets/${widgetId}/data`
+} as const;
+
+// Utility function to build query parameters
+export const buildQueryParams = (params: Record<string, any>): string => {
+  const searchParams = new URLSearchParams();
+  
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== '') {
+      if (Array.isArray(value)) {
+        value.forEach(item => searchParams.append(key, item.toString()));
+      } else {
+        searchParams.append(key, value.toString());
+      }
+    }
+  });
+  
+  const queryString = searchParams.toString();
+  return queryString ? `?${queryString}` : '';
+};
+
+// Utility function to build full URL with query parameters
+export const buildApiUrl = (endpoint: string, params?: Record<string, any>): string => {
+  return params ? `${endpoint}${buildQueryParams(params)}` : endpoint;
+};
+
+// Export all endpoints as a single object for easy access
+export const API_ENDPOINTS = {
+  COMPANY: COMPANY_ENDPOINTS,
+  STOCK: STOCK_ENDPOINTS,
+  PORTFOLIO: PORTFOLIO_ENDPOINTS,
+  REPORTS: REPORTS_ENDPOINTS,
+  USER: USER_ENDPOINTS,
+  DASHBOARD: DASHBOARD_ENDPOINTS
+} as const;
+
+// Type definitions for better TypeScript support
+export type ApiEndpoint = typeof API_ENDPOINTS;
+export type CompanyEndpoint = typeof COMPANY_ENDPOINTS;
+export type StockEndpoint = typeof STOCK_ENDPOINTS;
+export type PortfolioEndpoint = typeof PORTFOLIO_ENDPOINTS;
+export type ReportsEndpoint = typeof REPORTS_ENDPOINTS;
+export type UserEndpoint = typeof USER_ENDPOINTS;
+export type DashboardEndpoint = typeof DASHBOARD_ENDPOINTS;
