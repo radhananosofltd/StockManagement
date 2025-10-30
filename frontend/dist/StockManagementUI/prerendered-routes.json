@@ -1,0 +1,10 @@
+{
+  "routes": {
+    "/": {},
+    "/dashboard": {},
+    "/dashboard/company": {},
+    "/dashboard/home": {},
+    "/dashboard/reports": {},
+    "/dashboard/stocks": {}
+  }
+}
