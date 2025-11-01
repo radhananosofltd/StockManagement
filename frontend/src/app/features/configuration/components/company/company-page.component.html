@@ -179,11 +179,16 @@
           <span>Import Companies</span>
         }
       </button>
-      <button class="action-btn" (click)="exportCompanies()">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M9 10h6v6h4l-7 7-7-7h4zm-4-4h14v2H5z"/>
-        </svg>
-        <span>Export Data</span>
+      <button class="action-btn" (click)="exportCompanies()" [disabled]="isLoadingCompanies()">
+        @if (isLoadingCompanies()) {
+          <span class="spinner"></span>
+          <span>Exporting...</span>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 10h6v6h4l-7 7-7-7h4zm-4-4h14v2H5z"/>
+          </svg>
+          <span>Export Data</span>
+        }
       </button>
     </div>
   </div>

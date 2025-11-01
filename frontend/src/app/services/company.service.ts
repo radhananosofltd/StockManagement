@@ -92,6 +92,10 @@ export class CompanyService {
     );
   }
 
+  exportCompanies(): Observable<CompanyListDTO[]> {
+    return this.getCompanies();
+  }
+
   submitCompanyLegacy(company: Company): Observable<ApiResponse> {
     const createDto: CreateCompanyDTO = {
       customerCode: company.id.toString(),

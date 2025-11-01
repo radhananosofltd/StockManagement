@@ -443,7 +443,73 @@ export class CompanyPageComponent implements AfterViewInit {
 
   public exportCompanies(): void {
     console.log('Export companies clicked');
-    // TODO: Implement export functionality
+    this.isLoadingCompanies.set(true);
+    this.errorMessage.set('');
+
+    this.companyService.exportCompanies().subscribe({
+      next: (companies: CompanyListDTO[]) => {
+        this.isLoadingCompanies.set(false);
+        
+        if (companies.length === 0) {
+          this.errorMessage.set('No company data available to export.');
+          return;
+        }
+
+        this.generateExcelFile(companies);
+      },
+      error: (error: any) => {
+        this.isLoadingCompanies.set(false);
+        this.errorMessage.set(
+          error.error?.message || 
+          'Failed to fetch company data for export. Please try again.'
+        );
+        console.error('Error fetching companies for export:', error);
+      }
+    });
+  }
+
+  private generateExcelFile(companies: CompanyListDTO[]): void {
+    try {
+      // Prepare data for Excel export
+      const exportData = companies.map(company => ({
+        'Company Code': company.customerCode,
+        'Company Name': company.customerName,
+        'Company Address': company.customerAddress || '',
+        'Currency Value': company.currency,
+        'Created Date': new Date(company.createdDate).toLocaleDateString(),
+        'Status': company.isActive ? 'Active' : 'Inactive'
+      }));
+
+      // Create a new workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+      // Set column widths for better formatting
+      const columnWidths = [
+        { wch: 15 }, // Company Code
+        { wch: 30 }, // Company Name
+        { wch: 40 }, // Company Address
+        { wch: 15 }, // Currency Value
+        { wch: 15 }, // Created Date
+        { wch: 10 }  // Status
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // Add the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Companies');
+
+      // Generate filename with current date
+      const currentDate = new Date().toISOString().split('T')[0];
+      const filename = `companies_export_${currentDate}.xlsx`;
+
+      // Write and download the file
+      XLSX.writeFile(workbook, filename);
+
+      this.successMessage.set(`Successfully exported ${companies.length} companies to ${filename}`);
+    } catch (error) {
+      this.errorMessage.set('Failed to generate Excel file. Please try again.');
+      console.error('Excel generation error:', error);
+    }
   }
 
 
