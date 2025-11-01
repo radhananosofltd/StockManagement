@@ -11,6 +11,19 @@ import { SkuComponent } from './features/configuration/components/sku/sku.compon
 import { ItemSpecificationComponent } from './features/configuration/components/item-specification/item-specification.component';
 import { LabelGenerationComponent } from './features/configuration/components/label-generation/label-generation.component';
 import { UserProfileComponent } from './features/user/components/user-profile/user-profile.component';
+// Stock Maintenance Components
+import { InwardComponent } from './features/StockMaintenance/components/Inward/Inward.component';
+import { OutwardComponent } from './features/StockMaintenance/components/Outward/Outward.component';
+import { TransferComponent } from './features/StockMaintenance/components/Transfer/Transfer.component';
+import { ConversionComponent } from './features/StockMaintenance/components/Conversion/Conversion.component';
+// Reports Components
+import { CustomizedViewsComponent } from './features/Reports/components/CustomizedViews/CustomizedViews.component';
+import { CustomizedDownloadsComponent } from './features/Reports/components/CustomizedDownloads/CustomizedDownloads.component';
+// Admin Components
+import { BackupComponent } from './features/Admin/components/Backup/Backup.component';
+import { RestoreComponent } from './features/Admin/components/Restore/Restore.component';
+import { ArchiveComponent } from './features/Admin/components/Archive/Archive.component';
+import { UserRoleAuthComponent } from './features/Admin/components/UserRoleAuth/UserRoleAuth.component';
 import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 
@@ -71,13 +84,48 @@ export const routes: Routes = [
         path: 'configuration/label-generation',
         component: LabelGenerationComponent
       },
+      // Stock Maintenance Routes
       {
-        path: 'stocks',
-        component: HomePageComponent // Placeholder for now
+        path: 'stock-maintenance/inward',
+        component: InwardComponent
       },
       {
-        path: 'reports',
-        component: HomePageComponent // Placeholder for now
+        path: 'stock-maintenance/outward',
+        component: OutwardComponent
+      },
+      {
+        path: 'stock-maintenance/transfer',
+        component: TransferComponent
+      },
+      {
+        path: 'stock-maintenance/conversion',
+        component: ConversionComponent
+      },
+      // Reports Routes
+      {
+        path: 'reports/customized-views',
+        component: CustomizedViewsComponent
+      },
+      {
+        path: 'reports/customized-downloads',
+        component: CustomizedDownloadsComponent
+      },
+      // Admin Routes
+      {
+        path: 'admin/backup',
+        component: BackupComponent
+      },
+      {
+        path: 'admin/restore',
+        component: RestoreComponent
+      },
+      {
+        path: 'admin/archive',
+        component: ArchiveComponent
+      },
+      {
+        path: 'admin/user-role-auth',
+        component: UserRoleAuthComponent
       },
       {
         path: 'profile',

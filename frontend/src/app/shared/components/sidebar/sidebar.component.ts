@@ -76,14 +76,75 @@ export class SidebarComponent implements OnInit {
       ]
     },
     {
-      label: 'Stocks',
-      icon: '📊',
-      route: '/dashboard/stocks'
+      label: 'Stock Maintenance',
+      icon: '📦',
+      expanded: false,
+      children: [
+        {
+          label: 'Inward (Single / Bulk / Import)',
+          icon: '📥',
+          route: '/dashboard/stock-maintenance/inward'
+        },
+        {
+          label: 'Outward (Single / Bulk / Import)',
+          icon: '�',
+          route: '/dashboard/stock-maintenance/outward'
+        },
+        {
+          label: 'Transfer',
+          icon: '🔄',
+          route: '/dashboard/stock-maintenance/transfer'
+        },
+        {
+          label: 'Conversion',
+          icon: '🔀',
+          route: '/dashboard/stock-maintenance/conversion'
+        }
+      ]
     },
     {
       label: 'Reports',
       icon: '📈',
-      route: '/dashboard/reports'
+      expanded: false,
+      children: [
+        {
+          label: 'Customized Views',
+          icon: '👁️',
+          route: '/dashboard/reports/customized-views'
+        },
+        {
+          label: 'Customized Downloads',
+          icon: '⬇️',
+          route: '/dashboard/reports/customized-downloads'
+        }
+      ]
+    },
+    {
+      label: 'Admin',
+      icon: '👨‍💼',
+      expanded: false,
+      children: [
+        {
+          label: 'Backup',
+          icon: '💾',
+          route: '/dashboard/admin/backup'
+        },
+        {
+          label: 'Restore',
+          icon: '🔄',
+          route: '/dashboard/admin/restore'
+        },
+        {
+          label: 'Archive',
+          icon: '📁',
+          route: '/dashboard/admin/archive'
+        },
+        {
+          label: 'User Role and Authorization Setup',
+          icon: '🔐',
+          route: '/dashboard/admin/user-role-auth'
+        }
+      ]
     }
   ];
 

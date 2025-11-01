@@ -164,7 +164,7 @@
 }
 
 .submenu.expanded {
-  max-height: none;
+  max-height: 500px; /* Set a reasonable max height for animation */
   overflow: visible;
 }
 
@@ -181,7 +181,7 @@
   text-decoration: none;
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .submenu-link:hover {
@@ -203,7 +203,7 @@
 }
 
 .submenu-text {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .sidebar-footer {
