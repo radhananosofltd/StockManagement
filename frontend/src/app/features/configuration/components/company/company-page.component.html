@@ -147,6 +147,15 @@
         </div>
       </div>
     }
+
+    @if (importMessage()) {
+      <div class="import-message">
+        <div class="message-content">
+          <span class="spinner"></span>
+          {{ importMessage() }}
+        </div>
+      </div>
+    }
   </div>
 
   <!-- Quick Actions Card -->
@@ -159,11 +168,16 @@
         </svg>
         <span>View All Companies</span>
       </button>
-      <button class="action-btn" (click)="importCompanies()">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
-        </svg>
-        <span>Import Companies</span>
+      <button class="action-btn" (click)="importCompanies()" [disabled]="isImporting()">
+        @if (isImporting()) {
+          <span class="spinner"></span>
+          <span>Importing...</span>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+          </svg>
+          <span>Import Companies</span>
+        }
       </button>
       <button class="action-btn" (click)="exportCompanies()">
         <svg viewBox="0 0 24 24" fill="currentColor">

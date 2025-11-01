@@ -51,5 +51,54 @@ namespace Stock_Management_Business.Service
             var company = await _repo.GetCompanyById(id);
             return company != null ? _mapper.Map<CompanyDTO>(company) : null;
         }
+
+        public async Task<BulkImportResultDTO> BulkImportCompanies(List<CreateCompanyDTO> companies, int createdBy)
+        {
+            var result = new BulkImportResultDTO
+            {
+                TotalRecords = companies.Count,
+                Errors = new List<string>()
+            };
+
+            var successCount = 0;
+            var failedCount = 0;
+
+            foreach (var company in companies)
+            {
+                try
+                {
+                    // Check if company code already exists
+                    var exists = await _repo.CompanyCodeExists(company.CustomerCode);
+                    if (exists)
+                    {
+                        result.Errors.Add($"Company with code '{company.CustomerCode}' already exists.");
+                        failedCount++;
+                        continue;
+                    }
+
+                    var companyEntity = _mapper.Map<CompanyEntity>(company);
+                    companyEntity.CreatedBy = createdBy;
+                    companyEntity.CreatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+                    companyEntity.IsActive = true;
+
+                    await _repo.AddCompany(companyEntity);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    result.Errors.Add($"Failed to import company '{company.CustomerCode}': {ex.Message}");
+                    failedCount++;
+                }
+            }
+
+            result.SuccessfulRecords = successCount;
+            result.FailedRecords = failedCount;
+            result.Success = failedCount == 0;
+            result.Message = result.Success 
+                ? $"Successfully imported all {successCount} companies." 
+                : $"Imported {successCount} companies with {failedCount} failures.";
+
+            return result;
+        }
     }
 }

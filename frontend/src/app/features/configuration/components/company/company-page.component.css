@@ -252,6 +252,20 @@
   color: #991b1b;
 }
 
+.import-message {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+  border: 2px solid #fbbf24;
+  color: #92400e;
+}
+
 .message-content {
   display: flex;
   align-items: flex-start;

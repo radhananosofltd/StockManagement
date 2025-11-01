@@ -12,5 +12,6 @@ namespace Stock_Management_Business.Interface
         Task<int> AddCompany(CreateCompanyDTO company, int createdBy);
         Task<List<CompanyListDTO>> GetAllCompanies();
         Task<CompanyDTO?> GetCompanyById(int id);
+        Task<BulkImportResultDTO> BulkImportCompanies(List<CreateCompanyDTO> companies, int createdBy);
     }
 }

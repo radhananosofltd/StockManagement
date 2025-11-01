@@ -28,6 +28,15 @@ export interface ApiResponse<T = any> {
   data?: T;
 }
 
+export interface BulkImportResponse {
+  success: boolean;
+  message: string;
+  totalRecords: number;
+  successfulRecords: number;
+  failedRecords: number;
+  errors?: string[];
+}
+
 export interface Company {
   id: number;
   name: string;
@@ -67,6 +76,17 @@ export class CompanyService {
     }).pipe(
       catchError(error => {
         console.error('Error fetching companies:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  bulkImportCompanies(companies: CreateCompanyDTO[]): Observable<BulkImportResponse> {
+    return this.http.post<BulkImportResponse>(COMPANY_ENDPOINTS.BULK_IMPORT, companies, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(error => {
+        console.error('Error bulk importing companies:', error);
         return throwError(() => error);
       })
     );

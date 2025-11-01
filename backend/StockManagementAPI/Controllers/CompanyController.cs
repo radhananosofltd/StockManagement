@@ -79,5 +79,43 @@ namespace StockManagementAPI.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving the company" });
             }
         }
+
+        [HttpPost("bulk-import")]
+        public async Task<IActionResult> BulkImportCompanies([FromBody] List<CreateCompanyDTO> companies)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                if (companies == null || companies.Count == 0)
+                {
+                    return BadRequest(new { message = "No companies provided for import" });
+                }
+
+                // Get the current user ID from JWT token
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return Unauthorized("Invalid user token");
+                }
+
+                var result = await _service.BulkImportCompanies(companies, userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { 
+                    success = false,
+                    message = "An error occurred during bulk import",
+                    totalRecords = companies?.Count ?? 0,
+                    successfulRecords = 0,
+                    failedRecords = companies?.Count ?? 0,
+                    errors = new[] { ex.Message }
+                });
+            }
+        }
     }
 }

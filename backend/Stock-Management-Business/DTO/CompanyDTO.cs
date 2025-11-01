@@ -38,4 +38,14 @@ namespace Stock_Management_Business.DTO
         public DateTime CreatedDate { get; set; }
         public bool IsActive { get; set; }
     }
+    
+    public class BulkImportResultDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public int TotalRecords { get; set; }
+        public int SuccessfulRecords { get; set; }
+        public int FailedRecords { get; set; }
+        public List<string>? Errors { get; set; }
+    }
 }

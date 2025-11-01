@@ -36,6 +36,7 @@ export const COMPANY_ENDPOINTS = {
   
   // Import/Export operations
   IMPORT: `${API_BASE_URL}/company/import`,
+  BULK_IMPORT: `${API_BASE_URL}/company/bulk-import`,
   EXPORT: `${API_BASE_URL}/company/export`,
   
   // Search and filter
