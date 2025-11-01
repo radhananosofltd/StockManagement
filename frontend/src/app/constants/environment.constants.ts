@@ -21,7 +21,7 @@ export interface EnvironmentConfig {
 // Development Environment
 export const developmentConfig: EnvironmentConfig = {
   production: false,
-  apiBaseUrl: 'https://api-dev.example.com',
+  apiBaseUrl: 'http://localhost:5134',
   apiVersion: 'v1',
   apiTimeout: 30000,
   enableLogging: true,

@@ -3,8 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from './auth.service';
-
-const API_BASE_URL = 'http://localhost:5134/api';
+import { COMPANY_ENDPOINTS } from '../constants/api-endpoints.constants';
 
 export interface CreateCompanyDTO {
   customerCode: string;
@@ -52,7 +51,7 @@ export class CompanyService {
   }
 
   submitCompany(company: CreateCompanyDTO): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${API_BASE_URL}/company`, company, {
+    return this.http.post<ApiResponse>(COMPANY_ENDPOINTS.CREATE, company, {
       headers: this.getHeaders()
     }).pipe(
       catchError(error => {
@@ -63,7 +62,7 @@ export class CompanyService {
   }
 
   getCompanies(): Observable<CompanyListDTO[]> {
-    return this.http.get<CompanyListDTO[]>(`${API_BASE_URL}/company`, {
+    return this.http.get<CompanyListDTO[]>(COMPANY_ENDPOINTS.GET_ALL, {
       headers: this.getHeaders()
     }).pipe(
       catchError(error => {

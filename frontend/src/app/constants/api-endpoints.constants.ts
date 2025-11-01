@@ -15,32 +15,32 @@ export const API_CONFIG = {
 } as const;
 
 // Construct full API base URL using environment configuration
-export const API_BASE_URL = `${environment.apiBaseUrl}/api/${environment.apiVersion}`;
+export const API_BASE_URL = `${environment.apiBaseUrl}/api`;
 
 // Company API Endpoints
 export const COMPANY_ENDPOINTS = {
   // Base company endpoint
-  BASE: `${API_BASE_URL}/companies`,
+  BASE: `${API_BASE_URL}/company`,
   
   // Specific endpoints
-  CREATE: `${API_BASE_URL}/companies`,
-  GET_ALL: `${API_BASE_URL}/companies`,
-  GET_BY_ID: (id: number) => `${API_BASE_URL}/companies/${id}`,
-  UPDATE: (id: number) => `${API_BASE_URL}/companies/${id}`,
-  DELETE: (id: number) => `${API_BASE_URL}/companies/${id}`,
+  CREATE: `${API_BASE_URL}/company`,
+  GET_ALL: `${API_BASE_URL}/company`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/company/${id}`,
+  UPDATE: (id: number) => `${API_BASE_URL}/company/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/company/${id}`,
   
   // Bulk operations
-  BULK_CREATE: `${API_BASE_URL}/companies/bulk`,
-  BULK_UPDATE: `${API_BASE_URL}/companies/bulk`,
-  BULK_DELETE: `${API_BASE_URL}/companies/bulk`,
+  BULK_CREATE: `${API_BASE_URL}/company/bulk`,
+  BULK_UPDATE: `${API_BASE_URL}/company/bulk`,
+  BULK_DELETE: `${API_BASE_URL}/company/bulk`,
   
   // Import/Export operations
-  IMPORT: `${API_BASE_URL}/companies/import`,
-  EXPORT: `${API_BASE_URL}/companies/export`,
+  IMPORT: `${API_BASE_URL}/company/import`,
+  EXPORT: `${API_BASE_URL}/company/export`,
   
   // Search and filter
-  SEARCH: `${API_BASE_URL}/companies/search`,
-  FILTER: `${API_BASE_URL}/companies/filter`
+  SEARCH: `${API_BASE_URL}/company/search`,
+  FILTER: `${API_BASE_URL}/company/filter`
 } as const;
 
 // Stock API Endpoints
@@ -48,30 +48,6 @@ export const STOCK_ENDPOINTS = {
   // Base stock endpoint
   BASE: `${API_BASE_URL}/stocks`,
   
-  // Specific endpoints
-  CREATE: `${API_BASE_URL}/stocks`,
-  GET_ALL: `${API_BASE_URL}/stocks`,
-  GET_BY_ID: (id: number) => `${API_BASE_URL}/stocks/${id}`,
-  GET_BY_COMPANY: (companyId: number) => `${API_BASE_URL}/stocks/company/${companyId}`,
-  UPDATE: (id: number) => `${API_BASE_URL}/stocks/${id}`,
-  DELETE: (id: number) => `${API_BASE_URL}/stocks/${id}`,
-  
-  // Stock price operations
-  GET_PRICE: (stockId: number) => `${API_BASE_URL}/stocks/${stockId}/price`,
-  GET_PRICE_HISTORY: (stockId: number) => `${API_BASE_URL}/stocks/${stockId}/price-history`,
-  UPDATE_PRICE: (stockId: number) => `${API_BASE_URL}/stocks/${stockId}/price`,
-  
-  // Market data
-  MARKET_DATA: `${API_BASE_URL}/stocks/market-data`,
-  LIVE_PRICES: `${API_BASE_URL}/stocks/live-prices`,
-  
-  // Portfolio operations
-  PORTFOLIO: `${API_BASE_URL}/stocks/portfolio`,
-  PORTFOLIO_VALUE: `${API_BASE_URL}/stocks/portfolio/value`,
-  
-  // Analytics
-  PERFORMANCE: `${API_BASE_URL}/stocks/performance`,
-  TRENDS: `${API_BASE_URL}/stocks/trends`
 } as const;
 
 // Portfolio API Endpoints
@@ -119,18 +95,25 @@ export const REPORTS_ENDPOINTS = {
   EXPORT_CSV: (reportId: number) => `${API_BASE_URL}/reports/${reportId}/export/csv`
 } as const;
 
-// User Management API Endpoints
-export const USER_ENDPOINTS = {
-  // Base user endpoint
-  BASE: `${API_BASE_URL}/users`,
+// Authentication API Endpoints
+export const AUTH_ENDPOINTS = {
+  // Base auth endpoint
+  BASE: `${API_BASE_URL}/auth`,
   
   // Authentication
   LOGIN: `${API_BASE_URL}/auth/login`,
   LOGOUT: `${API_BASE_URL}/auth/logout`,
-  REGISTER: `${API_BASE_URL}/auth/register`,
-  REFRESH_TOKEN: `${API_BASE_URL}/auth/refresh`,
+  SIGNUP: `${API_BASE_URL}/auth/signup`,
   FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
   RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
+  REFRESH_TOKEN: `${API_BASE_URL}/auth/refresh`,
+  PROFILE: `${API_BASE_URL}/auth/profile`
+} as const;
+
+// User Management API Endpoints
+export const USER_ENDPOINTS = {
+  // Base user endpoint
+  BASE: `${API_BASE_URL}/users`,
   
   // User profile
   PROFILE: `${API_BASE_URL}/users/profile`,
@@ -183,6 +166,7 @@ export const buildApiUrl = (endpoint: string, params?: Record<string, any>): str
 
 // Export all endpoints as a single object for easy access
 export const API_ENDPOINTS = {
+  AUTH: AUTH_ENDPOINTS,
   COMPANY: COMPANY_ENDPOINTS,
   STOCK: STOCK_ENDPOINTS,
   PORTFOLIO: PORTFOLIO_ENDPOINTS,
@@ -193,6 +177,7 @@ export const API_ENDPOINTS = {
 
 // Type definitions for better TypeScript support
 export type ApiEndpoint = typeof API_ENDPOINTS;
+export type AuthEndpoint = typeof AUTH_ENDPOINTS;
 export type CompanyEndpoint = typeof COMPANY_ENDPOINTS;
 export type StockEndpoint = typeof STOCK_ENDPOINTS;
 export type PortfolioEndpoint = typeof PORTFOLIO_ENDPOINTS;

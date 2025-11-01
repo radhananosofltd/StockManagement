@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { AUTH_ENDPOINTS } from '../constants/api-endpoints.constants';
 
 export interface LoginRequest {
   username: string;
@@ -72,7 +73,6 @@ export interface ResetPasswordResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:5134/api/auth'; // Updated to use new port
   private readonly tokenKey = 'authToken';
   private readonly userKey = 'currentUser';
 
@@ -87,7 +87,7 @@ export class AuthService {
   login(username: string, password: string): Observable<LoginResponse> {
     const loginData: LoginRequest = { username, password };
     
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, loginData)
+    return this.http.post<LoginResponse>(AUTH_ENDPOINTS.LOGIN, loginData)
       .pipe(
         tap(response => {
           if (response.success && response.token) {
@@ -103,19 +103,19 @@ export class AuthService {
   signup(username: string, email: string, password: string, firstName?: string, lastName?: string): Observable<SignupResponse> {
     const signupData: SignupRequest = { username, email, password, firstName, lastName };
     
-    return this.http.post<SignupResponse>(`${this.apiUrl}/signup`, signupData);
+    return this.http.post<SignupResponse>(AUTH_ENDPOINTS.SIGNUP, signupData);
   }
 
   forgotPassword(email: string): Observable<ForgotPasswordResponse> {
     const forgotPasswordData: ForgotPasswordRequest = { email };
     
-    return this.http.post<ForgotPasswordResponse>(`${this.apiUrl}/forgot-password`, forgotPasswordData);
+    return this.http.post<ForgotPasswordResponse>(AUTH_ENDPOINTS.FORGOT_PASSWORD, forgotPasswordData);
   }
 
   resetPassword(resetCode: string, newPassword: string): Observable<ResetPasswordResponse> {
     const resetPasswordData: ResetPasswordRequest = { resetCode, newPassword };
     
-    return this.http.post<ResetPasswordResponse>(`${this.apiUrl}/reset-password`, resetPasswordData);
+    return this.http.post<ResetPasswordResponse>(AUTH_ENDPOINTS.RESET_PASSWORD, resetPasswordData);
   }
 
   logout(): void {
@@ -166,7 +166,7 @@ export class AuthService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<UserProfile>(`${this.apiUrl}/profile`, { headers });
+    return this.http.get<UserProfile>(AUTH_ENDPOINTS.PROFILE, { headers });
   }
 
   private setToken(token: string): void {
