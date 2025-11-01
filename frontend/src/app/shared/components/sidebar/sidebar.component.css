@@ -22,9 +22,12 @@
 }
 
 .logo-icon {
-  width: 2rem;
-  height: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   color: #60a5fa;
+  object-fit: contain;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .logo-text {

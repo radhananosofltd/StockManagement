@@ -28,6 +28,11 @@ namespace Stock_Management_DataAccess.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
+        public async Task<UserEntity?> GetByResetTokenAsync(string resetToken)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.ResetPasswordToken == resetToken);
+        }
+
         public async Task<UserEntity> CreateAsync(UserEntity user)
         {
             _context.Users.Add(user);

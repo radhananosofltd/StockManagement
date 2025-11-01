@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/components/login/login.component';
 import { DashboardComponent } from './features/dashboard/components/dashboard.component';
 import { HomePageComponent } from './pages/home/home-page/home-page.component';
-import { CompanyPageComponent } from './features/company/components/company-page/company-page.component';
+import { CompanyPageComponent } from './features/configuration/components/company/company-page.component';
 import { RegionComponent } from './features/configuration/components/region/region.component';
 import { CountryComponent } from './features/configuration/components/country/country.component';
 import { BranchComponent } from './features/configuration/components/branch/branch.component';
@@ -40,7 +40,7 @@ export const routes: Routes = [
         component: HomePageComponent
       },
       {
-        path: 'company',
+        path: 'configuration/company-page',
         component: CompanyPageComponent
       },
       {

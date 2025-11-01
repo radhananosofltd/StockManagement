@@ -322,8 +322,8 @@
         </div>
 
         <div class="form-actions">
-          <button
-            type="submit"
+          <button 
+            type="submit" 
             class="login-button"
             [disabled]="resetPasswordForm.invalid || isLoading"
           >

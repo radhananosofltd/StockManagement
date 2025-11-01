@@ -33,6 +33,12 @@ namespace Stock_Management_Business.DTO
         public string Message { get; set; } = string.Empty;
     }
 
+    public class ResetPasswordResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+    }
+
     public class UserProfileDTO
     {
         public int Id { get; set; }

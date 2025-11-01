@@ -107,6 +107,29 @@ namespace StockManagementAPI.Controllers
             }
         }
 
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            try
+            {
+                var result = await _authService.ResetPasswordAsync(request.ResetCode, request.NewPassword);
+                
+                return Ok(new
+                {
+                    success = result.Success,
+                    message = result.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred while resetting your password"
+                });
+            }
+        }
+
         [HttpGet("profile")]
         [Authorize]
         public async Task<IActionResult> GetProfile()
@@ -161,5 +184,11 @@ namespace StockManagementAPI.Controllers
     public class ForgotPasswordRequest
     {
         public string Email { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordRequest
+    {
+        public string ResetCode { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

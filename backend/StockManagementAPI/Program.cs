@@ -54,6 +54,7 @@ builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Register DbContext with PostgreSQL database  
 builder.Services.AddDbContext<StockManagementDBContext>(options =>

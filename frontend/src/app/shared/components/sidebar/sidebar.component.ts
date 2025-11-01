@@ -46,7 +46,7 @@ export class SidebarComponent implements OnInit {
         {
           label: 'Company',
           icon: '🏢',
-          route: '/dashboard/company'
+          route: '/dashboard/configuration/company-page'
         },
         {
           label: 'Branch',

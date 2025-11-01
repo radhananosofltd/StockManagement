@@ -15,12 +15,14 @@ namespace Stock_Management_Business.Service
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
         private readonly string _jwtSecret = "your-super-secret-jwt-key-that-should-be-at-least-32-characters-long";
 
-        public AuthService(IUserRepository userRepository, IMapper mapper)
+        public AuthService(IUserRepository userRepository, IMapper mapper, IEmailService emailService)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _emailService = emailService;
         }
 
         public async Task<AuthenticationResult> LoginAsync(string username, string password)
@@ -143,16 +145,32 @@ namespace Stock_Management_Business.Service
                     return new ForgotPasswordResult
                     {
                         Success = true,
-                        Message = "If an account with this email exists, password reset instructions have been sent."
+                        Message = "If an account with this email exists, a password reset code has been sent."
                     };
                 }
 
-                // In a real application, you would generate a reset token and send an email
-                // For this demo, we'll just return a success message
+                // Generate a 6-digit reset code
+                var resetCode = GenerateResetCode();
+                
+                // Store reset code and expiry (valid for 30 minutes)
+                user.ResetPasswordToken = resetCode;
+                user.ResetPasswordExpiry = DateTime.SpecifyKind(DateTime.UtcNow.AddMinutes(30), DateTimeKind.Utc);
+                
+                await _userRepository.UpdateAsync(user);
+
+                // Send email with reset code
+                var emailSent = await _emailService.SendPasswordResetEmailAsync(email, resetCode);
+                
+                if (!emailSent)
+                {
+                    // Log the reset code for development purposes if email fails
+                    Console.WriteLine($"Email failed. Reset code for {email}: {resetCode}");
+                }
+
                 return new ForgotPasswordResult
                 {
                     Success = true,
-                    Message = "Password reset instructions have been sent to your email address."
+                    Message = "A password reset code has been sent to your email address."
                 };
             }
             catch (Exception ex)
@@ -161,6 +179,54 @@ namespace Stock_Management_Business.Service
                 {
                     Success = false,
                     Message = "An error occurred while processing your request"
+                };
+            }
+        }
+
+        public async Task<ResetPasswordResult> ResetPasswordAsync(string resetCode, string newPassword)
+        {
+            try
+            {
+                var user = await _userRepository.GetByResetTokenAsync(resetCode);
+                
+                if (user == null)
+                {
+                    return new ResetPasswordResult
+                    {
+                        Success = false,
+                        Message = "Invalid reset code. Please check the code or request a new one."
+                    };
+                }
+
+                // Check if reset code has expired
+                if (user.ResetPasswordExpiry == null || user.ResetPasswordExpiry < DateTime.UtcNow)
+                {
+                    return new ResetPasswordResult
+                    {
+                        Success = false,
+                        Message = "Reset code has expired. Please request a new one."
+                    };
+                }
+
+                // Update password and clear reset token
+                user.PasswordHash = HashPassword(newPassword);
+                user.ResetPasswordToken = null;
+                user.ResetPasswordExpiry = null;
+                
+                await _userRepository.UpdateAsync(user);
+
+                return new ResetPasswordResult
+                {
+                    Success = true,
+                    Message = "Password has been reset successfully. Please login with your new password."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResetPasswordResult
+                {
+                    Success = false,
+                    Message = "An error occurred while resetting your password"
                 };
             }
         }
@@ -196,6 +262,12 @@ namespace Stock_Management_Business.Service
             {
                 return null;
             }
+        }
+
+        private string GenerateResetCode()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString();
         }
 
         private string GenerateJwtToken(UserEntity user)
