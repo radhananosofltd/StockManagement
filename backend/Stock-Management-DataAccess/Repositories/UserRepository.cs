@@ -20,7 +20,7 @@ namespace Stock_Management_DataAccess.Repositories
 
         public async Task<UserEntity?> GetByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
         }
 
         public async Task<UserEntity?> GetByEmailAsync(string email)
@@ -37,9 +37,46 @@ namespace Stock_Management_DataAccess.Repositories
 
         public async Task<UserEntity> UpdateAsync(UserEntity user)
         {
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-            return user;
+            try
+            {
+                // Ensure DateTime values have proper UTC kind for PostgreSQL
+                if (user.LastLoginAt.HasValue)
+                {
+                    user.LastLoginAt = DateTime.SpecifyKind(user.LastLoginAt.Value, DateTimeKind.Utc);
+                }
+                
+                if (user.ResetPasswordExpiry.HasValue)
+                {
+                    user.ResetPasswordExpiry = DateTime.SpecifyKind(user.ResetPasswordExpiry.Value, DateTimeKind.Utc);
+                }
+                
+                user.CreatedAt = DateTime.SpecifyKind(user.CreatedAt, DateTimeKind.Utc);
+
+                // Find the existing entity to update specific properties
+                var existingUser = await _context.Users.FindAsync(user.Id);
+                if (existingUser == null)
+                {
+                    throw new InvalidOperationException($"User with ID {user.Id} not found");
+                }
+
+                // Update only the properties that might have changed
+                existingUser.Username = user.Username;
+                existingUser.Email = user.Email;
+                existingUser.PasswordHash = user.PasswordHash;
+                existingUser.FirstName = user.FirstName;
+                existingUser.LastName = user.LastName;
+                existingUser.LastLoginAt = user.LastLoginAt;
+                existingUser.IsActive = user.IsActive;
+                existingUser.ResetPasswordToken = user.ResetPasswordToken;
+                existingUser.ResetPasswordExpiry = user.ResetPasswordExpiry;
+
+                await _context.SaveChangesAsync();
+                return existingUser;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating user: {ex.Message}", ex);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)

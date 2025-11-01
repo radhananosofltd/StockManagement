@@ -10,6 +10,7 @@ namespace Stock_Management_Business.Mapper
         {
             CreateMap<UserEntity, UserDTO>();
             CreateMap<UserDTO, UserEntity>();
+            CreateMap<UserEntity, UserProfileDTO>();
         }
     }
 }

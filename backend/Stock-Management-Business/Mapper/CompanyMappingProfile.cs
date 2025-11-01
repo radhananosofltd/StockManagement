@@ -13,6 +13,12 @@ namespace Stock_Management_Business.Mapper
     {
         public CompanyMappingProfile() {
             CreateMap<CompanyDTO, CompanyEntity>();
+            CreateMap<CompanyEntity, CompanyDTO>();
+            CreateMap<CreateCompanyDTO, CompanyEntity>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+            CreateMap<CompanyEntity, CompanyListDTO>();
         }
     }
 }

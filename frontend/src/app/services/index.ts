@@ -12,11 +12,7 @@ export * from './company.service';
 // Re-export commonly used types
 export type {
   Company,
-  CompanyApiResponse,
-  CompanyListResponse,
-  CompanySearchParams
-} from './company.service';
-
-export type {
+  CreateCompanyDTO,
+  CompanyListDTO,
   ApiResponse
-} from './http.service';
+} from './company.service';

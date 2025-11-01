@@ -1,6 +1,6 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -17,7 +17,18 @@ export interface LoginResponse {
     id: number;
     username: string;
     email?: string;
+    firstName?: string;
+    lastName?: string;
   };
+}
+
+export interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  createdAt?: string;
 }
 
 export interface SignupRequest {
@@ -53,13 +64,14 @@ export interface ForgotPasswordResponse {
 export class AuthService {
   private readonly apiUrl = 'http://localhost:5134/api/auth'; // Updated to use new port
   private readonly tokenKey = 'authToken';
+  private readonly userKey = 'currentUser';
 
   constructor(
     private http: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    // Clear token on app startup for development/testing
-    this.removeToken();
+    // Authentication service initialized
+    // Token and user state will be preserved from localStorage
   }
 
   login(username: string, password: string): Observable<LoginResponse> {
@@ -70,6 +82,9 @@ export class AuthService {
         tap(response => {
           if (response.success && response.token) {
             this.setToken(response.token);
+            if (response.user) {
+              this.setCurrentUser(response.user);
+            }
           }
         })
       );
@@ -89,10 +104,29 @@ export class AuthService {
 
   logout(): void {
     this.removeToken();
+    this.removeCurrentUser();
+  }
+
+  // Method to validate if the stored token and user are still valid
+  validateStoredAuth(): boolean {
+    const token = this.getToken();
+    const user = this.getCurrentUser();
+    
+    if (!token || !user) {
+      // If either is missing, clear both and return false
+      this.logout();
+      return false;
+    }
+    
+    return true;
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    const user = this.getCurrentUser();
+    
+    // Check if both token and user exist
+    return !!(token && user);
   }
 
   getToken(): string | null {
@@ -100,6 +134,23 @@ export class AuthService {
       return localStorage.getItem(this.tokenKey);
     }
     return null;
+  }
+
+  getCurrentUser(): any | null {
+    if (isPlatformBrowser(this.platformId)) {
+      const userStr = localStorage.getItem(this.userKey);
+      return userStr ? JSON.parse(userStr) : null;
+    }
+    return null;
+  }
+
+  getUserProfile(): Observable<UserProfile> {
+    const token = this.getToken();
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<UserProfile>(`${this.apiUrl}/profile`, { headers });
   }
 
   private setToken(token: string): void {
@@ -111,6 +162,18 @@ export class AuthService {
   private removeToken(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.tokenKey);
+    }
+  }
+
+  private setCurrentUser(user: any): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.userKey, JSON.stringify(user));
+    }
+  }
+
+  private removeCurrentUser(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(this.userKey);
     }
   }
 }

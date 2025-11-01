@@ -29,7 +29,7 @@ namespace Stock_Management_DataAccess.Entities
         public string LastName { get; set; } = string.Empty;
 
         [Column("CreatedDate")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
         
         [Column("LastLoginDate")]
         public DateTime? LastLoginAt { get; set; }

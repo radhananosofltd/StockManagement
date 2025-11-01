@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Stock_Management_Business.Interface;
 using Stock_Management_Business.DTO;
+using System.Security.Claims;
 
 namespace StockManagementAPI.Controllers
 {
@@ -101,6 +103,41 @@ namespace StockManagementAPI.Controllers
                 {
                     success = false,
                     message = "An error occurred while processing your request"
+                });
+            }
+        }
+
+        [HttpGet("profile")]
+        [Authorize]
+        public async Task<IActionResult> GetProfile()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return Unauthorized();
+                }
+
+                var userProfile = await _authService.GetUserProfileAsync(userId);
+                
+                if (userProfile != null)
+                {
+                    return Ok(userProfile);
+                }
+                
+                return NotFound(new
+                {
+                    success = false,
+                    message = "User profile not found"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred while retrieving user profile"
                 });
             }
         }

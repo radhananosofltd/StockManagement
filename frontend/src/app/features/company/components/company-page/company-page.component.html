@@ -8,45 +8,87 @@
     <form [formGroup]="companyForm" (ngSubmit)="onSubmit()" class="company-form">
       <div class="form-row">
         <div class="form-group">
-          <label for="companyId">Company ID</label>
+          <label for="customerCode">Company Code</label>
           <input
-            id="companyId"
-            type="number"
-            min="1"
-            step="1"
-            formControlName="id"
-            placeholder="Enter company ID (e.g., 1001, 2500, 9999)"
-            [class.error]="companyForm.get('id')?.invalid && companyForm.get('id')?.touched"
-            (keypress)="onNumberKeyPress($event)"
+            id="customerCode"
+            type="text"
+            formControlName="customerCode"
+            placeholder="Enter company code (e.g., AAPL, MSFT)"
+            [class.error]="companyForm.get('customerCode')?.invalid && companyForm.get('customerCode')?.touched"
           />
-          @if (companyForm.get('id')?.invalid && companyForm.get('id')?.touched) {
+          @if (companyForm.get('customerCode')?.invalid && companyForm.get('customerCode')?.touched) {
             <div class="error-message">
-              @if (companyForm.get('id')?.errors?.['required']) {
-                Company ID is required
+              @if (companyForm.get('customerCode')?.errors?.['required']) {
+                Company code is required
               }
-              @if (companyForm.get('id')?.errors?.['positiveInteger']) {
-                Company ID must be a positive integer number
+              @if (companyForm.get('customerCode')?.errors?.['companyCode']) {
+                Company code must be 3-10 alphanumeric characters
               }
             </div>
           }
         </div>
 
         <div class="form-group">
-          <label for="companyName">Company Name</label>
+          <label for="customerName">Company Name</label>
           <input
-            id="companyName"
+            id="customerName"
             type="text"
-            formControlName="name"
+            formControlName="customerName"
             placeholder="Enter company name (e.g., Apple Inc.)"
-            [class.error]="companyForm.get('name')?.invalid && companyForm.get('name')?.touched"
+            [class.error]="companyForm.get('customerName')?.invalid && companyForm.get('customerName')?.touched"
           />
-          @if (companyForm.get('name')?.invalid && companyForm.get('name')?.touched) {
+          @if (companyForm.get('customerName')?.invalid && companyForm.get('customerName')?.touched) {
             <div class="error-message">
-              @if (companyForm.get('name')?.errors?.['required']) {
+              @if (companyForm.get('customerName')?.errors?.['required']) {
                 Company name is required
               }
-              @if (companyForm.get('name')?.errors?.['minlength']) {
+              @if (companyForm.get('customerName')?.errors?.['minlength']) {
                 Company name must be at least 2 characters
+              }
+              @if (companyForm.get('customerName')?.errors?.['maxlength']) {
+                Company name cannot exceed 255 characters
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="customerAddress">Company Address</label>
+          <textarea
+            id="customerAddress"
+            formControlName="customerAddress"
+            placeholder="Enter company address (optional)"
+            rows="3"
+            [class.error]="companyForm.get('customerAddress')?.invalid && companyForm.get('customerAddress')?.touched"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="currency">Currency</label>
+          <select
+            id="currency"
+            formControlName="currency"
+            [class.error]="companyForm.get('currency')?.invalid && companyForm.get('currency')?.touched"
+          >
+            <option value="USD">USD - US Dollar</option>
+            <option value="EUR">EUR - Euro</option>
+            <option value="GBP">GBP - British Pound</option>
+            <option value="JPY">JPY - Japanese Yen</option>
+            <option value="CAD">CAD - Canadian Dollar</option>
+            <option value="AUD">AUD - Australian Dollar</option>
+            <option value="CHF">CHF - Swiss Franc</option>
+            <option value="CNY">CNY - Chinese Yuan</option>
+            <option value="INR">INR - Indian Rupee</option>
+          </select>
+          @if (companyForm.get('currency')?.invalid && companyForm.get('currency')?.touched) {
+            <div class="error-message">
+              @if (companyForm.get('currency')?.errors?.['required']) {
+                Currency is required
+              }
+              @if (companyForm.get('currency')?.errors?.['pattern']) {
+                Please select a valid currency
               }
             </div>
           }
@@ -131,4 +173,63 @@
       </button>
     </div>
   </div>
+
+  <!-- Companies Grid -->
+  @if (showCompaniesGrid()) {
+    <div class="companies-grid-container" id="companies-grid" #companiesGrid>
+      <div class="grid-header">
+        <h3>All Companies</h3>
+        <button class="close-btn" (click)="hideCompaniesGrid()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </div>
+
+      @if (isLoadingCompanies()) {
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading companies...</p>
+        </div>
+      } @else if (companies().length === 0) {
+        <div class="no-data">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <p>No companies found. Add your first company using the form above.</p>
+        </div>
+      } @else {
+        <div class="companies-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Currency</th>
+                <th>Created Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (company of companies(); track company.id) {
+                <tr>
+                  <td class="company-code">{{ company.customerCode }}</td>
+                  <td class="company-name">{{ company.customerName }}</td>
+                  <td class="company-address">{{ company.customerAddress || '-' }}</td>
+                  <td class="company-currency">{{ company.currency }}</td>
+                  <td class="company-date">{{ company.createdDate | date:'short' }}</td>
+                  <td class="company-status">
+                    <span class="status-badge" [class.active]="company.isActive">
+                      {{ company.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
 </div>

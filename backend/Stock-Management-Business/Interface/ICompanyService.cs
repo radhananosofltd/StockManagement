@@ -9,6 +9,8 @@ namespace Stock_Management_Business.Interface
 {
     public interface ICompanyService
     {
-        Task<int> AddCompany(CompanyDTO company);
+        Task<int> AddCompany(CreateCompanyDTO company, int createdBy);
+        Task<List<CompanyListDTO>> GetAllCompanies();
+        Task<CompanyDTO?> GetCompanyById(int id);
     }
 }

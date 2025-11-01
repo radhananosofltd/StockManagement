@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../services/auth.service';
 
 interface MenuItem {
   label: string;
@@ -18,7 +19,9 @@ interface MenuItem {
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
+  currentUser: any = null;
+
   menuItems: MenuItem[] = [
     {
       label: 'Dashboard',
@@ -84,7 +87,18 @@ export class SidebarComponent {
     }
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadCurrentUser();
+  }
+
+  loadCurrentUser(): void {
+    this.currentUser = this.authService.getCurrentUser();
+  }
 
   toggleSubmenu(item: MenuItem): void {
     if (item.children) {
@@ -96,5 +110,21 @@ export class SidebarComponent {
     if (route) {
       this.router.navigate([route]);
     }
+  }
+
+  navigateToProfile(): void {
+    this.router.navigate(['/dashboard/profile']);
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  getDisplayName(): string {
+    if (this.currentUser?.firstName && this.currentUser?.lastName) {
+      return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
+    }
+    return this.currentUser?.username || 'User';
   }
 }

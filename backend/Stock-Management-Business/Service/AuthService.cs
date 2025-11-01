@@ -47,8 +47,8 @@ namespace Stock_Management_Business.Service
                     };
                 }
 
-                // Update last login
-                user.LastLoginAt = DateTime.UtcNow;
+                // Update last login with explicit UTC kind
+                user.LastLoginAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
                 await _userRepository.UpdateAsync(user);
 
                 // Generate JWT token
@@ -107,7 +107,7 @@ namespace Stock_Management_Business.Service
                     PasswordHash = HashPassword(password),
                     FirstName = firstName,
                     LastName = lastName,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
                     IsActive = true
                 };
 
@@ -178,6 +178,24 @@ namespace Stock_Management_Business.Service
         {
             var hashedPassword = HashPassword(password);
             return hashedPassword == passwordHash;
+        }
+
+        public async Task<UserProfileDTO?> GetUserProfileAsync(int userId)
+        {
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    return null;
+                }
+
+                return _mapper.Map<UserProfileDTO>(user);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         private string GenerateJwtToken(UserEntity user)

@@ -10,6 +10,7 @@ import { CategoryComponent } from './features/configuration/components/category/
 import { SkuComponent } from './features/configuration/components/sku/sku.component';
 import { ItemSpecificationComponent } from './features/configuration/components/item-specification/item-specification.component';
 import { LabelGenerationComponent } from './features/configuration/components/label-generation/label-generation.component';
+import { UserProfileComponent } from './features/user/components/user-profile/user-profile.component';
 import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 
@@ -77,6 +78,10 @@ export const routes: Routes = [
       {
         path: 'reports',
         component: HomePageComponent // Placeholder for now
+      },
+      {
+        path: 'profile',
+        component: UserProfileComponent
       }
     ]
   }
