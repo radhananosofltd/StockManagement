@@ -1,0 +1,16 @@
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\bin\Debug\net8.0\Stock-Management-Business.deps.json
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\bin\Debug\net8.0\Stock-Management-Business.dll
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\bin\Debug\net8.0\Stock-Management-Business.pdb
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\bin\Debug\net8.0\Stock-Management-DataAccess.dll
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\bin\Debug\net8.0\Stock-Management-DataAccess.pdb
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\Stock-Management-Business.csproj.AssemblyReference.cache
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\Stock-Management-Business.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\Stock-Management-Business.AssemblyInfoInputs.cache
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\Stock-Management-Business.AssemblyInfo.cs
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\Stock-Management-Business.csproj.CoreCompileInputs.cache
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\Stock-Management-Business.sourcelink.json
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\Stock-Management-Business.csproj.CopyComplete
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\Stock-Management-Business.dll
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\refint\Stock-Management-Business.dll
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\Stock-Management-Business.pdb
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-Business\obj\Debug\net8.0\ref\Stock-Management-Business.dll

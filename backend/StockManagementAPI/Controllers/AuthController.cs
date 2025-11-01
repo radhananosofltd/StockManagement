@@ -1,11 +1,6 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Stock_Management_Business.DTO;
 using Stock_Management_Business.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Stock_Management_Business.DTO;
 
 namespace StockManagementAPI.Controllers
 {
@@ -21,108 +16,113 @@ namespace StockManagementAPI.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponseDTO>> Login([FromBody] LoginRequestDTO loginRequest)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(new LoginResponseDTO
+                var result = await _authService.LoginAsync(request.Username, request.Password);
+                
+                if (result.Success)
                 {
-                    Success = false,
-                    Message = "Invalid input data"
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Login successful",
+                        token = result.Token,
+                        user = result.User
+                    });
+                }
+                
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Invalid user credentials. Please check your username and password."
                 });
             }
-
-            var result = await _authService.LoginAsync(loginRequest);
-            
-            if (result.Success)
+            catch (Exception ex)
             {
-                return Ok(result);
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred during login"
+                });
             }
-            
-            return Unauthorized(result);
         }
 
         [HttpPost("signup")]
-        public async Task<ActionResult<SignupResponseDTO>> Signup([FromBody] SignupRequestDTO signupRequest)
+        public async Task<IActionResult> Signup([FromBody] SignupRequest request)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(new SignupResponseDTO
+                var result = await _authService.SignupAsync(request.Username, request.Email, request.Password, request.FirstName, request.LastName);
+                
+                if (result.Success)
                 {
-                    Success = false,
-                    Message = "Invalid input data"
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Account created successfully",
+                        user = result.User
+                    });
+                }
+                
+                return BadRequest(new
+                {
+                    success = false,
+                    message = result.Message
                 });
             }
-
-            var result = await _authService.SignupAsync(signupRequest);
-            
-            if (result.Success)
+            catch (Exception ex)
             {
-                return Ok(result);
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred during signup"
+                });
             }
-            
-            return BadRequest(result);
         }
 
         [HttpPost("forgot-password")]
-        public async Task<ActionResult<ForgotPasswordResponseDTO>> ForgotPassword([FromBody] ForgotPasswordRequestDTO forgotPasswordRequest)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(new ForgotPasswordResponseDTO
+                var result = await _authService.ForgotPasswordAsync(request.Email);
+                
+                return Ok(new
                 {
-                    Success = false,
-                    Message = "Invalid input data"
+                    success = result.Success,
+                    message = result.Message
                 });
             }
-
-            var result = await _authService.ForgotPasswordAsync(forgotPasswordRequest);
-            return Ok(result);
-        }
-
-        [HttpPost("reset-password")]
-        public async Task<ActionResult<ResetPasswordResponseDTO>> ResetPassword([FromBody] ResetPasswordRequestDTO resetPasswordRequest)
-        {
-            if (!ModelState.IsValid)
+            catch (Exception ex)
             {
-                return BadRequest(new ResetPasswordResponseDTO
+                return StatusCode(500, new
                 {
-                    Success = false,
-                    Message = "Invalid input data"
+                    success = false,
+                    message = "An error occurred while processing your request"
                 });
             }
-
-            var result = await _authService.ResetPasswordAsync(resetPasswordRequest);
-            
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-            
-            return BadRequest(result);
         }
+    }
 
-        [HttpGet("user/{id}")]
-        [Authorize]
-        public async Task<ActionResult<UserDTO>> GetUser(int id)
-        {
-            var user = await _authService.GetUserByIdAsync(id);
-            
-            if (user == null)
-            {
-                return NotFound("User not found");
-            }
-            
-            return Ok(user);
-        }
+    public class LoginRequest
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
 
-        [HttpPost("logout")]
-        [Authorize]
-        public ActionResult Logout()
-        {
-            // For JWT tokens, logout is typically handled client-side by removing the token
-            // Here we can perform any server-side cleanup if needed
-            return Ok(new { Success = true, Message = "Logged out successfully" });
-        }
+    public class SignupRequest
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+    }
+
+    public class ForgotPasswordRequest
+    {
+        public string Email { get; set; } = string.Empty;
     }
 }

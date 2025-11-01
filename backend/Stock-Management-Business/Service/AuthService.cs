@@ -1,18 +1,13 @@
 using AutoMapper;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using Stock_Management_Business.DTO;
 using Stock_Management_Business.Interface;
-using Stock_Management_DataAccess.Entities;
 using Stock_Management_DataAccess.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
+using Stock_Management_DataAccess.Entities;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Stock_Management_Business.Service
 {
@@ -20,240 +15,188 @@ namespace Stock_Management_Business.Service
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
-        private readonly IConfiguration _configuration;
+        private readonly string _jwtSecret = "your-super-secret-jwt-key-that-should-be-at-least-32-characters-long";
 
-        public AuthService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration)
+        public AuthService(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
-            _configuration = configuration;
         }
 
-        public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequest)
+        public async Task<AuthenticationResult> LoginAsync(string username, string password)
         {
             try
             {
-                var user = await _userRepository.GetUserByUsernameAsync(loginRequest.Username);
+                var user = await _userRepository.GetByUsernameAsync(username);
                 
-                if (user == null)
+                if (user == null || !VerifyPassword(password, user.PasswordHash))
                 {
-                    user = await _userRepository.GetUserByEmailAsync(loginRequest.Username);
-                }
-
-                if (user == null || !VerifyPassword(loginRequest.Password, user.PasswordHash))
-                {
-                    return new LoginResponseDTO
+                    return new AuthenticationResult
                     {
                         Success = false,
-                        Message = "Invalid username or password"
+                        Message = "Invalid user credentials. Please check your username and password."
                     };
                 }
 
-                // Update last login date
-                user.LastLoginDate = DateTime.UtcNow;
-                await _userRepository.UpdateUserAsync(user);
+                if (!user.IsActive)
+                {
+                    return new AuthenticationResult
+                    {
+                        Success = false,
+                        Message = "Your account has been deactivated. Please contact administrator."
+                    };
+                }
 
-                var userDTO = _mapper.Map<UserDTO>(user);
-                var token = GenerateJwtToken(userDTO);
+                // Update last login
+                user.LastLoginAt = DateTime.UtcNow;
+                await _userRepository.UpdateAsync(user);
 
-                return new LoginResponseDTO
+                // Generate JWT token
+                var token = GenerateJwtToken(user);
+                var userDto = _mapper.Map<UserDTO>(user);
+
+                return new AuthenticationResult
                 {
                     Success = true,
                     Message = "Login successful",
                     Token = token,
-                    User = userDTO
+                    User = userDto
                 };
             }
             catch (Exception ex)
             {
-                return new LoginResponseDTO
+                return new AuthenticationResult
                 {
                     Success = false,
-                    Message = $"Login failed: {ex.Message}"
+                    Message = "An error occurred during login"
                 };
             }
         }
 
-        public async Task<SignupResponseDTO> SignupAsync(SignupRequestDTO signupRequest)
+        public async Task<SignupResult> SignupAsync(string username, string email, string password, string firstName = "", string lastName = "")
         {
             try
             {
-                // Check if user already exists
-                if (await _userRepository.UserExistsAsync(signupRequest.Username, signupRequest.Email))
+                // Check if username already exists
+                var existingUserByUsername = await _userRepository.GetByUsernameAsync(username);
+                if (existingUserByUsername != null)
                 {
-                    return new SignupResponseDTO
+                    return new SignupResult
                     {
                         Success = false,
-                        Message = "User with this username or email already exists"
+                        Message = "Username already exists. Please choose a different username."
                     };
                 }
 
-                var userEntity = new UserEntity
+                // Check if email already exists
+                var existingUserByEmail = await _userRepository.GetByEmailAsync(email);
+                if (existingUserByEmail != null)
                 {
-                    Username = signupRequest.Username,
-                    Email = signupRequest.Email,
-                    PasswordHash = HashPassword(signupRequest.Password),
-                    FirstName = signupRequest.FirstName,
-                    LastName = signupRequest.LastName,
-                    CreatedDate = DateTime.UtcNow,
+                    return new SignupResult
+                    {
+                        Success = false,
+                        Message = "Email already exists. Please use a different email address."
+                    };
+                }
+
+                // Create new user
+                var user = new UserEntity
+                {
+                    Username = username,
+                    Email = email,
+                    PasswordHash = HashPassword(password),
+                    FirstName = firstName,
+                    LastName = lastName,
+                    CreatedAt = DateTime.UtcNow,
                     IsActive = true
                 };
 
-                var createdUser = await _userRepository.CreateUserAsync(userEntity);
-                var userDTO = _mapper.Map<UserDTO>(createdUser);
+                var createdUser = await _userRepository.CreateAsync(user);
+                var userDto = _mapper.Map<UserDTO>(createdUser);
 
-                return new SignupResponseDTO
+                return new SignupResult
                 {
                     Success = true,
-                    Message = "User created successfully",
-                    User = userDTO
+                    Message = "Account created successfully",
+                    User = userDto
                 };
             }
             catch (Exception ex)
             {
-                return new SignupResponseDTO
+                return new SignupResult
                 {
                     Success = false,
-                    Message = $"Signup failed: {ex.Message}"
+                    Message = "An error occurred during signup"
                 };
             }
         }
 
-        public async Task<ForgotPasswordResponseDTO> ForgotPasswordAsync(ForgotPasswordRequestDTO forgotPasswordRequest)
+        public async Task<ForgotPasswordResult> ForgotPasswordAsync(string email)
         {
             try
             {
-                var user = await _userRepository.GetUserByEmailAsync(forgotPasswordRequest.Email);
+                var user = await _userRepository.GetByEmailAsync(email);
                 
                 if (user == null)
                 {
-                    // Don't reveal if email exists or not for security
-                    return new ForgotPasswordResponseDTO
+                    // For security reasons, we'll return success even if email doesn't exist
+                    return new ForgotPasswordResult
                     {
                         Success = true,
-                        Message = "If the email exists, a password reset link has been sent"
+                        Message = "If an account with this email exists, password reset instructions have been sent."
                     };
                 }
 
-                // Generate reset token
-                var resetToken = GenerateResetToken();
-                user.ResetPasswordToken = resetToken;
-                user.ResetPasswordExpiry = DateTime.UtcNow.AddHours(1); // Token expires in 1 hour
-
-                await _userRepository.UpdateUserAsync(user);
-
-                // In a real application, you would send an email here
-                // For now, we'll just return success
-                return new ForgotPasswordResponseDTO
+                // In a real application, you would generate a reset token and send an email
+                // For this demo, we'll just return a success message
+                return new ForgotPasswordResult
                 {
                     Success = true,
-                    Message = "Password reset instructions have been sent to your email"
+                    Message = "Password reset instructions have been sent to your email address."
                 };
             }
             catch (Exception ex)
             {
-                return new ForgotPasswordResponseDTO
+                return new ForgotPasswordResult
                 {
                     Success = false,
-                    Message = $"Failed to process password reset: {ex.Message}"
+                    Message = "An error occurred while processing your request"
                 };
             }
         }
 
-        public async Task<ResetPasswordResponseDTO> ResetPasswordAsync(ResetPasswordRequestDTO resetPasswordRequest)
+        private string HashPassword(string password)
         {
-            try
+            using (var sha256 = SHA256.Create())
             {
-                var user = await _userRepository.GetUserByResetTokenAsync(resetPasswordRequest.Token);
-                
-                if (user == null)
-                {
-                    return new ResetPasswordResponseDTO
-                    {
-                        Success = false,
-                        Message = "Invalid or expired reset token"
-                    };
-                }
-
-                user.PasswordHash = HashPassword(resetPasswordRequest.NewPassword);
-                user.ResetPasswordToken = null;
-                user.ResetPasswordExpiry = null;
-
-                await _userRepository.UpdateUserAsync(user);
-
-                return new ResetPasswordResponseDTO
-                {
-                    Success = true,
-                    Message = "Password has been reset successfully"
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResetPasswordResponseDTO
-                {
-                    Success = false,
-                    Message = $"Failed to reset password: {ex.Message}"
-                };
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password + "salt"));
+                return Convert.ToBase64String(hashedBytes);
             }
         }
 
-        public async Task<UserDTO> GetUserByIdAsync(int userId)
+        private bool VerifyPassword(string password, string passwordHash)
         {
-            var user = await _userRepository.GetUserByIdAsync(userId);
-            return _mapper.Map<UserDTO>(user);
+            var hashedPassword = HashPassword(password);
+            return hashedPassword == passwordHash;
         }
 
-        public string GenerateJwtToken(UserDTO user)
+        private string GenerateJwtToken(UserEntity user)
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["SecretKey"];
-            var issuer = jwtSettings["Issuer"];
-            var audience = jwtSettings["Audience"];
-            var expiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"]);
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtSecret);
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
-                new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Email, user.Email)
+                }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
-
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
-                signingCredentials: credentials
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public bool VerifyPassword(string password, string hash)
-        {
-            return BCrypt.Net.BCrypt.Verify(password, hash);
-        }
-
-        public string HashPassword(string password)
-        {
-            return BCrypt.Net.BCrypt.HashPassword(password);
-        }
-
-        private string GenerateResetToken()
-        {
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                byte[] tokenBytes = new byte[32];
-                rng.GetBytes(tokenBytes);
-                return Convert.ToBase64String(tokenBytes);
-            }
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 }

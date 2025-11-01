@@ -1,0 +1,74 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <svg class="logo-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+      </svg>
+      <span class="logo-text">StockMgmt</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <h3 class="nav-section-title">Menu</h3>
+      <ul class="nav-list">
+        <li class="nav-item" *ngFor="let item of menuItems">
+          <!-- Items with children (Configuration) -->
+          <div *ngIf="item.children; else simpleItem">
+            <button 
+              class="nav-link expandable"
+              [class.expanded]="item.expanded"
+              (click)="toggleSubmenu(item)"
+            >
+              <span class="nav-icon">{{ item.icon }}</span>
+              <span class="nav-text">{{ item.label }}</span>
+              <svg class="expand-icon" [class.rotated]="item.expanded" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+              </svg>
+            </button>
+            
+            <!-- Submenu -->
+            <ul class="submenu" [class.expanded]="item.expanded">
+              <li class="submenu-item" *ngFor="let child of item.children">
+                <a 
+                  [routerLink]="child.route" 
+                  routerLinkActive="active"
+                  class="submenu-link"
+                >
+                  <span class="submenu-icon">{{ child.icon }}</span>
+                  <span class="submenu-text">{{ child.label }}</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Simple items (Dashboard, Stocks, Reports) -->
+          <ng-template #simpleItem>
+            <a 
+              [routerLink]="item.route" 
+              routerLinkActive="active"
+              class="nav-link"
+            >
+              <span class="nav-icon">{{ item.icon }}</span>
+              <span class="nav-text">{{ item.label }}</span>
+            </a>
+          </ng-template>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+      </div>
+      <div class="user-details">
+        <span class="user-name">Admin User</span>
+        <span class="user-role">Administrator</span>
+      </div>
+    </div>
+  </div>
+</aside>

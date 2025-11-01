@@ -1,0 +1,13 @@
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\bin\Debug\net8.0\Stock-Management-DataAccess.deps.json
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\bin\Debug\net8.0\Stock-Management-DataAccess.dll
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\bin\Debug\net8.0\Stock-Management-DataAccess.pdb
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\Stock-Management-DataAccess.csproj.AssemblyReference.cache
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\Stock-Management-DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\Stock-Management-DataAccess.AssemblyInfoInputs.cache
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\Stock-Management-DataAccess.AssemblyInfo.cs
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\Stock-Management-DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\Stock-Management-DataAccess.sourcelink.json
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\Stock-Management-DataAccess.dll
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\refint\Stock-Management-DataAccess.dll
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\Stock-Management-DataAccess.pdb
+C:\Users\HP\NanoSoftStock360\backend\Stock-Management-DataAccess\obj\Debug\net8.0\ref\Stock-Management-DataAccess.dll

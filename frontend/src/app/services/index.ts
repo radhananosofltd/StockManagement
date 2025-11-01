@@ -9,15 +9,6 @@ export * from './http.service';
 // Company Service
 export * from './company.service';
 
-// Authentication Service
-export * from './auth.service';
-
-// Authentication Guard
-export * from './auth.guard';
-
-// Authentication Interceptor
-export * from './auth.interceptor';
-
 // Re-export commonly used types
 export type {
   Company,
@@ -29,13 +20,3 @@ export type {
 export type {
   ApiResponse
 } from './http.service';
-
-export type {
-  User,
-  LoginRequest,
-  LoginResponse,
-  SignupRequest,
-  SignupResponse,
-  ForgotPasswordRequest,
-  ForgotPasswordResponse
-} from './auth.service';

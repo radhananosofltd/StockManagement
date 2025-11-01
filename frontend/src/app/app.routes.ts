@@ -1,9 +1,17 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from './dashboard.component';
-import { HomePageComponent } from './home-page.component';
-import { CompanyPageComponent } from './company-page.component';
-import { LoginComponent } from './login.component';
-import { AuthGuard } from './services/auth.guard';
+import { LoginComponent } from './features/auth/components/login/login.component';
+import { DashboardComponent } from './features/dashboard/components/dashboard.component';
+import { HomePageComponent } from './pages/home/home-page/home-page.component';
+import { CompanyPageComponent } from './features/company/components/company-page/company-page.component';
+import { RegionComponent } from './features/configuration/components/region/region.component';
+import { CountryComponent } from './features/configuration/components/country/country.component';
+import { BranchComponent } from './features/configuration/components/branch/branch.component';
+import { CategoryComponent } from './features/configuration/components/category/category.component';
+import { SkuComponent } from './features/configuration/components/sku/sku.component';
+import { ItemSpecificationComponent } from './features/configuration/components/item-specification/item-specification.component';
+import { LabelGenerationComponent } from './features/configuration/components/label-generation/label-generation.component';
+import { authGuard } from './guards/auth.guard';
+import { loginGuard } from './guards/login.guard';
 
 export const routes: Routes = [
   {
@@ -13,12 +21,13 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+    canActivate: [loginGuard]
   },
   {
     path: 'dashboard',
     component: DashboardComponent,
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -34,6 +43,34 @@ export const routes: Routes = [
         component: CompanyPageComponent
       },
       {
+        path: 'configuration/country',
+        component: CountryComponent
+      },
+      {
+        path: 'configuration/region',
+        component: RegionComponent
+      },
+      {
+        path: 'configuration/branch',
+        component: BranchComponent
+      },
+      {
+        path: 'configuration/category',
+        component: CategoryComponent
+      },
+      {
+        path: 'configuration/sku',
+        component: SkuComponent
+      },
+      {
+        path: 'configuration/item-specification',
+        component: ItemSpecificationComponent
+      },
+      {
+        path: 'configuration/label-generation',
+        component: LabelGenerationComponent
+      },
+      {
         path: 'stocks',
         component: HomePageComponent // Placeholder for now
       },
@@ -42,9 +79,5 @@ export const routes: Routes = [
         component: HomePageComponent // Placeholder for now
       }
     ]
-  },
-  {
-    path: '**',
-    redirectTo: '/login'
   }
 ];

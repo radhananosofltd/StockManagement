@@ -1,11 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Stock_Management_DataAccess.Entities;
 using Stock_Management_DataAccess.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Stock_Management_DataAccess.Repositories
 {
@@ -18,60 +13,49 @@ namespace Stock_Management_DataAccess.Repositories
             _context = context;
         }
 
-        public async Task<UserEntity> GetUserByUsernameAsync(string username)
+        public async Task<UserEntity?> GetByIdAsync(int id)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username && u.IsActive);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public async Task<UserEntity> GetUserByEmailAsync(string email)
+        public async Task<UserEntity?> GetByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.IsActive);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
 
-        public async Task<UserEntity> GetUserByIdAsync(int userId)
+        public async Task<UserEntity?> GetByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId && u.IsActive);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<UserEntity> CreateUserAsync(UserEntity user)
+        public async Task<UserEntity> CreateAsync(UserEntity user)
         {
-            user.CreatedDate = DateTime.UtcNow;
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
         }
 
-        public async Task<UserEntity> UpdateUserAsync(UserEntity user)
+        public async Task<UserEntity> UpdateAsync(UserEntity user)
         {
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
             return user;
         }
 
-        public async Task<bool> DeleteUserAsync(int userId)
+        public async Task<bool> DeleteAsync(int id)
         {
-            var user = await GetUserByIdAsync(userId);
-            if (user != null)
-            {
-                user.IsActive = false;
-                await UpdateUserAsync(user);
-                return true;
-            }
-            return false;
+            var user = await GetByIdAsync(id);
+            if (user == null)
+                return false;
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<UserEntity> GetUserByResetTokenAsync(string token)
+        public async Task<IEnumerable<UserEntity>> GetAllAsync()
         {
-            return await _context.Users.FirstOrDefaultAsync(u => 
-                u.ResetPasswordToken == token && 
-                u.ResetPasswordExpiry > DateTime.UtcNow && 
-                u.IsActive);
-        }
-
-        public async Task<bool> UserExistsAsync(string username, string email)
-        {
-            return await _context.Users.AnyAsync(u => 
-                (u.Username == username || u.Email == email) && u.IsActive);
+            return await _context.Users.ToListAsync();
         }
     }
 }

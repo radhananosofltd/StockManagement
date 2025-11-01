@@ -1,21 +1,15 @@
 using Stock_Management_DataAccess.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Stock_Management_DataAccess.Interfaces
 {
     public interface IUserRepository
     {
-        Task<UserEntity> GetUserByUsernameAsync(string username);
-        Task<UserEntity> GetUserByEmailAsync(string email);
-        Task<UserEntity> GetUserByIdAsync(int userId);
-        Task<UserEntity> CreateUserAsync(UserEntity user);
-        Task<UserEntity> UpdateUserAsync(UserEntity user);
-        Task<bool> DeleteUserAsync(int userId);
-        Task<UserEntity> GetUserByResetTokenAsync(string token);
-        Task<bool> UserExistsAsync(string username, string email);
+        Task<UserEntity?> GetByIdAsync(int id);
+        Task<UserEntity?> GetByUsernameAsync(string username);
+        Task<UserEntity?> GetByEmailAsync(string email);
+        Task<UserEntity> CreateAsync(UserEntity user);
+        Task<UserEntity> UpdateAsync(UserEntity user);
+        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<UserEntity>> GetAllAsync();
     }
 }
