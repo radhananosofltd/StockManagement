@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configure URLs
 builder.WebHost.UseUrls("http://localhost:5134");
-
+//builder.WebHost.UseUrls("http://0.0.0.0:5000");
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

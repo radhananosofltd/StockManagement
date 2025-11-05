@@ -22,15 +22,8 @@ namespace Stock_Management_DataAccess
             // Configure UserEntity
             modelBuilder.Entity<UserEntity>(entity =>
             {
-                // Configure DateTime properties for PostgreSQL
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnType("timestamp with time zone");
-                    
-                entity.Property(e => e.LastLoginAt)
-                    .HasColumnType("timestamp with time zone");
-                    
-                entity.Property(e => e.ResetPasswordExpiry)
-                    .HasColumnType("timestamp with time zone");
+                // Configure indexes and constraints
+                entity.HasIndex(e => e.Email).IsUnique();
             });
 
             // Configure CompanyEntity
@@ -38,13 +31,6 @@ namespace Stock_Management_DataAccess
             {
                 entity.HasIndex(e => e.CustomerCode).IsUnique();
                 entity.HasIndex(e => e.IsActive);
-                
-                // Configure DateTime properties for PostgreSQL
-                entity.Property(e => e.CreatedDate)
-                    .HasColumnType("timestamp with time zone");
-                    
-                entity.Property(e => e.ModifiedDate)
-                    .HasColumnType("timestamp with time zone");
                 
                 // Configure foreign key relationships
                 entity.HasOne(e => e.CreatedByUser)
