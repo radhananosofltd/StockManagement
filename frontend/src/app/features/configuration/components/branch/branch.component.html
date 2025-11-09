@@ -261,9 +261,9 @@
             [class.error]="branchForm.get('country')?.invalid && branchForm.get('country')?.touched"
           >
             <option value="">Select Country</option>
-            <option *ngFor="let country of countries()" [value]="country.countryid">
-  {{ country.countryname }}
-</option>
+             <option *ngFor="let country of countries()" [value]="country.countryId">
+               {{ country.countryName }}
+             </option>
           </select>
           @if (branchForm.get('country')?.invalid && branchForm.get('country')?.touched) {
             <div class="error-message">

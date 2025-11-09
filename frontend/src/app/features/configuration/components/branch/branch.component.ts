@@ -75,8 +75,14 @@ export class BranchComponent implements OnInit{
       error: (error: any) => { console.error('Error fetching companies', error); }
     });
 
-    this.http.get<any[]>(COUNTRY_ENDPOINTS.GET_ALL).subscribe({
-      next: (data: any[]) => { this.countries.set(data); },
+    this.http.get<any>(COUNTRY_ENDPOINTS.GET_ALL).subscribe({
+      next: (response: any) => {
+        if (response && Array.isArray(response.data)) {
+          this.countries.set(response.data);
+        } else {
+          this.countries.set([]);
+        }
+      },
       error: (error: any) => { console.error('Error fetching countries', error); }
     });
 
