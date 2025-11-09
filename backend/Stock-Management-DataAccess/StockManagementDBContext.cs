@@ -15,6 +15,7 @@ namespace Stock_Management_DataAccess
         public DbSet<CompanyEntity> CompanyEntity { get; set; }
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<CountryEntity> CountryEntity { get; set; }
+        public DbSet<BranchEntity> BranchEntity { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,6 +49,43 @@ namespace Stock_Management_DataAccess
                     .WithMany()
                     .HasForeignKey(e => e.CountryId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure BranchEntity
+            modelBuilder.Entity<BranchEntity>(entity =>
+            {
+                entity.HasIndex(e => e.BranchCode).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.BranchCountryId);
+                entity.HasIndex(e => e.CompanyID);
+                
+                // Configure foreign key relationships
+                entity.HasOne(e => e.CreatedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.CreatedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.ModifiedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.ModifiedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.BranchCountry)
+                    .WithMany()
+                    .HasForeignKey(e => e.BranchCountryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Company)
+                    .WithMany()
+                    .HasForeignKey(e => e.CompanyID)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                // Configure self-referencing relationship for head office
+                entity.HasOne(e => e.HeadOfficeBranch)
+                    .WithMany()
+                    .HasForeignKey(e => e.HeadOfficeBranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
             });
         }
     }
