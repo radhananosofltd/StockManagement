@@ -8,29 +8,58 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Stock_Management_DataAccess.Entities
 {
-    [Table("Companies")]
+    [Table("company")]
     public class CompanyEntity
     {
         [Key]
-        [Column("id")]
+        [Column("companyid")]
         public int Id { get; set; }
         
         [Required]
         [MaxLength(50)]
-        [Column("CustomerCode")]
-        public string CustomerCode { get; set; } = string.Empty;
+        [Column("companycode")]
+        public string CompanyCode { get; set; } = string.Empty;
         
         [Required]
         [MaxLength(255)]
-        [Column("CustomerName")]
-        public string CustomerName { get; set; } = string.Empty;
+        [Column("companyname")]
+        public string CompanyName { get; set; } = string.Empty;
         
-        [Column("CustomerAddress")]
-        public string? CustomerAddress { get; set; }
+        [Required]
+        [MaxLength(255)]
+        [Column("contactpersonname")]
+        public string ContactName { get; set; } = string.Empty;
         
-        [MaxLength(10)]
-        [Column("Currency")]
-        public string Currency { get; set; } = "USD";
+        [Required]
+        [MaxLength(255)]
+        [Column("contactpersonemail")]
+        public string ContactEmail { get; set; } = string.Empty;
+        
+        [MaxLength(500)]
+        [Column("website")]
+        public string? Website { get; set; }
+        
+        [MaxLength(500)]
+        [Column("companylogourl")]
+        public string? CompanyLogoURL { get; set; }
+        
+        [MaxLength(50)]
+        [Column("pan")]
+        public string? PAN { get; set; }
+        
+        [MaxLength(100)]
+        [Column("taxidnumbertype")]
+        public string? TaxIDNumberType { get; set; }
+        
+        [MaxLength(100)]
+        [Column("taxidnumber")]
+        public string? TaxIDNumber { get; set; }
+        
+        [Column("companyaddress")]
+        public string? CompanyAddress { get; set; }
+        
+        [Column("countryid")]
+        public int? CountryId { get; set; }
         
         [Required]
         [Column("created_by")]
@@ -56,5 +85,8 @@ namespace Stock_Management_DataAccess.Entities
         
         [ForeignKey("ModifiedBy")]
         public virtual UserEntity? ModifiedByUser { get; set; }
+        
+    [ForeignKey("CountryId")]
+    public virtual CountryEntity? Country { get; set; }
     }
 }

@@ -22,19 +22,21 @@ namespace Stock_Management_Business.Service
             _mapper = mapper;
         }
 
-        public async Task<int> AddCompany(CreateCompanyDTO company, int createdBy)
+        public async Task<int> AddCompany(CreateCompanyDTO company)
         {
             // Check if company code already exists
-            var exists = await _repo.CompanyCodeExists(company.CustomerCode);
+            var exists = await _repo.CompanyCodeExists(company.CompanyCode);
             if (exists)
             {
-                throw new InvalidOperationException($"Company with code '{company.CustomerCode}' already exists.");
+                throw new InvalidOperationException($"Company with code '{company.CompanyCode}' already exists.");
             }
 
             var companyEntity = _mapper.Map<CompanyEntity>(company);
-            companyEntity.CreatedBy = createdBy;
+            companyEntity.CreatedBy = company.UserId;
             companyEntity.CreatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
-            companyEntity.IsActive = true;
+            companyEntity.ModifiedBy = company.UserId;
+            companyEntity.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            companyEntity.IsActive = company.IsActive;
 
             var result = await _repo.AddCompany(companyEntity);
             return result;
@@ -52,7 +54,7 @@ namespace Stock_Management_Business.Service
             return company != null ? _mapper.Map<CompanyDTO>(company) : null;
         }
 
-        public async Task<BulkImportResultDTO> BulkImportCompanies(List<CreateCompanyDTO> companies, int createdBy)
+        public async Task<BulkImportResultDTO> BulkImportCompanies(List<CreateCompanyDTO> companies)
         {
             var result = new BulkImportResultDTO
             {
@@ -68,25 +70,25 @@ namespace Stock_Management_Business.Service
                 try
                 {
                     // Check if company code already exists
-                    var exists = await _repo.CompanyCodeExists(company.CustomerCode);
+                    var exists = await _repo.CompanyCodeExists(company.CompanyCode);
                     if (exists)
                     {
-                        result.Errors.Add($"Company with code '{company.CustomerCode}' already exists.");
+                        result.Errors.Add($"Company with code '{company.CompanyCode}' already exists.");
                         failedCount++;
                         continue;
                     }
 
                     var companyEntity = _mapper.Map<CompanyEntity>(company);
-                    companyEntity.CreatedBy = createdBy;
+                    companyEntity.CreatedBy = company.UserId;
                     companyEntity.CreatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
-                    companyEntity.IsActive = true;
+                    companyEntity.IsActive = company.IsActive;
 
                     await _repo.AddCompany(companyEntity);
                     successCount++;
                 }
                 catch (Exception ex)
                 {
-                    result.Errors.Add($"Failed to import company '{company.CustomerCode}': {ex.Message}");
+                    result.Errors.Add($"Failed to import company '{company.CompanyCode}': {ex.Message}");
                     failedCount++;
                 }
             }

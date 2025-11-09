@@ -30,7 +30,7 @@ namespace Stock_Management_DataAccess
             // Configure CompanyEntity
             modelBuilder.Entity<CompanyEntity>(entity =>
             {
-                entity.HasIndex(e => e.CustomerCode).IsUnique();
+                entity.HasIndex(e => e.CompanyCode).IsUnique();
                 entity.HasIndex(e => e.IsActive);
                 
                 // Configure foreign key relationships
@@ -42,6 +42,11 @@ namespace Stock_Management_DataAccess
                 entity.HasOne(e => e.ModifiedByUser)
                     .WithMany()
                     .HasForeignKey(e => e.ModifiedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Country)
+                    .WithMany()
+                    .HasForeignKey(e => e.CountryId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
         }

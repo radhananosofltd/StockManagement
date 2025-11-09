@@ -38,7 +38,7 @@ namespace Stock_Management_DataAccess.Repositories
             {
                 return await _context.CompanyEntity
                     .Where(c => c.IsActive)
-                    .OrderBy(c => c.CustomerName)
+                    .OrderBy(c => c.CompanyName)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -60,12 +60,12 @@ namespace Stock_Management_DataAccess.Repositories
             }
         }
 
-        public async Task<bool> CompanyCodeExists(string customerCode)
+        public async Task<bool> CompanyCodeExists(string companyCode)
         {
             try
             {
                 return await _context.CompanyEntity
-                    .AnyAsync(c => c.CustomerCode == customerCode && c.IsActive);
+                    .AnyAsync(c => c.CompanyCode == companyCode && c.IsActive);
             }
             catch (Exception ex)
             {

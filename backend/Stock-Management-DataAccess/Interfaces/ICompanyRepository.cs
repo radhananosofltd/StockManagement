@@ -12,6 +12,6 @@ namespace Stock_Management_DataAccess.Interfaces
         Task<int> AddCompany(CompanyEntity company);
         Task<List<CompanyEntity>> GetAllCompanies();
         Task<CompanyEntity?> GetCompanyById(int id);
-        Task<bool> CompanyCodeExists(string customerCode);
+        Task<bool> CompanyCodeExists(string companyCode);
     }
 }

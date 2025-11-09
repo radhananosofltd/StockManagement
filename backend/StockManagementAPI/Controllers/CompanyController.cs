@@ -8,7 +8,7 @@ namespace StockManagementAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+   // [Authorize]
     public class CompanyController : ControllerBase
     {
         private readonly ICompanyService _service;
@@ -28,14 +28,7 @@ namespace StockManagementAPI.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Get the current user ID from JWT token
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-                {
-                    return Unauthorized("Invalid user token");
-                }
-
-                var result = await _service.AddCompany(company, userId);
+                var result = await _service.AddCompany(company);
                 return Ok(new { id = result, message = "Company created successfully" });
             }
             catch (InvalidOperationException ex)
@@ -95,14 +88,7 @@ namespace StockManagementAPI.Controllers
                     return BadRequest(new { message = "No companies provided for import" });
                 }
 
-                // Get the current user ID from JWT token
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-                {
-                    return Unauthorized("Invalid user token");
-                }
-
-                var result = await _service.BulkImportCompanies(companies, userId);
+                var result = await _service.BulkImportCompanies(companies);
                 return Ok(result);
             }
             catch (Exception ex)
