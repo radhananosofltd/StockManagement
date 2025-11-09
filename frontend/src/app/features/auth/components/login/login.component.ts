@@ -1,8 +1,10 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../services/auth.service';
+import { SessionTimeoutService } from '../../../../services/session-timeout.service';
+import { SessionConfigApiService } from '../../../../config/session-config-api.service';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +13,7 @@ import { AuthService } from '../../../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   signupForm: FormGroup;
   forgotPasswordForm: FormGroup;
@@ -21,12 +23,16 @@ export class LoginComponent {
   errorMessage = '';
   successMessage = '';
   currentView: 'login' | 'signup' | 'forgot-password' | 'reset-password' = 'login';
+  sessionTimeoutMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
+    private sessionTimeoutService: SessionTimeoutService,
+    private sessionConfigApiService: SessionConfigApiService
   ) {
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required]],
@@ -53,6 +59,20 @@ export class LoginComponent {
     });
   }
 
+  ngOnInit(): void {
+    // Check if user came from session timeout
+    this.route.queryParams.subscribe(params => {
+      if (params['reason'] === 'session-timeout') {
+        this.sessionTimeoutMessage = 'Your session has expired due to inactivity. Please log in again.';
+      } else if (params['reason'] === 'unauthorized') {
+        this.sessionTimeoutMessage = 'Your session is invalid. Please log in again.';
+      }
+    });
+
+    // Stop any existing session timer
+    this.sessionTimeoutService.stopTimer();
+  }
+
   onLogin() {
     if (this.loginForm.valid) {
       this.isLoading = true;
@@ -65,6 +85,12 @@ export class LoginComponent {
         next: (response: any) => {
           this.isLoading = false;
           if (response.success) {
+            // Clear any session expired flags
+            this.sessionTimeoutService.clearSessionExpiredFlag();
+            
+            // Initialize session configuration from backend and start timer
+            this.initializeSessionFromBackend();
+            
             this.router.navigate(['/dashboard/home']);
           } else {
             this.errorMessage = 'Invalid user credentials. Please check your username and password.';
@@ -211,5 +237,19 @@ export class LoginComponent {
   private clearMessages() {
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  /**
+   * Initialize session configuration from backend
+   */
+  private async initializeSessionFromBackend(): Promise<void> {
+    try {
+      await this.sessionConfigApiService.initializeSessionConfig();
+      this.sessionTimeoutService.startSessionTimer();
+      console.log('Session initialized with backend configuration:', this.sessionTimeoutService.getSessionConfig());
+    } catch (error) {
+      console.warn('Failed to load backend session config, using defaults:', error);
+      this.sessionTimeoutService.startSessionTimer();
+    }
   }
 }

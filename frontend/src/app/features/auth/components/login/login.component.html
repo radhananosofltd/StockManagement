@@ -59,6 +59,10 @@
         </button>
       </div>
 
+      <div class="session-timeout-message" *ngIf="sessionTimeoutMessage">
+        {{ sessionTimeoutMessage }}
+      </div>
+
       <div class="success-message" *ngIf="successMessage">
         {{ successMessage }}
       </div>

@@ -1,0 +1,31 @@
+<!-- Session Warning Modal -->
+<div *ngIf="showWarningModal" class="session-modal-overlay">
+  <div class="session-modal-container">
+    <div class="session-modal-header">
+      <h3>Session Warning</h3>
+    </div>
+    <div class="session-modal-body">
+      <p>Your session will expire in 2 minutes due to inactivity.</p>
+      <p>Click "Continue" to extend your session.</p>
+    </div>
+    <div class="session-modal-footer">
+      <button class="btn btn-primary" (click)="continueSession()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- Session Expired Modal -->
+<div *ngIf="showExpiredModal" class="session-modal-overlay">
+  <div class="session-modal-container">
+    <div class="session-modal-header">
+      <h3>Session Expired</h3>
+    </div>
+    <div class="session-modal-body">
+      <p>Your session has expired due to inactivity.</p>
+      <p>Please log in again to continue.</p>
+    </div>
+    <div class="session-modal-footer">
+      <button class="btn btn-primary" (click)="acknowledgeExpiration()">OK</button>
+    </div>
+  </div>
+</div>
