@@ -10,8 +10,29 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StockManagementAPI.Middleware;
+using Serilog;
+
+// Configure Serilog for logging
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/app-.log", 
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7,
+        shared: true,
+        flushToDiskInterval: TimeSpan.FromSeconds(1))
+    .CreateLogger();
+
+try
+{
+    Log.Information("Starting up the application");
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Use Serilog for logging
+builder.Host.UseSerilog();
 
 // Configure URLs
 builder.WebHost.UseUrls("http://localhost:5134");
@@ -64,6 +85,8 @@ builder.Services.AddCors(options =>
 // Register repositories and services
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<ICountryRepository, CountryRepository>();
+builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -114,3 +137,13 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

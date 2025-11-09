@@ -14,6 +14,7 @@ namespace Stock_Management_DataAccess
 
         public DbSet<CompanyEntity> CompanyEntity { get; set; }
         public DbSet<UserEntity> Users { get; set; }
+        public DbSet<CountryEntity> CountryEntity { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
