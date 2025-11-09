@@ -1,14 +1,440 @@
-<div class="page-container">
+<div class="branch-page">
   <div class="page-header">
-    <h1 class="page-title">{{ title }}</h1>
-    <p class="page-description">Manage branch configurations for the stock management system</p>
+    <h2>Branch Management</h2>
+    <p>Add and manage branches in your stock portfolio</p>
   </div>
-  
-  <div class="page-content">
-    <div class="content-placeholder">
-      <div class="placeholder-icon">🏢</div>
-      <h3>Branch Configuration</h3>
-      <p>This page will contain branch management functionality.</p>
+
+  <div class="expandable-panel">
+    <div class="panel-header" (click)="toggleFormPanel()">
+      <h3>Add New Branch</h3>
+      <button class="toggle-btn" type="button">
+        <svg 
+          class="toggle-icon" 
+          [class.rotated]="isFormExpanded()"
+          viewBox="0 0 24 24" 
+          fill="currentColor"
+        >
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="panel-content" [class.expanded]="isFormExpanded()">
+      <div class="branch-form-container">
+    <form [formGroup]="branchForm" (ngSubmit)="onSubmit()" class="branch-form">
+      <!-- Row 1: Company, Branch Code, Branch Name -->
+      <div class="form-row-three">
+        <div class="form-group">
+          <label for="company">Company</label>
+          <select
+            id="company"
+            formControlName="company"
+            [class.error]="branchForm.get('company')?.invalid && branchForm.get('company')?.touched"
+          >
+            <option value="">Select Company</option>
+            <option value="1">Tech Solutions Inc.</option>
+            <option value="2">Global Innovations Ltd.</option>
+            <option value="3">NanoSoft Technologies</option>
+            <option value="4">Retail Masters Corp.</option>
+            <option value="5">European Trading Co.</option>
+          </select>
+          @if (branchForm.get('company')?.invalid && branchForm.get('company')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('company')?.errors?.['required']) {
+                Company is required
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="branchCode">Branch Code</label>
+          <input
+            id="branchCode"
+            type="text"
+            formControlName="branchCode"
+            placeholder="Enter code"
+            [class.error]="branchForm.get('branchCode')?.invalid && branchForm.get('branchCode')?.touched"
+          />
+          @if (branchForm.get('branchCode')?.invalid && branchForm.get('branchCode')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('branchCode')?.errors?.['required']) {
+                Branch code is required
+              }
+              @if (branchForm.get('branchCode')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="branchName">Branch Name</label>
+          <input
+            id="branchName"
+            type="text"
+            formControlName="branchName"
+            placeholder="Enter branch name"
+            [class.error]="branchForm.get('branchName')?.invalid && branchForm.get('branchName')?.touched"
+          />
+          @if (branchForm.get('branchName')?.invalid && branchForm.get('branchName')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('branchName')?.errors?.['required']) {
+                Branch name is required
+              }
+              @if (branchForm.get('branchName')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Row 2: Head Office, Contact Name, Contact Email -->
+      <div class="form-row-three">
+        <div class="form-group">
+          <label for="headOffice">
+            Head Office
+            <input
+              id="isHeadOffice"
+              type="checkbox"
+              formControlName="isHeadOffice"
+              class="checkbox-input"
+              style="margin-left: 8px; vertical-align: top;"
+            />
+          </label>
+          <select
+            id="headOffice"
+            formControlName="headOffice"
+            [class.error]="branchForm.get('headOffice')?.invalid && branchForm.get('headOffice')?.touched"
+          >
+            <option value="">Select Head Office</option>
+            <option value="1">Head Office 1</option>
+            <option value="2">Head Office 2</option>
+            <option value="3">Head Office 3</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="contactName">Contact Name</label>
+          <input
+            id="contactName"
+            type="text"
+            formControlName="contactName"
+            placeholder="Enter contact name"
+            [class.error]="branchForm.get('contactName')?.invalid && branchForm.get('contactName')?.touched"
+          />
+          @if (branchForm.get('contactName')?.invalid && branchForm.get('contactName')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('contactName')?.errors?.['required']) {
+                Contact name is required
+              }
+              @if (branchForm.get('contactName')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="contactEmail">Contact Email</label>
+          <input
+            id="contactEmail"
+            type="text"
+            formControlName="contactEmail"
+            placeholder="Enter email"
+            [class.error]="branchForm.get('contactEmail')?.invalid && branchForm.get('contactEmail')?.touched"
+          />
+          @if (branchForm.get('contactEmail')?.invalid && branchForm.get('contactEmail')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('contactEmail')?.errors?.['required']) {
+                Email is required
+              }
+              @if (branchForm.get('contactEmail')?.errors?.['email']) {
+                Please enter a valid email
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Row 3: Phone, City, State -->
+      <div class="form-row-three">
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input
+            id="phone"
+            type="text"
+            formControlName="phone"
+            placeholder="Enter phone number"
+            [class.error]="branchForm.get('phone')?.invalid && branchForm.get('phone')?.touched"
+          />
+          @if (branchForm.get('phone')?.invalid && branchForm.get('phone')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('phone')?.errors?.['pattern']) {
+                Only numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="city">City</label>
+          <input
+            id="city"
+            type="text"
+            formControlName="city"
+            placeholder="Enter city"
+            [class.error]="branchForm.get('city')?.invalid && branchForm.get('city')?.touched"
+          />
+          @if (branchForm.get('city')?.invalid && branchForm.get('city')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('city')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="state">State</label>
+          <input
+            id="state"
+            type="text"
+            formControlName="state"
+            placeholder="Enter state"
+            [class.error]="branchForm.get('state')?.invalid && branchForm.get('state')?.touched"
+          />
+          @if (branchForm.get('state')?.invalid && branchForm.get('state')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('state')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Row 4: Branch Address, Postal Code, Country -->
+      <div class="form-row-three">
+        <div class="form-group">
+          <label for="branchAddress">Branch Address</label>
+          <textarea
+            id="branchAddress"
+            formControlName="branchAddress"
+            placeholder="Enter address"
+            rows="3"
+            [class.error]="branchForm.get('branchAddress')?.invalid && branchForm.get('branchAddress')?.touched"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="postalCode">Postal Code</label>
+          <input
+            id="postalCode"
+            type="text"
+            formControlName="postalCode"
+            placeholder="Enter postal code"
+            [class.error]="branchForm.get('postalCode')?.invalid && branchForm.get('postalCode')?.touched"
+          />
+          @if (branchForm.get('postalCode')?.invalid && branchForm.get('postalCode')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('postalCode')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+
+          <label for="isActive" class="checkbox-label">
+            <input
+              id="isActive"
+              type="checkbox"
+              formControlName="isActive"
+              class="checkbox-input"
+            />
+            <span class="checkbox-text">Active</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="country">Country</label>
+          <select
+            id="country"
+            formControlName="country"
+            [class.error]="branchForm.get('country')?.invalid && branchForm.get('country')?.touched"
+          >
+            <option value="">Select Country</option>
+            <option value="1">United States</option>
+            <option value="2">India</option>
+            <option value="3">United Kingdom</option>
+          </select>
+          @if (branchForm.get('country')?.invalid && branchForm.get('country')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('country')?.errors?.['required']) {
+                Country is required
+              }
+            </div>
+          }
+
+          <div class="form-actions" style="margin-top: 1rem;">
+            <button
+              type="submit"
+              [disabled]="branchForm.invalid || isSubmitting()"
+              class="submit-btn"
+            >
+              @if (isSubmitting()) {
+                <span class="spinner"></span>
+                Submitting...
+              } @else {
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                Add Branch
+              }
+            </button>
+
+            <button
+              type="button"
+              (click)="resetForm()"
+              class="reset-btn"
+              [disabled]="isSubmitting()"
+            >
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+              </svg>
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    @if (successMessage()) {
+      <div class="success-message">
+        <div class="message-content">
+          <svg class="success-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          {{ successMessage() }}
+        </div>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="error-message-box">
+        <div class="message-content">
+          <svg class="error-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          {{ errorMessage() }}
+        </div>
+      </div>
+    }
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions Panel -->
+  <div class="expandable-panel">
+    <div class="panel-header" (click)="toggleBranchesPanel()">
+      <h3>Quick Actions</h3>
+      <button class="toggle-btn" type="button">
+        <svg 
+          class="toggle-icon" 
+          [class.rotated]="isBranchesPanelExpanded()"
+          viewBox="0 0 24 24" 
+          fill="currentColor"
+        >
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="panel-content" [class.expanded]="isBranchesPanelExpanded()">
+      <div class="branches-management-content">
+        <div class="quick-actions-card">
+          <div class="actions-grid">
+            <button class="action-btn" (click)="viewBranches()">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+              </svg>
+              <span>View All Branches</span>
+            </button>
+            <button class="action-btn">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+              </svg>
+              <span>Import Branches</span>
+            </button>
+            <button class="action-btn">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 10h6v6h4l-7 7-7-7h4zm-4-4h14v2H5z"/>
+              </svg>
+              <span>Export Data</span>
+            </button>
+          </div>
+        </div>
+
+        @if (showBranchesGrid()) {
+          <div class="branches-grid-container">
+            <div class="grid-header">
+              <h3>All Branches</h3>
+              <button class="close-btn" (click)="hideBranchesGrid()">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            @if (isLoadingBranches()) {
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading branches...</p>
+              </div>
+            } @else if (branches().length === 0) {
+              <div class="no-data">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <p>No branches found. Add your first branch using the form above.</p>
+              </div>
+            } @else {
+              <div class="branches-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Address</th>
+                      <th>Country</th>
+                      <th>Contact</th>
+                      <th>Phone</th>
+                      <th>Created Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (branch of branches(); track branch.id) {
+                      <tr>
+                        <td class="branch-name">{{ branch.branchName }}</td>
+                        <td class="branch-address">{{ branch.branchAddress || '-' }}</td>
+                        <td class="branch-country">{{ branch.country }}</td>
+                        <td class="branch-contact">{{ branch.contactName }}</td>
+                        <td class="branch-phone">{{ branch.phone }}</td>
+                        <td class="branch-date">{{ branch.createdDate | date:'short' }}</td>
+                        <td class="branch-status">
+                          <span class="status-badge" [class.active]="branch.isActive">
+                            {{ branch.isActive ? 'Active' : 'Inactive' }}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+      </div>
     </div>
   </div>
 </div>

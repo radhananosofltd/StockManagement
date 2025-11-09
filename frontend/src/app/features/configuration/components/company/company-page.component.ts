@@ -45,18 +45,46 @@ export class CompanyPageComponent implements AfterViewInit {
   public readonly importMessage = signal('');
   public readonly companies = signal<CompanyListDTO[]>([]);
   public readonly showCompaniesGrid = signal(false);
+  public readonly isFormExpanded = signal(true); // Form panel expanded by default
+  public readonly isQuickActionsExpanded = signal(true); // Quick actions panel expanded by default
+  public readonly isCompaniesGridExpanded = signal(true); // Companies grid panel expanded by default
+  public readonly isCompaniesPanelExpanded = signal(true); // Combined companies panel expanded by default
 
   public readonly companyForm: FormGroup = this.fb.group({
     customerCode: ['', [
       Validators.required,
-      CustomValidators.companyCode
+      Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)
     ]],
     customerName: ['', [
       Validators.required,
-      Validators.minLength(2),
-      Validators.maxLength(255)
+      Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)
     ]],
+    contactName: ['', [
+      Validators.required,
+      Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)
+    ]],
+    contactEmail: ['', [
+      Validators.required,
+      Validators.email
+    ]],
+    website: ['', [
+      Validators.pattern(/^[a-zA-Z0-9 .\-@:\/]+$/)
+    ]],
+    companyLogoUrl: ['', [
+      Validators.pattern(/^[a-zA-Z0-9 .\-:\/]+$/)
+    ]],
+    pan: ['', [
+      Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)
+    ]],
+    taxIdentificationNumberType: ['', [
+      Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)
+    ]],
+    taxIdentificationNumber: ['', [
+      Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)
+    ]],
+    isActive: [true],
     customerAddress: [''],
+    country: ['', Validators.required],
     currency: ['USD', [
       Validators.required,
       Validators.pattern(/^[A-Z]{3}$/)
@@ -210,10 +238,90 @@ export class CompanyPageComponent implements AfterViewInit {
     this.companies.set([]);
   }
 
+  public toggleFormPanel(): void {
+    this.isFormExpanded.set(!this.isFormExpanded());
+  }
+
+  public toggleQuickActionsPanel(): void {
+    this.isQuickActionsExpanded.set(!this.isQuickActionsExpanded());
+  }
+
+  public toggleCompaniesGridPanel(): void {
+    this.isCompaniesGridExpanded.set(!this.isCompaniesGridExpanded());
+  }
+
+  public toggleCompaniesPanel(): void {
+    this.isCompaniesPanelExpanded.set(!this.isCompaniesPanelExpanded());
+  }
+
   private loadCompanies(shouldScrollAfterLoad: boolean = false): void {
     this.isLoadingCompanies.set(true);
     this.errorMessage.set('');
 
+    // Mock data - replace with actual API call when backend is ready
+    setTimeout(() => {
+      const mockCompanies: CompanyListDTO[] = [
+        {
+          id: 1,
+          customerCode: 'TECH001',
+          customerName: 'Tech Solutions Inc.',
+          customerAddress: '123 Technology Drive, Silicon Valley, CA 94025',
+          currency: 'USD',
+          createdDate: '2024-01-15T10:30:00',
+          isActive: true
+        },
+        {
+          id: 2,
+          customerCode: 'GLOBAL02',
+          customerName: 'Global Innovations Ltd.',
+          customerAddress: '456 Innovation Street, London, UK',
+          currency: 'GBP',
+          createdDate: '2024-02-20T14:45:00',
+          isActive: true
+        },
+        {
+          id: 3,
+          customerCode: 'NANO003',
+          customerName: 'NanoSoft Technologies',
+          customerAddress: '789 Software Park, Bangalore, India',
+          currency: 'INR',
+          createdDate: '2024-03-10T09:15:00',
+          isActive: true
+        },
+        {
+          id: 4,
+          customerCode: 'RETAIL04',
+          customerName: 'Retail Masters Corp.',
+          customerAddress: '321 Commerce Blvd, New York, NY 10001',
+          currency: 'USD',
+          createdDate: '2024-04-05T11:20:00',
+          isActive: false
+        },
+        {
+          id: 5,
+          customerCode: 'EURO005',
+          customerName: 'European Trading Co.',
+          customerAddress: '654 Trade Street, Frankfurt, Germany',
+          currency: 'EUR',
+          createdDate: '2024-05-12T16:30:00',
+          isActive: true
+        }
+      ];
+
+      this.isLoadingCompanies.set(false);
+      this.companies.set(mockCompanies);
+      
+      // If we should scroll after loading, do it with a delay to ensure DOM update
+      if (shouldScrollAfterLoad) {
+        setTimeout(() => {
+          console.log('Scrolling after companies loaded');
+          this.scrollToCompaniesGrid();
+        }, 300);
+      }
+    }, 800);
+
+    // Uncomment this when backend API is ready:
+    /*
     this.companyService.getCompanies().subscribe({
       next: (companies: CompanyListDTO[]) => {
         this.isLoadingCompanies.set(false);
@@ -236,6 +344,7 @@ export class CompanyPageComponent implements AfterViewInit {
         console.error('Error loading companies:', error);
       }
     });
+    */
   }
 
   public importCompanies(): void {
