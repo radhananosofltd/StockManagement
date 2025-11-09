@@ -36,8 +36,9 @@ builder.Host.UseSerilog();
 
 // Configure URLs
 builder.WebHost.UseUrls("http://localhost:5134");
-//builder.WebHost.UseUrls("http://0.0.0.0:5000");
-// Add services to the container.
+    //builder.WebHost.UseUrls("http://0.0.0.0:5000");
+    // Add services to the container.
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -69,21 +70,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Add CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngularApp",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:4200", "http://localhost:49354", "http://localhost:51697") // Angular dev server ports
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
-});
+    // Add CORS
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll",
+            policy =>
+            {
+                policy.WithOrigins("http://localhost:4200", "http://localhost:49354", "http://localhost:51697") // Angular dev server ports
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials();
+            });
+    });
 
-// Register repositories and services
-builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+    // Register repositories and services
+    builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<ICountryRepository, CountryRepository>();
 builder.Services.AddScoped<ICountryService, CountryService>();
@@ -122,11 +123,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Use CORS
-app.UseCors("AllowAngularApp");
+    // Use CORS
+    app.UseCors("AllowAll");
 
-// Add session middleware
-app.UseSession();
+    // Add session middleware
+    app.UseSession();
 
 // Add custom session timeout middleware
 app.UseMiddleware<SessionTimeoutMiddleware>();

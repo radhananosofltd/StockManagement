@@ -1,6 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal,OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { COMPANY_ENDPOINTS, COUNTRY_ENDPOINTS } from '../../../../constants/api-endpoints.constants';
 
 interface Branch {
   id: number;
@@ -20,7 +22,9 @@ interface Branch {
   templateUrl: './branch.component.html',
   styleUrl: './branch.component.css'
 })
-export class BranchComponent {
+export class BranchComponent implements OnInit{
+  companies = signal<any[]>([]);
+  countries = signal<any[]>([]);
   branchForm: FormGroup;
   
   // Signals for panel expansion states
@@ -35,7 +39,7 @@ export class BranchComponent {
   isLoadingBranches = signal(false);
   branches = signal<Branch[]>([]);
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private http: HttpClient) {
     this.branchForm = this.fb.group({
       company: ['', [Validators.required]],
       branchCode: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
@@ -63,6 +67,19 @@ export class BranchComponent {
         headOfficeControl?.enable();
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.http.get<any[]>(COMPANY_ENDPOINTS.GET_ALL).subscribe({
+      next: (data: any[]) => { this.companies.set(data); },
+      error: (error: any) => { console.error('Error fetching companies', error); }
+    });
+
+    this.http.get<any[]>(COUNTRY_ENDPOINTS.GET_ALL).subscribe({
+      next: (data: any[]) => { this.countries.set(data); },
+      error: (error: any) => { console.error('Error fetching countries', error); }
+    });
+
   }
 
   toggleFormPanel() {

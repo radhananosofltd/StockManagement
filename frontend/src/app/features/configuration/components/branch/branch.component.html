@@ -27,17 +27,14 @@
         <div class="form-group">
           <label for="company">Company</label>
           <select
-            id="company"
-            formControlName="company"
-            [class.error]="branchForm.get('company')?.invalid && branchForm.get('company')?.touched"
-          >
-            <option value="">Select Company</option>
-            <option value="1">Tech Solutions Inc.</option>
-            <option value="2">Global Innovations Ltd.</option>
-            <option value="3">NanoSoft Technologies</option>
-            <option value="4">Retail Masters Corp.</option>
-            <option value="5">European Trading Co.</option>
-          </select>
+  id="company"
+  formControlName="company"
+  [class.error]="branchForm.get('company')?.invalid && branchForm.get('company')?.touched">
+  <option value="">Select Company</option>
+<option *ngFor="let company of companies()" [value]="company.id">
+  {{ company.companyName }}
+</option>
+</select>
           @if (branchForm.get('company')?.invalid && branchForm.get('company')?.touched) {
             <div class="error-message">
               @if (branchForm.get('company')?.errors?.['required']) {
@@ -264,9 +261,9 @@
             [class.error]="branchForm.get('country')?.invalid && branchForm.get('country')?.touched"
           >
             <option value="">Select Country</option>
-            <option value="1">United States</option>
-            <option value="2">India</option>
-            <option value="3">United Kingdom</option>
+            <option *ngFor="let country of countries()" [value]="country.countryid">
+  {{ country.countryname }}
+</option>
           </select>
           @if (branchForm.get('country')?.invalid && branchForm.get('country')?.touched) {
             <div class="error-message">
