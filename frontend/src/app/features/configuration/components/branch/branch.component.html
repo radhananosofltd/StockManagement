@@ -22,8 +22,31 @@
     <div class="panel-content" [class.expanded]="isFormExpanded()">
       <div class="branch-form-container">
     <form [formGroup]="branchForm" (ngSubmit)="onSubmit()" class="branch-form">
-      <!-- Row 1: Branch Code, Name, Head Office Dropdown -->
+      <!-- Row 1: Company, Branch Code, Branch Name -->
       <div class="form-row-three">
+        <div class="form-group">
+          <label for="company">Company</label>
+          <select
+            id="company"
+            formControlName="company"
+            [class.error]="branchForm.get('company')?.invalid && branchForm.get('company')?.touched"
+          >
+            <option value="">Select Company</option>
+            <option value="1">Tech Solutions Inc.</option>
+            <option value="2">Global Innovations Ltd.</option>
+            <option value="3">NanoSoft Technologies</option>
+            <option value="4">Retail Masters Corp.</option>
+            <option value="5">European Trading Co.</option>
+          </select>
+          @if (branchForm.get('company')?.invalid && branchForm.get('company')?.touched) {
+            <div class="error-message">
+              @if (branchForm.get('company')?.errors?.['required']) {
+                Company is required
+              }
+            </div>
+          }
+        </div>
+
         <div class="form-group">
           <label for="branchCode">Branch Code</label>
           <input
@@ -65,7 +88,10 @@
             </div>
           }
         </div>
+      </div>
 
+      <!-- Row 2: Head Office, Contact Name, Contact Email -->
+      <div class="form-row-three">
         <div class="form-group">
           <label for="headOffice">
             Head Office
@@ -88,10 +114,7 @@
             <option value="3">Head Office 3</option>
           </select>
         </div>
-      </div>
 
-      <!-- Row 2: Contact Name, Contact Email, Phone -->
-      <div class="form-row-three">
         <div class="form-group">
           <label for="contactName">Contact Name</label>
           <input
@@ -133,7 +156,10 @@
             </div>
           }
         </div>
+      </div>
 
+      <!-- Row 3: Phone, City, State -->
+      <div class="form-row-three">
         <div class="form-group">
           <label for="phone">Phone</label>
           <input
@@ -151,10 +177,7 @@
             </div>
           }
         </div>
-      </div>
 
-      <!-- Row 3: City, State, Postal Code -->
-      <div class="form-row-three">
         <div class="form-group">
           <label for="city">City</label>
           <input
@@ -190,6 +213,20 @@
             </div>
           }
         </div>
+      </div>
+
+      <!-- Row 4: Branch Address, Postal Code, Country -->
+      <div class="form-row-three">
+        <div class="form-group">
+          <label for="branchAddress">Branch Address</label>
+          <textarea
+            id="branchAddress"
+            formControlName="branchAddress"
+            placeholder="Enter address"
+            rows="3"
+            [class.error]="branchForm.get('branchAddress')?.invalid && branchForm.get('branchAddress')?.touched"
+          ></textarea>
+        </div>
 
         <div class="form-group">
           <label for="postalCode">Postal Code</label>
@@ -207,20 +244,16 @@
               }
             </div>
           }
-        </div>
-      </div>
 
-      <!-- Row 4: Address, Country, Form Actions -->
-      <div class="form-row-three">
-        <div class="form-group">
-          <label for="branchAddress">Branch Address</label>
-          <textarea
-            id="branchAddress"
-            formControlName="branchAddress"
-            placeholder="Enter address"
-            rows="3"
-            [class.error]="branchForm.get('branchAddress')?.invalid && branchForm.get('branchAddress')?.touched"
-          ></textarea>
+          <label for="isActive" class="checkbox-label">
+            <input
+              id="isActive"
+              type="checkbox"
+              formControlName="isActive"
+              class="checkbox-input"
+            />
+            <span class="checkbox-text">Active</span>
+          </label>
         </div>
 
         <div class="form-group">
@@ -243,19 +276,7 @@
             </div>
           }
 
-          <label for="isActive" class="checkbox-label">
-            <input
-              id="isActive"
-              type="checkbox"
-              formControlName="isActive"
-              class="checkbox-input"
-            />
-            <span class="checkbox-text">Active</span>
-          </label>
-        </div>
-
-        <div class="form-group" style="display: flex; align-items: center; justify-content: center;">
-          <div class="form-actions">
+          <div class="form-actions" style="margin-top: 1rem;">
             <button
               type="submit"
               [disabled]="branchForm.invalid || isSubmitting()"

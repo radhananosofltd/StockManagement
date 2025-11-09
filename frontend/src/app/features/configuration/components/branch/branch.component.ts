@@ -37,6 +37,7 @@ export class BranchComponent {
 
   constructor(private fb: FormBuilder) {
     this.branchForm = this.fb.group({
+      company: ['', [Validators.required]],
       branchCode: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
       branchName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
       contactName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
@@ -107,6 +108,7 @@ export class BranchComponent {
 
   resetForm() {
     this.branchForm.reset({
+      company: '',
       isActive: true,
       isHeadOffice: false
     });
