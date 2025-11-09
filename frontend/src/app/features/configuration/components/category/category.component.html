@@ -22,12 +22,167 @@
 
     <div class="panel-content" [class.expanded]="isAddCategoryPanelExpanded()">
       <div class="category-form-container">
-        <!-- Category form will be added here -->
-        <div class="content-placeholder">
-          <div class="placeholder-icon">📂</div>
-          <h3>Category Form</h3>
-          <p>Category form fields will be added here.</p>
-        </div>
+        <form [formGroup]="categoryForm">
+          <!-- Category Name and Active Checkbox in same row -->
+          <div class="form-row">
+            <div class="form-row-col1">
+              <div class="form-field category-name-field">
+                <label for="categoryName">Category <span class="required">*</span></label>
+                <input 
+                  type="text" 
+                  id="categoryName"
+                  formControlName="categoryName"
+                  placeholder="Enter category name"
+                  [class.error]="categoryForm.get('categoryName')?.invalid && categoryForm.get('categoryName')?.touched"
+                />
+                @if (categoryForm.get('categoryName')?.invalid && categoryForm.get('categoryName')?.touched) {
+                  <span class="error-message">Category name is required</span>
+                }
+              </div>
+              <div class="form-field checkbox-field-inline">
+                <label>
+                  <input 
+                    type="checkbox" 
+                    formControlName="isActive"
+                  />
+                  <span>Active</span>
+                </label>
+              </div>
+            </div>
+            <div class="form-row-col2">
+              <div class="form-actions">
+                <button 
+                  type="button" 
+                  class="submit-btn" 
+                  (click)="addCategory()"
+                  [disabled]="isSubmitting()"
+                >
+                  @if (isSubmitting()) {
+                    <span class="spinner"></span>
+                    <span>Adding...</span>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    <span>Add Category</span>
+                  }
+                </button>
+                <button 
+                  type="button" 
+                  class="reset-btn" 
+                  (click)="resetForm()"
+                  [disabled]="isSubmitting()"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                  </svg>
+                  <span>Reset</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Specifications Grid Display -->
+          <div class="specifications-grid-container">
+
+            @if (isLoadingSpecifications()) {
+                <div class="loading-spinner">
+                  <div class="spinner"></div>
+                  <p>Loading specifications...</p>
+                </div>
+              } @else if (specifications().length === 0) {
+                <div class="no-data">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <p>No specifications found.</p>
+                </div>
+              } @else {
+                <div class="specifications-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style="width: 40px;"></th>
+                        <th>Name</th>
+                        <th>Data Type</th>
+                        <th>SKU</th>
+                        <th>Editable</th>
+                        <th>Configurable</th>
+                        <th>Bulk Input</th>
+                        <th>Lockable</th>
+                        <th>Background</th>
+                        <th>Action</th>
+                        <th>SKU Order</th>
+                      </tr>
+                    </thead>
+                    <tbody cdkDropList (cdkDropListDropped)="dropSpecificationRow($event)">
+                      @for (spec of specifications(); track spec.id) {
+                        @if (spec.isActive) {
+                          <tr cdkDrag>
+                            <td class="drag-handle-cell">
+                              <span cdkDragHandle class="drag-handle-icon" title="Drag to reorder">&#9776;</span>
+                            </td>
+                            <td class="spec-name">{{ spec.name }}</td>
+                            <td class="spec-datatype">{{ spec.dataType }}</td>
+                            <td class="spec-boolean">
+                              <span class="boolean-indicator" [class.active]="spec.sku">
+                                {{ spec.sku ? '✓' : '✗' }}
+                              </span>
+                            </td>
+                            <td class="spec-boolean">
+                              <span class="boolean-indicator" [class.active]="spec.editable">
+                                {{ spec.editable ? '✓' : '✗' }}
+                              </span>
+                            </td>
+                            <td class="spec-boolean">
+                              <span class="boolean-indicator" [class.active]="spec.configurable">
+                                {{ spec.configurable ? '✓' : '✗' }}
+                              </span>
+                            </td>
+                            <td class="spec-boolean">
+                              <span class="boolean-indicator" [class.active]="spec.bulkInput">
+                                {{ spec.bulkInput ? '✓' : '✗' }}
+                              </span>
+                            </td>
+                            <td class="spec-boolean">
+                              <span class="boolean-indicator" [class.active]="spec.lockable">
+                                {{ spec.lockable ? '✓' : '✗' }}
+                              </span>
+                            </td>
+                            <td class="spec-boolean">
+                              <span class="boolean-indicator" [class.active]="spec.background">
+                                {{ spec.background ? '✓' : '✗' }}
+                              </span>
+                            </td>
+                            <td class="spec-action">
+                              <select class="action-dropdown" (change)="onSpecificationAction($event, spec)">
+                                <option value="">Select</option>
+                                <option value="add">Add</option>
+                                <option value="remove">Remove</option>
+                              </select>
+                            </td>
+                            <td class="spec-sku-order">
+                              <select class="sku-order-dropdown" (change)="onSkuOrderChange($event, spec)">
+                                <option value=""></option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                              </select>
+                            </td>
+                          </tr>
+                        }
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+          </div>
+
+          <!-- Form Action Buttons removed from here -->
+        </form>
       </div>
     </div>
   </div>
@@ -83,6 +238,66 @@
       </button>
     </div>
   </div>
+
+  <!-- Categories Grid Display -->
+  @if (showAllCategoriesPanel()) {
+    <div class="categories-grid-container" id="categories-grid" #categoriesGrid>
+      <div class="grid-header">
+        <h3>All Categories</h3>
+        <button class="close-btn" (click)="hideCategoriesGrid()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </div>
+
+      @if (isLoadingCategories()) {
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading categories...</p>
+        </div>
+      } @else if (categories().length === 0) {
+        <div class="no-data">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <p>No categories found. Add your first category using the form above.</p>
+        </div>
+      } @else {
+        <div class="categories-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Created Date</th>
+                <th>SKUFields</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cat of pagedCategories; track cat.category) {
+                <tr>
+                  <td class="category-name">{{ cat.category }}</td>
+                  <td class="category-status">
+                    <span class="status-badge" [class.active]="cat.status === 'Active'">
+                      {{ cat.status }}
+                    </span>
+                  </td>
+                  <td class="category-date">{{ cat.createdDate | date:'short' }}</td>
+                  <td class="category-skuFields">{{ cat.skuFields }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="pagination-controls" *ngIf="totalCategoryPages > 1">
+            <button class="pagination-btn" [disabled]="currentCategoryPage() === 1" (click)="setCategoryPage(currentCategoryPage() - 1)">Prev</button>
+            <span>Page {{ currentCategoryPage() }} of {{ totalCategoryPages }}</span>
+            <button class="pagination-btn" [disabled]="currentCategoryPage() === totalCategoryPages" (click)="setCategoryPage(currentCategoryPage() + 1)">Next</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
       </div>
     </div>
   </div>

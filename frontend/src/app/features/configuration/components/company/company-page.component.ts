@@ -50,6 +50,10 @@ export class CompanyPageComponent implements AfterViewInit {
   public readonly isCompaniesGridExpanded = signal(true); // Companies grid panel expanded by default
   public readonly isCompaniesPanelExpanded = signal(true); // Combined companies panel expanded by default
 
+  // Pagination signals for companies
+  currentCompanyPage = signal(1);
+  companiesPerPage = 10;
+
   public readonly companyForm: FormGroup = this.fb.group({
     customerCode: ['', [
       Validators.required,
@@ -260,65 +264,25 @@ export class CompanyPageComponent implements AfterViewInit {
 
     // Mock data - replace with actual API call when backend is ready
     setTimeout(() => {
-      const mockCompanies: CompanyListDTO[] = [
-        {
-          id: 1,
-          customerCode: 'TECH001',
-          customerName: 'Tech Solutions Inc.',
-          customerAddress: '123 Technology Drive, Silicon Valley, CA 94025',
-          currency: 'USD',
-          createdDate: '2024-01-15T10:30:00',
-          isActive: true
-        },
-        {
-          id: 2,
-          customerCode: 'GLOBAL02',
-          customerName: 'Global Innovations Ltd.',
-          customerAddress: '456 Innovation Street, London, UK',
-          currency: 'GBP',
-          createdDate: '2024-02-20T14:45:00',
-          isActive: true
-        },
-        {
-          id: 3,
-          customerCode: 'NANO003',
-          customerName: 'NanoSoft Technologies',
-          customerAddress: '789 Software Park, Bangalore, India',
-          currency: 'INR',
-          createdDate: '2024-03-10T09:15:00',
-          isActive: true
-        },
-        {
-          id: 4,
-          customerCode: 'RETAIL04',
-          customerName: 'Retail Masters Corp.',
-          customerAddress: '321 Commerce Blvd, New York, NY 10001',
-          currency: 'USD',
-          createdDate: '2024-04-05T11:20:00',
-          isActive: false
-        },
-        {
-          id: 5,
-          customerCode: 'EURO005',
-          customerName: 'European Trading Co.',
-          customerAddress: '654 Trade Street, Frankfurt, Germany',
-          currency: 'EUR',
-          createdDate: '2024-05-12T16:30:00',
-          isActive: true
-        }
-      ];
-
+      this.companies.set([
+        { id: 1, customerCode: 'C001', customerName: 'Tech Solutions Inc.', customerAddress: '123 Main St, NY', currency: 'USD', createdDate: '2024-01-01', isActive: true },
+        { id: 2, customerCode: 'C002', customerName: 'Global Innovations Ltd.', customerAddress: '456 North Ave, CA', currency: 'USD', createdDate: '2024-01-02', isActive: true },
+        { id: 3, customerCode: 'C003', customerName: 'NanoSoft Technologies', customerAddress: '789 Pacific Blvd, TX', currency: 'USD', createdDate: '2024-01-03', isActive: false },
+        { id: 4, customerCode: 'C004', customerName: 'Retail Masters Corp.', customerAddress: '321 Market St, FL', currency: 'USD', createdDate: '2024-01-04', isActive: true },
+        { id: 5, customerCode: 'C005', customerName: 'European Trading Co.', customerAddress: '654 Euro Rd, London', currency: 'GBP', createdDate: '2024-01-05', isActive: true },
+        { id: 6, customerCode: 'C006', customerName: 'Asia Pacific Holdings', customerAddress: '987 Asia St, Tokyo', currency: 'JPY', createdDate: '2024-01-06', isActive: false },
+        { id: 7, customerCode: 'C007', customerName: 'Middle East Ventures', customerAddress: '111 Desert Rd, Dubai', currency: 'AED', createdDate: '2024-01-07', isActive: true },
+        { id: 8, customerCode: 'C008', customerName: 'African Logistics', customerAddress: '222 Safari Ave, Nairobi', currency: 'KES', createdDate: '2024-01-08', isActive: true },
+        { id: 9, customerCode: 'C009', customerName: 'South American Foods', customerAddress: '333 Amazon St, Rio', currency: 'BRL', createdDate: '2024-01-09', isActive: false },
+        { id: 10, customerCode: 'C010', customerName: 'Australian Mining Ltd.', customerAddress: '444 Outback Rd, Sydney', currency: 'AUD', createdDate: '2024-01-10', isActive: true },
+        { id: 11, customerCode: 'C011', customerName: 'Canadian Energy', customerAddress: '555 Maple St, Toronto', currency: 'CAD', createdDate: '2024-01-11', isActive: true },
+        { id: 12, customerCode: 'C012', customerName: 'Nordic Shipping', customerAddress: '666 Fjord Rd, Oslo', currency: 'NOK', createdDate: '2024-01-12', isActive: false },
+        { id: 13, customerCode: 'C013', customerName: 'Eastern Europe Tech', customerAddress: '777 Baltic St, Warsaw', currency: 'PLN', createdDate: '2024-01-13', isActive: true },
+        { id: 14, customerCode: 'C014', customerName: 'Mediterranean Textiles', customerAddress: '888 Olive Rd, Athens', currency: 'EUR', createdDate: '2024-01-14', isActive: true },
+        { id: 15, customerCode: 'C015', customerName: 'Scandinavian Design', customerAddress: '999 Design St, Stockholm', currency: 'SEK', createdDate: '2024-01-15', isActive: false }
+      ]);
       this.isLoadingCompanies.set(false);
-      this.companies.set(mockCompanies);
-      
-      // If we should scroll after loading, do it with a delay to ensure DOM update
-      if (shouldScrollAfterLoad) {
-        setTimeout(() => {
-          console.log('Scrolling after companies loaded');
-          this.scrollToCompaniesGrid();
-        }, 300);
-      }
-    }, 800);
+    }, 1000);
 
     // Uncomment this when backend API is ready:
     /*
@@ -621,5 +585,19 @@ export class CompanyPageComponent implements AfterViewInit {
     }
   }
 
+  get pagedCompanies() {
+    const page = this.currentCompanyPage();
+    const start = (page - 1) * this.companiesPerPage;
+    const end = start + this.companiesPerPage;
+    return this.companies().slice(start, end);
+  }
+
+  get totalCompanyPages() {
+    return Math.ceil(this.companies().length / this.companiesPerPage);
+  }
+
+  setCompanyPage(page: number) {
+    this.currentCompanyPage.set(page);
+  }
 
 }

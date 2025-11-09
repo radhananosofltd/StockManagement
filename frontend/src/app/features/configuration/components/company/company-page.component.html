@@ -408,7 +408,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (company of companies(); track company.id) {
+              @for (company of pagedCompanies; track company.id) {
                 <tr>
                   <td class="company-code">{{ company.customerCode }}</td>
                   <td class="company-name">{{ company.customerName }}</td>
@@ -424,6 +424,11 @@
               }
             </tbody>
           </table>
+          <div class="pagination-controls" *ngIf="totalCompanyPages > 1">
+            <button class="pagination-btn" [disabled]="currentCompanyPage() === 1" (click)="setCompanyPage(currentCompanyPage() - 1)">Prev</button>
+            <span>Page {{ currentCompanyPage() }} of {{ totalCompanyPages }}</span>
+            <button class="pagination-btn" [disabled]="currentCompanyPage() === totalCompanyPages" (click)="setCompanyPage(currentCompanyPage() + 1)">Next</button>
+          </div>
         </div>
       }
     </div>
