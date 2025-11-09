@@ -1,14 +1,381 @@
-<div class="page-container">
+<div class="item-specification-page">
   <div class="page-header">
-    <h1 class="page-title">{{ title }}</h1>
-    <p class="page-description">Manage item specification configurations for the stock management system</p>
+    <h2>Item Specification Management</h2>
+    <p>Add and manage item specifications in your stock portfolio</p>
   </div>
-  
-  <div class="page-content">
-    <div class="content-placeholder">
-      <div class="placeholder-icon">📋</div>
-      <h3>Item Specification Configuration</h3>
-      <p>This page will contain item specification management functionality.</p>
+
+  <!-- Add Specification Panel -->
+  <div class="expandable-panel">
+    <div class="panel-header" (click)="toggleFormPanel()">
+      <h3>Add Specification</h3>
+      <button class="toggle-btn" type="button">
+        <svg 
+          class="toggle-icon" 
+          [class.rotated]="isFormExpanded()"
+          viewBox="0 0 24 24" 
+          fill="currentColor"
+        >
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="panel-content" [class.expanded]="isFormExpanded()">
+      <div class="specification-form-container">
+        <form [formGroup]="specificationForm" (ngSubmit)="onSubmit()" class="specification-form">
+          <!-- Row 1: Name with Default checkbox, DataType, Name Case, Value Case (4 columns) -->
+          <div class="form-row-four">
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label for="name" style="margin: 0;">Name</label>
+                <label for="isDefault" style="display: flex; align-items: center; gap: 0.25rem; margin: 0; white-space: nowrap;">
+                  <input
+                    id="isDefault"
+                    type="checkbox"
+                    formControlName="isDefault"
+                    class="checkbox-input"
+                  />
+                  <span style="font-size: 0.75rem; color: #64748b;">Default</span>
+                </label>
+              </div>
+              <input
+                id="name"
+                type="text"
+                formControlName="name"
+                placeholder="Enter name"
+                [class.error]="specificationForm.get('name')?.invalid && specificationForm.get('name')?.touched"
+              />
+              @if (specificationForm.get('name')?.invalid && specificationForm.get('name')?.touched) {
+                <div class="error-message">
+                  Name is required
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="dataType">DataType</label>
+              <select
+                id="dataType"
+                formControlName="dataType"
+                [class.error]="specificationForm.get('dataType')?.invalid && specificationForm.get('dataType')?.touched"
+              >
+                <option value="Double">Double</option>
+                <option value="String">String</option>
+                <option value="DateTime">DateTime</option>
+              </select>
+              @if (specificationForm.get('dataType')?.invalid && specificationForm.get('dataType')?.touched) {
+                <div class="error-message">
+                  DataType is required
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="nameCase">Name Case</label>
+              <select
+                id="nameCase"
+                formControlName="nameCase"
+              >
+                <option value="Title">Title</option>
+                <option value="Lower">Lower</option>
+                <option value="Upper">Upper</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="valueCase">Value Case</label>
+              <select
+                id="valueCase"
+                formControlName="valueCase"
+              >
+                <option value="Title">Title</option>
+                <option value="Lower">Lower</option>
+                <option value="Upper">Upper</option>
+                <option value="WholeNumber">Whole Number</option>
+                <option value="Double">Double</option>
+                <option value="Date">Date</option>
+                <option value="DateTime">DateTime</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 2: SKU, Editable, Configurable, Bulk Input (4 columns) -->
+          <div class="form-row-four">
+            <div class="form-group">
+              <label for="sku" class="checkbox-label">
+                <input
+                  id="sku"
+                  type="checkbox"
+                  formControlName="sku"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-text">SKU</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="editable" class="checkbox-label">
+                <input
+                  id="editable"
+                  type="checkbox"
+                  formControlName="editable"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-text">Editable</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="configurable" class="checkbox-label">
+                <input
+                  id="configurable"
+                  type="checkbox"
+                  formControlName="configurable"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-text">Configurable</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="bulkInput" class="checkbox-label">
+                <input
+                  id="bulkInput"
+                  type="checkbox"
+                  formControlName="bulkInput"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-text">Bulk Input</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Row 3: Lockable, Background, Active, Buttons (4 columns) -->
+          <div class="form-row-four">
+            <div class="form-group">
+              <label for="lockable" class="checkbox-label">
+                <input
+                  id="lockable"
+                  type="checkbox"
+                  formControlName="lockable"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-text">Lockable</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="background" class="checkbox-label">
+                <input
+                  id="background"
+                  type="checkbox"
+                  formControlName="background"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-text">Background</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="isActive" class="checkbox-label">
+                <input
+                  id="isActive"
+                  type="checkbox"
+                  formControlName="isActive"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-text">Active</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <div class="form-actions">
+                <button
+                  type="submit"
+                  [disabled]="specificationForm.invalid || isSubmitting()"
+                  class="submit-btn"
+                >
+                  @if (isSubmitting()) {
+                    <span class="spinner"></span>
+                    Submitting...
+                  } @else {
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Add Specification
+                  }
+                </button>
+
+                <button
+                  type="button"
+                  (click)="resetForm()"
+                  class="reset-btn"
+                  [disabled]="isSubmitting()"
+                >
+                  <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                  </svg>
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions Panel -->
+  <div class="expandable-panel">
+    <div class="panel-header" (click)="toggleQuickActionsPanel()">
+      <h3>Quick Actions</h3>
+      <button class="toggle-btn" type="button">
+        <svg 
+          class="toggle-icon" 
+          [class.rotated]="isQuickActionsPanelExpanded()"
+          viewBox="0 0 24 24" 
+          fill="currentColor"
+        >
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="panel-content" [class.expanded]="isQuickActionsPanelExpanded()">
+      <div class="quick-actions-content">
+        <div class="quick-actions-card">
+          <div class="actions-grid">
+            <button class="action-btn" (click)="viewSpecifications()">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+              </svg>
+              <span>View All Specifications</span>
+            </button>
+            <button class="action-btn" (click)="importSpecifications()" [disabled]="isImporting()">
+              @if (isImporting()) {
+                <span class="spinner"></span>
+                <span>Importing...</span>
+              } @else {
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                </svg>
+                <span>Import Specifications</span>
+              }
+            </button>
+            <button class="action-btn" (click)="exportSpecifications()" [disabled]="isExporting()">
+              @if (isExporting()) {
+                <span class="spinner"></span>
+                <span>Exporting...</span>
+              } @else {
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 10h6v6h4l-7 7-7-7h4zm-4-4h14v2H5z"/>
+                </svg>
+                <span>Export Specifications</span>
+              }
+            </button>
+          </div>
+        </div>
+        
+        @if (showSpecificationsGrid()) {
+          <div class="specifications-grid-container">
+            <div class="grid-header">
+              <h3>All Specifications</h3>
+              <button class="close-btn" (click)="hideSpecificationsGrid()">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            @if (isLoadingSpecifications()) {
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading specifications...</p>
+              </div>
+            } @else if (specifications().length === 0) {
+              <div class="no-data">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <p>No specifications found. Add your first specification using the form above.</p>
+              </div>
+            } @else {
+              <div class="specifications-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Default</th>
+                      <th>Name</th>
+                      <th>Data Type</th>
+                      <th>Name Case</th>
+                      <th>Value Case</th>
+                      <th>SKU</th>
+                      <th>Editable</th>
+                      <th>Configurable</th>
+                      <th>Bulk Input</th>
+                      <th>Lockable</th>
+                      <th>Background</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (spec of specifications(); track spec.id) {
+                      <tr>
+                        <td class="spec-default">
+                          <span class="badge" [class.badge-default]="spec.isDefault">
+                            {{ spec.isDefault ? 'Yes' : 'No' }}
+                          </span>
+                        </td>
+                        <td class="spec-name">{{ spec.name }}</td>
+                        <td class="spec-datatype">{{ spec.dataType }}</td>
+                        <td class="spec-case">{{ spec.nameCase }}</td>
+                        <td class="spec-case">{{ spec.valueCase }}</td>
+                        <td class="spec-boolean">
+                          <span class="boolean-indicator" [class.active]="spec.sku">
+                            {{ spec.sku ? '' : '' }}
+                          </span>
+                        </td>
+                        <td class="spec-boolean">
+                          <span class="boolean-indicator" [class.active]="spec.editable">
+                            {{ spec.editable ? '' : '' }}
+                          </span>
+                        </td>
+                        <td class="spec-boolean">
+                          <span class="boolean-indicator" [class.active]="spec.configurable">
+                            {{ spec.configurable ? '' : '' }}
+                          </span>
+                        </td>
+                        <td class="spec-boolean">
+                          <span class="boolean-indicator" [class.active]="spec.bulkInput">
+                            {{ spec.bulkInput ? '' : '' }}
+                          </span>
+                        </td>
+                        <td class="spec-boolean">
+                          <span class="boolean-indicator" [class.active]="spec.lockable">
+                            {{ spec.lockable ? '' : '' }}
+                          </span>
+                        </td>
+                        <td class="spec-boolean">
+                          <span class="boolean-indicator" [class.active]="spec.background">
+                            {{ spec.background ? '' : '' }}
+                          </span>
+                        </td>
+                        <td class="spec-status">
+                          <span class="status-badge" [class.status-active]="spec.isActive">
+                            {{ spec.isActive ? 'Active' : 'Inactive' }}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+        </div>
     </div>
   </div>
 </div>
+
+

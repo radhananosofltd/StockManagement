@@ -34,23 +34,13 @@ export class SidebarComponent implements OnInit {
       expanded: false,
       children: [
         {
-          label: 'Country',
-          icon: '🌍',
-          route: '/dashboard/configuration/country'
-        },
-        {
-          label: 'Region',
-          icon: '🗺️',
-          route: '/dashboard/configuration/region'
-        },
-        {
           label: 'Company',
           icon: '🏢',
           route: '/dashboard/configuration/company-page'
         },
         {
           label: 'Branch',
-          icon: '🏢',
+          icon: '🏬',
           route: '/dashboard/configuration/branch'
         },
         {

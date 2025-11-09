@@ -4,16 +4,33 @@
     <p>Add and manage companies in your stock portfolio</p>
   </div>
 
-  <div class="company-form-container">
+  <div class="expandable-panel">
+    <div class="panel-header" (click)="toggleFormPanel()">
+      <h3>Add New Company</h3>
+      <button class="toggle-btn" type="button">
+        <svg 
+          class="toggle-icon" 
+          [class.rotated]="isFormExpanded()"
+          viewBox="0 0 24 24" 
+          fill="currentColor"
+        >
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="panel-content" [class.expanded]="isFormExpanded()">
+      <div class="company-form-container">
     <form [formGroup]="companyForm" (ngSubmit)="onSubmit()" class="company-form">
-      <div class="form-row">
+      <!-- Row 1: Company Code, Name, Contact Name -->
+      <div class="form-row-three">
         <div class="form-group">
           <label for="customerCode">Company Code</label>
           <input
             id="customerCode"
             type="text"
             formControlName="customerCode"
-            placeholder="Enter company code (e.g., AAPL, MSFT)"
+            placeholder="Enter code"
             [class.error]="companyForm.get('customerCode')?.invalid && companyForm.get('customerCode')?.touched"
           />
           @if (companyForm.get('customerCode')?.invalid && companyForm.get('customerCode')?.touched) {
@@ -21,8 +38,8 @@
               @if (companyForm.get('customerCode')?.errors?.['required']) {
                 Company code is required
               }
-              @if (companyForm.get('customerCode')?.errors?.['companyCode']) {
-                Company code must be 3-10 alphanumeric characters
+              @if (companyForm.get('customerCode')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
               }
             </div>
           }
@@ -34,7 +51,7 @@
             id="customerName"
             type="text"
             formControlName="customerName"
-            placeholder="Enter company name (e.g., Apple Inc.)"
+            placeholder="Enter company name"
             [class.error]="companyForm.get('customerName')?.invalid && companyForm.get('customerName')?.touched"
           />
           @if (companyForm.get('customerName')?.invalid && companyForm.get('customerName')?.touched) {
@@ -42,87 +59,227 @@
               @if (companyForm.get('customerName')?.errors?.['required']) {
                 Company name is required
               }
-              @if (companyForm.get('customerName')?.errors?.['minlength']) {
-                Company name must be at least 2 characters
+              @if (companyForm.get('customerName')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
               }
-              @if (companyForm.get('customerName')?.errors?.['maxlength']) {
-                Company name cannot exceed 255 characters
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="contactName">Contact Name</label>
+          <input
+            id="contactName"
+            type="text"
+            formControlName="contactName"
+            placeholder="Enter contact name"
+            [class.error]="companyForm.get('contactName')?.invalid && companyForm.get('contactName')?.touched"
+          />
+          @if (companyForm.get('contactName')?.invalid && companyForm.get('contactName')?.touched) {
+            <div class="error-message">
+              @if (companyForm.get('contactName')?.errors?.['required']) {
+                Contact name is required
+              }
+              @if (companyForm.get('contactName')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
               }
             </div>
           }
         </div>
       </div>
 
-      <div class="form-row">
+      <!-- Row 2: Contact Email, Website, Company Logo URL -->
+      <div class="form-row-three">
+        <div class="form-group">
+          <label for="contactEmail">Contact Email</label>
+          <input
+            id="contactEmail"
+            type="text"
+            formControlName="contactEmail"
+            placeholder="Enter email"
+            [class.error]="companyForm.get('contactEmail')?.invalid && companyForm.get('contactEmail')?.touched"
+          />
+          @if (companyForm.get('contactEmail')?.invalid && companyForm.get('contactEmail')?.touched) {
+            <div class="error-message">
+              @if (companyForm.get('contactEmail')?.errors?.['required']) {
+                Email is required
+              }
+              @if (companyForm.get('contactEmail')?.errors?.['email']) {
+                Please enter a valid email
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="website">Website</label>
+          <input
+            id="website"
+            type="text"
+            formControlName="website"
+            placeholder="Enter website URL"
+            [class.error]="companyForm.get('website')?.invalid && companyForm.get('website')?.touched"
+          />
+          @if (companyForm.get('website')?.invalid && companyForm.get('website')?.touched) {
+            <div class="error-message">
+              @if (companyForm.get('website')?.errors?.['pattern']) {
+                Invalid website format
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="companyLogoUrl">Company Logo URL</label>
+          <input
+            id="companyLogoUrl"
+            type="text"
+            formControlName="companyLogoUrl"
+            placeholder="Enter logo URL"
+            [class.error]="companyForm.get('companyLogoUrl')?.invalid && companyForm.get('companyLogoUrl')?.touched"
+          />
+          @if (companyForm.get('companyLogoUrl')?.invalid && companyForm.get('companyLogoUrl')?.touched) {
+            <div class="error-message">
+              @if (companyForm.get('companyLogoUrl')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Row 3: PAN, Tax Identification Number Type, Tax Identification Number -->
+      <div class="form-row-three">
+        <div class="form-group">
+          <label for="pan">PAN</label>
+          <input
+            id="pan"
+            type="text"
+            formControlName="pan"
+            placeholder="Enter PAN"
+            [class.error]="companyForm.get('pan')?.invalid && companyForm.get('pan')?.touched"
+          />
+          @if (companyForm.get('pan')?.invalid && companyForm.get('pan')?.touched) {
+            <div class="error-message">
+              @if (companyForm.get('pan')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="taxIdentificationNumberType">Tax ID Number Type</label>
+          <input
+            id="taxIdentificationNumberType"
+            type="text"
+            formControlName="taxIdentificationNumberType"
+            placeholder="Enter tax ID type"
+            [class.error]="companyForm.get('taxIdentificationNumberType')?.invalid && companyForm.get('taxIdentificationNumberType')?.touched"
+          />
+          @if (companyForm.get('taxIdentificationNumberType')?.invalid && companyForm.get('taxIdentificationNumberType')?.touched) {
+            <div class="error-message">
+              @if (companyForm.get('taxIdentificationNumberType')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="taxIdentificationNumber">Tax ID Number</label>
+          <input
+            id="taxIdentificationNumber"
+            type="text"
+            formControlName="taxIdentificationNumber"
+            placeholder="Enter tax ID number"
+            [class.error]="companyForm.get('taxIdentificationNumber')?.invalid && companyForm.get('taxIdentificationNumber')?.touched"
+          />
+          @if (companyForm.get('taxIdentificationNumber')?.invalid && companyForm.get('taxIdentificationNumber')?.touched) {
+            <div class="error-message">
+              @if (companyForm.get('taxIdentificationNumber')?.errors?.['pattern']) {
+                Only letters, numbers, space, dot and hyphen allowed
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Row 4: Address, Country, Is Active -->
+      <div class="form-row-three">
         <div class="form-group">
           <label for="customerAddress">Company Address</label>
           <textarea
             id="customerAddress"
             formControlName="customerAddress"
-            placeholder="Enter company address (optional)"
+            placeholder="Enter address"
             rows="3"
             [class.error]="companyForm.get('customerAddress')?.invalid && companyForm.get('customerAddress')?.touched"
           ></textarea>
         </div>
 
         <div class="form-group">
-          <label for="currency">Currency</label>
+          <label for="country">Country</label>
           <select
-            id="currency"
-            formControlName="currency"
-            [class.error]="companyForm.get('currency')?.invalid && companyForm.get('currency')?.touched"
+            id="country"
+            formControlName="country"
+            [class.error]="companyForm.get('country')?.invalid && companyForm.get('country')?.touched"
           >
-            <option value="USD">USD - US Dollar</option>
-            <option value="EUR">EUR - Euro</option>
-            <option value="GBP">GBP - British Pound</option>
-            <option value="JPY">JPY - Japanese Yen</option>
-            <option value="CAD">CAD - Canadian Dollar</option>
-            <option value="AUD">AUD - Australian Dollar</option>
-            <option value="CHF">CHF - Swiss Franc</option>
-            <option value="CNY">CNY - Chinese Yuan</option>
-            <option value="INR">INR - Indian Rupee</option>
+            <option value="">Select Country</option>
+            <option value="1">United States</option>
+            <option value="2">India</option>
+            <option value="3">United Kingdom</option>
           </select>
-          @if (companyForm.get('currency')?.invalid && companyForm.get('currency')?.touched) {
+          @if (companyForm.get('country')?.invalid && companyForm.get('country')?.touched) {
             <div class="error-message">
-              @if (companyForm.get('currency')?.errors?.['required']) {
-                Currency is required
-              }
-              @if (companyForm.get('currency')?.errors?.['pattern']) {
-                Please select a valid currency
+              @if (companyForm.get('country')?.errors?.['required']) {
+                Country is required
               }
             </div>
           }
+          
+          <label for="isActive" class="checkbox-label">
+            <input
+              id="isActive"
+              type="checkbox"
+              formControlName="isActive"
+              class="checkbox-input"
+            />
+            <span class="checkbox-text">Active</span>
+          </label>
         </div>
-      </div>
 
-      <div class="form-actions">
-        <button
-          type="submit"
-          [disabled]="companyForm.invalid || isSubmitting()"
-          class="submit-btn"
-        >
-          @if (isSubmitting()) {
-            <span class="spinner"></span>
-            Submitting...
-          } @else {
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-            </svg>
-            Add Company
-          }
-        </button>
+        <div class="form-group">
+          <div class="form-actions">
+            <button
+              type="submit"
+              [disabled]="companyForm.invalid || isSubmitting()"
+              class="submit-btn"
+            >
+              @if (isSubmitting()) {
+                <span class="spinner"></span>
+                Submitting...
+              } @else {
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                Add Company
+              }
+            </button>
 
-        <button
-          type="button"
-          (click)="resetForm()"
-          class="reset-btn"
-          [disabled]="isSubmitting()"
-        >
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-          </svg>
-          Reset
-        </button>
+            <button
+              type="button"
+              (click)="resetForm()"
+              class="reset-btn"
+              [disabled]="isSubmitting()"
+            >
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+              </svg>
+              Reset
+            </button>
+          </div>
+        </div>
       </div>
     </form>
 
@@ -156,11 +313,31 @@
         </div>
       </div>
     }
+      </div>
+    </div>
   </div>
 
-  <!-- Quick Actions Card -->
-  <div class="quick-actions-card">
-    <h3>Quick Actions</h3>
+  <!-- Quick Actions & Companies Grid -->
+  <div class="expandable-panel">
+    <div class="panel-header" (click)="toggleCompaniesPanel()">
+      <h3>Quick Actions</h3>
+      <button class="toggle-btn" type="button">
+        <svg 
+          class="toggle-icon" 
+          [class.rotated]="isCompaniesPanelExpanded()"
+          viewBox="0 0 24 24" 
+          fill="currentColor"
+        >
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="panel-content" [class.expanded]="isCompaniesPanelExpanded()">
+      <div class="companies-management-content">
+        <!-- Quick Actions Card -->
+        <div class="quick-actions-card">
+    <!-- <h3>Quick Actions</h3> -->
     <div class="actions-grid">
       <button class="action-btn" (click)="viewCompanies()">
         <svg viewBox="0 0 24 24" fill="currentColor">
@@ -251,4 +428,7 @@
       }
     </div>
   }
+      </div>
+    </div>
+  </div>
 </div>
