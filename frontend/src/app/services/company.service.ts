@@ -1,4 +1,19 @@
-﻿import { Injectable, inject } from '@angular/core';
+﻿export interface BulkImportCompanyDTO {
+  companyCode: string;
+  companyName: string;
+  contactName?: string;
+  contactEmail?: string;
+  website?: string;
+  companyLogoURL?: string;
+  pan?: string;
+  taxIDNumberType?: string;
+  taxIDNumber?: string;
+  companyAddress?: string;
+  countryId?: number;
+  userId?: number;
+  isActive?: boolean;
+}
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -6,17 +21,18 @@ import { AuthService } from './auth.service';
 import { COMPANY_ENDPOINTS } from '../constants/api-endpoints.constants';
 
 export interface CreateCompanyDTO {
-  customerCode: string;
-  customerName: string;
-  customerAddress?: string;
+  companyCode: string;
+  companyName: string;
+  companyAddress?: string;
   currency: string;
 }
 
 export interface CompanyListDTO {
   id: number;
-  customerCode: string;
-  customerName: string;
-  customerAddress?: string;
+  companyCode: string;
+  companyName: string;
+  companyAddress?: string;
+  countryName?: string;
   currency: string;
   createdDate: string;
   isActive: boolean;
@@ -81,7 +97,7 @@ export class CompanyService {
     );
   }
 
-  bulkImportCompanies(companies: CreateCompanyDTO[]): Observable<BulkImportResponse> {
+  bulkImportCompanies(companies: BulkImportCompanyDTO[]): Observable<BulkImportResponse> {
     return this.http.post<BulkImportResponse>(COMPANY_ENDPOINTS.BULK_IMPORT, companies, {
       headers: this.getHeaders()
     }).pipe(
@@ -98,9 +114,9 @@ export class CompanyService {
 
   submitCompanyLegacy(company: Company): Observable<ApiResponse> {
     const createDto: CreateCompanyDTO = {
-      customerCode: company.id.toString(),
-      customerName: company.name,
-      customerAddress: '',
+      companyCode: company.id.toString(),
+      companyName: company.name,
+      companyAddress: '',
       currency: 'USD'
     };
     return this.submitCompany(createDto);

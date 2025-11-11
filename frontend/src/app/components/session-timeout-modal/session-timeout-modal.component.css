@@ -1,0 +1,120 @@
+.session-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  backdrop-filter: blur(2px);
+}
+
+.session-modal-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 450px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.session-modal-header {
+  background: #f8f9fa;
+  padding: 20px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.session-modal-header h3 {
+  margin: 0;
+  color: #dc3545;
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.session-modal-header h3::before {
+  content: '⚠️';
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.session-modal-body {
+  padding: 25px 20px;
+  color: #495057;
+  line-height: 1.6;
+}
+
+.session-modal-body p {
+  margin: 0 0 15px 0;
+}
+
+.session-modal-body p:last-child {
+  margin-bottom: 0;
+}
+
+.session-modal-footer {
+  padding: 15px 20px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #dee2e6;
+  background: #f8f9fa;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 123, 255, 0.4);
+}
+
+/* Responsive design */
+@media (max-width: 576px) {
+  .session-modal-container {
+    width: 95%;
+    margin: 10px;
+  }
+  
+  .session-modal-header,
+  .session-modal-body,
+  .session-modal-footer {
+    padding: 15px;
+  }
+}

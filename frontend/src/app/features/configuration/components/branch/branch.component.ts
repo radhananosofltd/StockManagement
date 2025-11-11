@@ -1,6 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { COMPANY_ENDPOINTS, COUNTRY_ENDPOINTS, BRANCH_ENDPOINTS } from '../../../../constants/api-endpoints.constants';
+import { AuthService } from '../../../../services/auth.service';
+import * as XLSX from 'xlsx';
 
 interface Branch {
   id: number;
@@ -20,7 +24,166 @@ interface Branch {
   templateUrl: './branch.component.html',
   styleUrl: './branch.component.css'
 })
-export class BranchComponent {
+export class BranchComponent implements OnInit{
+  // Import branches: file input and handler
+  importBranchesInput: HTMLInputElement | null = null;
+
+  openImportBranchesDialog(): void {
+    if (!this.importBranchesInput) {
+      this.importBranchesInput = document.createElement('input');
+      this.importBranchesInput.type = 'file';
+      this.importBranchesInput.accept = '.xlsx,.xls';
+      this.importBranchesInput.style.display = 'none';
+      this.importBranchesInput.addEventListener('change', (event: any) => {
+        const file = event.target.files[0];
+        if (file) {
+          this.handleImportBranchesFile(file);
+        }
+      });
+      document.body.appendChild(this.importBranchesInput);
+    }
+    this.importBranchesInput.value = '';
+    this.importBranchesInput.click();
+  }
+
+  handleImportBranchesFile(file: File): void {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    console.log('Selected file:', file);
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      this.errorMessage.set('Only Excel files (.xlsx, .xls) are accepted.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+      console.log('Parsed Excel data:', jsonData);
+      if (!jsonData || jsonData.length === 0) {
+        this.errorMessage.set('Excel file is empty or could not be parsed.');
+        console.log('error1');
+        return;
+      }
+      // Validate columns
+      const requiredColumns = [
+        'branchCode', 'branchName', 'headOffice', 'contactPersonName', 'contactPersonEmail',
+        'phone', 'branchAddress', 'branchCountryId', 'companyId', 'headOfficeBranchId', 'userId', 'isActive'
+      ];
+      const firstRow = jsonData[0] || {};
+      const missingColumns = requiredColumns.filter(col => !Object.prototype.hasOwnProperty.call(firstRow, col));
+      if (missingColumns.length > 0) {
+        this.errorMessage.set('Missing columns: ' + missingColumns.join(', '));
+        console.log('error2',missingColumns);
+        return;
+      }
+      // Transform Excel data to match CreateBranchDTO requirements
+      const transformedData = jsonData.map((row: any) => ({
+        branchCode: row.branchCode,
+        branchName: row.branchName,
+        headOffice: row.headOffice === true || row.headOffice === 'TRUE' || row.headOffice === 'true',
+        contactPersonName: row.contactPersonName,
+        contactPersonEmail: row.contactPersonEmail,
+        phone: typeof row.phone === 'string' ? row.phone : (row.phone ? String(row.phone) : ''),
+        website: row.website && typeof row.website === 'string' && row.website.trim() !== '' ? row.website : null,
+        pan: '',
+        taxIdentificationNumberType: '',
+        taxIdentificationNumber: '',
+        branchAddress: row.branchAddress,
+        branchCountryId: Number(row.branchCountryId) || null,
+        companyId: Number(row.companyId) || null,
+        headOfficeBranchId: Number(row.headOfficeBranchId) || null,
+        userId: Number(row.userId) || null,
+        isActive: row.isActive === true || row.isActive === 'TRUE' || row.isActive === 'true'
+      }));
+      console.log('json' , jsonData);
+      this.isSubmitting.set(true);
+      console.log('Sending bulk import request:', transformedData);
+      try {
+        this.http.post(BRANCH_ENDPOINTS.BULK_IMPORT, transformedData, {
+          headers: { 'Content-Type': 'application/json' }
+        }).subscribe({
+          next: (response: any) => {
+            this.isSubmitting.set(false);
+            this.successMessage.set('Branches imported successfully!');
+            console.log('Bulk import response:', response);
+          },
+            error: (error: any) => {
+              this.isSubmitting.set(false);
+              let detailedError = 'Failed to import branches.';
+              // Extract validation errors from backend response
+              if (error?.error) {
+                if (error.error.errors) {
+                  // ASP.NET Core ModelState error format
+                  const errors = error.error.errors;
+                  const errorMessages = Object.keys(errors).map(key => `${key}: ${errors[key].join(', ')}`);
+                  detailedError += '\n' + errorMessages.join('\n');
+                } else if (error.error.title) {
+                  detailedError += ' ' + error.error.title;
+                } else if (typeof error.error === 'string') {
+                  detailedError += ' ' + error.error;
+                } else if (error.error.message) {
+                  detailedError += ' ' + error.error.message;
+                }
+              }
+              this.errorMessage.set(detailedError);
+              console.error('Error importing branches:', error);
+            }
+        });
+      } catch (err) {
+        this.isSubmitting.set(false);
+        this.errorMessage.set('Could not send request. Check your network or API URL.');
+        console.error('Request error:', err);
+        alert('Request error: ' + err);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  exportBranches(): void {
+    this.isSubmitting.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    // Fetch branch data as JSON
+    this.http.get<any[]>(BRANCH_ENDPOINTS.GET_ALL).subscribe({
+      next: (data: any[]) => {
+        // Prepare data for Excel
+        const exportData = data.map(branch => ({
+          BranchName: branch.branchName,
+          BranchAddress: branch.branchAddress,
+          Country: branch.countryName,
+          Phone: branch.phone,
+          CreatedDate: branch.createdDate,
+          IsActive: branch.isActive ? 'Active' : 'Inactive'
+        }));
+        const currentDate = new Date().toISOString().split('T')[0];
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Branches');
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `branches_export_${currentDate}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.isSubmitting.set(false);
+        this.successMessage.set('Export successful!');
+      },
+      error: (error: any) => {
+        this.isSubmitting.set(false);
+        this.errorMessage.set('Failed to export branches.');
+        console.error('Error exporting branches:', error);
+      }
+    });
+  }
+  companies = signal<any[]>([]);
+  countries = signal<any[]>([]);
+  headOffices = signal<any[]>([]);
   branchForm: FormGroup;
   
   // Signals for panel expansion states
@@ -35,22 +198,21 @@ export class BranchComponent {
   isLoadingBranches = signal(false);
   branches = signal<Branch[]>([]);
 
-  // Pagination signals for branches
   currentBranchPage = signal(1);
   branchesPerPage = 10;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private authService: AuthService) {
     this.branchForm = this.fb.group({
       company: ['', [Validators.required]],
-      branchCode: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
-      branchName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
-      contactName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
-      contactEmail: ['', [Validators.required, Validators.email]],
+      branchCode: ['', [Validators.required, Validators.maxLength(20)]],
+      branchName: ['', [Validators.required, Validators.maxLength(200)]],
+      contactName: ['', [Validators.required, Validators.maxLength(100)]],
+      contactEmail: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
       phone: ['', [Validators.pattern(/^[0-9 .\-]+$/)]],
       city: ['', [Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
       state: ['', [Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
       postalCode: ['', [Validators.pattern(/^[a-zA-Z0-9 .\-]+$/)]],
-      branchAddress: [''],
+      branchAddress: ['', [Validators.maxLength(1000)]],
       country: ['', [Validators.required]],
       isActive: [true],
       isHeadOffice: [false],
@@ -67,6 +229,31 @@ export class BranchComponent {
         headOfficeControl?.enable();
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.http.get<any[]>(COMPANY_ENDPOINTS.GET_ALL).subscribe({
+      next: (data: any[]) => { this.companies.set(data); },
+      error: (error: any) => { console.error('Error fetching companies', error); }
+    });
+
+    this.http.get<any>(COUNTRY_ENDPOINTS.GET_ALL).subscribe({
+      next: (response: any) => {
+        if (response && Array.isArray(response.data)) {
+          this.countries.set(response.data);
+        } else {
+          this.countries.set([]);
+        }
+      },
+      error: (error: any) => { console.error('Error fetching countries', error); }
+    });
+
+    // Fetch head offices for dropdown
+    this.http.get<any[]>(BRANCH_ENDPOINTS.HEAD_OFFICES).subscribe({
+      next: (data: any[]) => { this.headOffices.set(data); },
+      error: (error: any) => { console.error('Error fetching head offices', error); }
+    });
+
   }
 
   toggleFormPanel() {
@@ -108,6 +295,49 @@ export class BranchComponent {
         this.errorMessage.set('');
       }, 3000);
     }
+      if (this.branchForm.valid) {
+        this.isSubmitting.set(true);
+        this.successMessage.set('');
+        this.errorMessage.set('');
+
+        // Prepare payload for API
+        const currentUser = this.authService.getCurrentUser();
+        // Helper to convert empty string to null
+        const toNull = (val: any) => (val === '' ? null : val);
+        const payload = {
+          branchCode: this.branchForm.value.branchCode,
+          branchName: this.branchForm.value.branchName,
+          headOffice: this.branchForm.value.isHeadOffice,
+          contactPersonName: this.branchForm.value.contactName,
+          contactPersonEmail: this.branchForm.value.contactEmail,
+          phone: toNull(this.branchForm.value.phone),
+          website: toNull(''),
+          pan: toNull(''),
+          taxIdentificationNumberType: toNull(''),
+          taxIdentificationNumber: toNull(''),
+          branchAddress: toNull(this.branchForm.value.branchAddress),
+          branchCountryId: toNull(this.branchForm.value.country),
+          companyId: toNull(this.branchForm.value.company),
+          headOfficeBranchId: toNull(this.branchForm.value.headOffice),
+          userId: currentUser?.id || null,
+          isActive: this.branchForm.value.isActive
+        };
+
+        this.http.post(BRANCH_ENDPOINTS.CREATE, payload).subscribe({
+          next: (response: any) => {
+            this.isSubmitting.set(false);
+            this.successMessage.set('Branch added successfully!');
+            this.branchForm.reset();
+          },
+          error: (error: any) => {
+            this.isSubmitting.set(false);
+            this.errorMessage.set('Failed to add branch. Please try again.');
+            console.error('Error adding branch:', error);
+          }
+        });
+      } else {
+        this.errorMessage.set('Please fill all required fields correctly.');
+      }
   }
 
   resetForm() {
@@ -123,29 +353,28 @@ export class BranchComponent {
   viewBranches() {
     this.showBranchesGrid.set(true);
     this.isLoadingBranches.set(true);
-    
-    // Simulate API call to fetch branches
-    setTimeout(() => {
-        const mockBranches: Branch[] = [
-          { id: 1, branchName: 'Downtown Branch', branchAddress: '123 Main Street, Suite 100', country: 'United States', contactName: 'John Doe', phone: '+1 555-0100', createdDate: new Date('2024-01-15'), isActive: true },
-          { id: 2, branchName: 'North Branch', branchAddress: '456 North Avenue, Floor 2', country: 'India', contactName: 'Jane Smith', phone: '+91 98765-43210', createdDate: new Date('2024-02-20'), isActive: true },
-          { id: 3, branchName: 'West Coast Branch', branchAddress: '789 Pacific Blvd', country: 'United Kingdom', contactName: 'Bob Johnson', phone: '+44 20 7946 0958', createdDate: new Date('2024-03-10'), isActive: false },
-          { id: 4, branchName: 'East Branch', branchAddress: '101 East St', country: 'China', contactName: 'Li Wei', phone: '+86 10 1234 5678', createdDate: new Date('2024-04-05'), isActive: true },
-          { id: 5, branchName: 'South Branch', branchAddress: '202 South Ave', country: 'Brazil', contactName: 'Carlos Silva', phone: '+55 21 98765-4321', createdDate: new Date('2024-05-12'), isActive: true },
-          { id: 6, branchName: 'Central Branch', branchAddress: '303 Central Blvd', country: 'Germany', contactName: 'Anna Müller', phone: '+49 30 123456', createdDate: new Date('2024-06-18'), isActive: false },
-          { id: 7, branchName: 'Mountain Branch', branchAddress: '404 Mountain Rd', country: 'Nepal', contactName: 'Suman Gurung', phone: '+977 1 5555555', createdDate: new Date('2024-07-22'), isActive: true },
-          { id: 8, branchName: 'River Branch', branchAddress: '505 River St', country: 'Egypt', contactName: 'Fatima Hassan', phone: '+20 2 12345678', createdDate: new Date('2024-08-30'), isActive: true },
-          { id: 9, branchName: 'Desert Branch', branchAddress: '606 Desert Ave', country: 'Saudi Arabia', contactName: 'Omar Al-Farsi', phone: '+966 11 1234567', createdDate: new Date('2024-09-14'), isActive: false },
-          { id: 10, branchName: 'Island Branch', branchAddress: '707 Island Rd', country: 'Australia', contactName: 'Emily Brown', phone: '+61 2 9876 5432', createdDate: new Date('2024-10-01'), isActive: true },
-          { id: 11, branchName: 'Forest Branch', branchAddress: '808 Forest St', country: 'Canada', contactName: 'Michael Green', phone: '+1 416-555-1234', createdDate: new Date('2024-11-11'), isActive: true },
-          { id: 12, branchName: 'Lake Branch', branchAddress: '909 Lake Ave', country: 'Finland', contactName: 'Laura Virtanen', phone: '+358 9 1234567', createdDate: new Date('2024-12-20'), isActive: false },
-          { id: 13, branchName: 'Harbor Branch', branchAddress: '1010 Harbor Rd', country: 'Singapore', contactName: 'Tan Wei', phone: '+65 6123 4567', createdDate: new Date('2025-01-05'), isActive: true },
-          { id: 14, branchName: 'Valley Branch', branchAddress: '1111 Valley St', country: 'South Africa', contactName: 'Thabo Nkosi', phone: '+27 11 123 4567', createdDate: new Date('2025-02-15'), isActive: true },
-          { id: 15, branchName: 'Plaza Branch', branchAddress: '1212 Plaza Ave', country: 'Spain', contactName: 'Maria Garcia', phone: '+34 91 123 4567', createdDate: new Date('2025-03-10'), isActive: false }
-        ];
-        this.branches.set(mockBranches);
+    this.http.get<any[]>(BRANCH_ENDPOINTS.GET_ALL).subscribe({
+      next: (data: any[]) => {
+        // Map API response to Branch[] for grid display
+        const branches = data.map(branch => ({
+          id: branch.branchId,
+          branchName: branch.branchName,
+          branchAddress: branch.branchAddress,
+          country: branch.countryName,
+          contactName: branch.contactPersonName,
+          phone: branch.phone,
+          createdDate: branch.createdDate ? new Date(branch.createdDate) : new Date(),
+          isActive: branch.isActive
+        }));
+        this.branches.set(branches);
         this.isLoadingBranches.set(false);
-      }, 800);
+      },
+      error: (error: any) => {
+        this.isLoadingBranches.set(false);
+        this.errorMessage.set('Failed to load branches.');
+        console.error('Error fetching branches:', error);
+      }
+    });
   }
 
   hideBranchesGrid() {

@@ -18,7 +18,9 @@ namespace Stock_Management_Business.Mapper
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
-            CreateMap<CompanyEntity, CompanyListDTO>();
+            CreateMap<CompanyEntity, CompanyListDTO>()
+                .ForMember(dest => dest.CountryName, opt => opt.MapFrom(src => src.Country != null ? src.Country.CountryName : null))
+                .ForMember(dest => dest.Currency, opt => opt.MapFrom(src => src.Country != null ? src.Country.Currency : null));
         }
     }
 }

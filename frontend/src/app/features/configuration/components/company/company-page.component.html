@@ -226,9 +226,7 @@
             [class.error]="companyForm.get('country')?.invalid && companyForm.get('country')?.touched"
           >
             <option value="">Select Country</option>
-            <option value="1">United States</option>
-            <option value="2">India</option>
-            <option value="3">United Kingdom</option>
+            <option *ngFor="let country of countries()" [value]="country.countryId">{{ country.countryName }}</option>
           </select>
           @if (companyForm.get('country')?.invalid && companyForm.get('country')?.touched) {
             <div class="error-message">
@@ -402,6 +400,7 @@
                 <th>Code</th>
                 <th>Name</th>
                 <th>Address</th>
+                <th>Country</th>
                 <th>Currency</th>
                 <th>Created Date</th>
                 <th>Status</th>
@@ -410,10 +409,11 @@
             <tbody>
               @for (company of pagedCompanies; track company.id) {
                 <tr>
-                  <td class="company-code">{{ company.customerCode }}</td>
-                  <td class="company-name">{{ company.customerName }}</td>
-                  <td class="company-address">{{ company.customerAddress || '-' }}</td>
-                  <td class="company-currency">{{ company.currency }}</td>
+                  <td class="company-code">{{ company.companyCode }}</td>
+                  <td class="company-name">{{ company.companyName }}</td>
+                  <td class="company-address">{{ company.companyAddress || '-' }}</td>
+                  <td class="company-country">{{ company.countryName || '-' }}</td>
+                  <td class="company-currency">{{ company.currency || '-' }}</td>
                   <td class="company-date">{{ company.createdDate | date:'short' }}</td>
                   <td class="company-status">
                     <span class="status-badge" [class.active]="company.isActive">

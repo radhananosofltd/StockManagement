@@ -44,6 +44,27 @@ export const COMPANY_ENDPOINTS = {
   FILTER: `${API_BASE_URL}/company/filter`
 } as const;
 
+// Country API Endpoints
+export const COUNTRY_ENDPOINTS = {
+  // Base country endpoint
+  BASE: `${API_BASE_URL}/country`,
+
+  // Specific endpoints
+  GET_ALL: `${API_BASE_URL}/country`,
+  GET_BY_ID: (id: number) => `${API_BASE_URL}/country/${id}`,
+  CREATE: `${API_BASE_URL}/country`,
+  UPDATE: (id: number) => `${API_BASE_URL}/country/${id}`,
+  DELETE: (id: number) => `${API_BASE_URL}/country/${id}`,
+} as const;
+
+// Branch API Endpoints
+export const BRANCH_ENDPOINTS = {
+  HEAD_OFFICES: `${API_BASE_URL}/Branch/head-offices`,
+  CREATE: `${API_BASE_URL}/Branch`,
+  GET_ALL: `${API_BASE_URL}/Branch`,
+  BULK_IMPORT: `${API_BASE_URL}/Branch/bulk-import`
+} as const;
+
 // Stock API Endpoints
 export const STOCK_ENDPOINTS = {
   // Base stock endpoint

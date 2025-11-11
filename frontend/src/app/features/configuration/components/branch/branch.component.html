@@ -27,17 +27,14 @@
         <div class="form-group">
           <label for="company">Company</label>
           <select
-            id="company"
-            formControlName="company"
-            [class.error]="branchForm.get('company')?.invalid && branchForm.get('company')?.touched"
-          >
-            <option value="">Select Company</option>
-            <option value="1">Tech Solutions Inc.</option>
-            <option value="2">Global Innovations Ltd.</option>
-            <option value="3">NanoSoft Technologies</option>
-            <option value="4">Retail Masters Corp.</option>
-            <option value="5">European Trading Co.</option>
-          </select>
+  id="company"
+  formControlName="company"
+  [class.error]="branchForm.get('company')?.invalid && branchForm.get('company')?.touched">
+  <option value="">Select Company</option>
+<option *ngFor="let company of companies()" [value]="company.id">
+  {{ company.companyName }}
+</option>
+</select>
           @if (branchForm.get('company')?.invalid && branchForm.get('company')?.touched) {
             <div class="error-message">
               @if (branchForm.get('company')?.errors?.['required']) {
@@ -109,9 +106,9 @@
             [class.error]="branchForm.get('headOffice')?.invalid && branchForm.get('headOffice')?.touched"
           >
             <option value="">Select Head Office</option>
-            <option value="1">Head Office 1</option>
-            <option value="2">Head Office 2</option>
-            <option value="3">Head Office 3</option>
+            <option *ngFor="let office of headOffices()" [value]="office.branchId">
+              {{ office.branchName }}
+            </option>
           </select>
         </div>
 
@@ -264,9 +261,9 @@
             [class.error]="branchForm.get('country')?.invalid && branchForm.get('country')?.touched"
           >
             <option value="">Select Country</option>
-            <option value="1">United States</option>
-            <option value="2">India</option>
-            <option value="3">United Kingdom</option>
+             <option *ngFor="let country of countries()" [value]="country.countryId">
+               {{ country.countryName }}
+             </option>
           </select>
           @if (branchForm.get('country')?.invalid && branchForm.get('country')?.touched) {
             <div class="error-message">
@@ -360,13 +357,13 @@
               </svg>
               <span>View All Branches</span>
             </button>
-            <button class="action-btn">
+            <button class="action-btn" (click)="openImportBranchesDialog()">
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
               </svg>
               <span>Import Branches</span>
             </button>
-            <button class="action-btn">
+            <button class="action-btn" (click)="exportBranches()">
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M9 10h6v6h4l-7 7-7-7h4zm-4-4h14v2H5z"/>
               </svg>

@@ -10,6 +10,11 @@ export interface EnvironmentConfig {
   apiTimeout: number;
   enableLogging: boolean;
   enableMockData: boolean;
+  sessionConfig: {
+    timeoutMinutes: number;
+    warningMinutes: number;
+    activityCheckInterval: number;
+  };
   features: {
     realTimeUpdates: boolean;
     advancedAnalytics: boolean;
@@ -26,6 +31,11 @@ export const developmentConfig: EnvironmentConfig = {
   apiTimeout: 30000,
   enableLogging: true,
   enableMockData: true,
+  sessionConfig: {
+    timeoutMinutes: 2,
+    warningMinutes: 1,
+    activityCheckInterval: 30000
+  },
   features: {
     realTimeUpdates: false,
     advancedAnalytics: true,
@@ -37,11 +47,16 @@ export const developmentConfig: EnvironmentConfig = {
 // Staging Environment
 export const stagingConfig: EnvironmentConfig = {
   production: false,
-  apiBaseUrl: 'https://api-staging.example.com',
+  apiBaseUrl: 'https://api.staging.nanosoftstock360.com',
   apiVersion: 'v1',
   apiTimeout: 30000,
   enableLogging: true,
   enableMockData: false,
+  sessionConfig: {
+    timeoutMinutes: 30,
+    warningMinutes: 2,
+    activityCheckInterval: 60000
+  },
   features: {
     realTimeUpdates: true,
     advancedAnalytics: true,
@@ -53,11 +68,16 @@ export const stagingConfig: EnvironmentConfig = {
 // Production Environment
 export const productionConfig: EnvironmentConfig = {
   production: true,
-  apiBaseUrl: 'https://api.example.com',
+  apiBaseUrl: 'https://api.nanosoftstock360.com',
   apiVersion: 'v1',
   apiTimeout: 30000,
   enableLogging: false,
   enableMockData: false,
+  sessionConfig: {
+    timeoutMinutes: 30,
+    warningMinutes: 2,
+    activityCheckInterval: 60000
+  },
   features: {
     realTimeUpdates: true,
     advancedAnalytics: true,
