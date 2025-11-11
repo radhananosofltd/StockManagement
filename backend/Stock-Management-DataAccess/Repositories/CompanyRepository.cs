@@ -37,6 +37,7 @@ namespace Stock_Management_DataAccess.Repositories
             try
             {
                 return await _context.CompanyEntity
+                    .Include(c => c.Country)
                     .Where(c => c.IsActive)
                     .OrderBy(c => c.CompanyName)
                     .ToListAsync();

@@ -76,16 +76,18 @@ namespace Stock_Management_Business.DTO
     
     public class CompanyListDTO
     {
-        public int Id { get; set; }
-        public string CompanyCode { get; set; } = string.Empty;
-        public string CompanyName { get; set; } = string.Empty;
-        public string ContactName { get; set; } = string.Empty;
-        public string ContactEmail { get; set; } = string.Empty;
-        public string? Website { get; set; }
-        public string? CompanyAddress { get; set; }
-        public int? CountryId { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public bool IsActive { get; set; }
+    public int Id { get; set; }
+    public string CompanyCode { get; set; } = string.Empty;
+    public string CompanyName { get; set; } = string.Empty;
+    public string ContactName { get; set; } = string.Empty;
+    public string ContactEmail { get; set; } = string.Empty;
+    public string? Website { get; set; }
+    public string? CompanyAddress { get; set; }
+    public int? CountryId { get; set; }
+    public string? CountryName { get; set; }
+    public string? Currency { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public bool IsActive { get; set; }
     }
     
     public class BulkImportResultDTO

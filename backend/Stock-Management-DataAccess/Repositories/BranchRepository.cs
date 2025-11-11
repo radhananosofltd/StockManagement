@@ -39,6 +39,7 @@ namespace Stock_Management_DataAccess.Repositories
                 return await _context.BranchEntity
                     .Where(b => b.IsActive)
                     .Include(b => b.BranchCountry)
+                    .Include(b => b.Company)
                    // .Include(b => b.HeadOfficeBranch)
                     .OrderBy(b => b.BranchName)
                     .ToListAsync();

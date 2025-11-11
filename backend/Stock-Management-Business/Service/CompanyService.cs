@@ -81,6 +81,8 @@ namespace Stock_Management_Business.Service
                     var companyEntity = _mapper.Map<CompanyEntity>(company);
                     companyEntity.CreatedBy = company.UserId;
                     companyEntity.CreatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+                    companyEntity.ModifiedBy = company.UserId;
+                    companyEntity.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
                     companyEntity.IsActive = company.IsActive;
 
                     await _repo.AddCompany(companyEntity);

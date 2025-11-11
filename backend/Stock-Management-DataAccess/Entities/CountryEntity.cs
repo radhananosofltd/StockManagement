@@ -11,11 +11,14 @@ namespace Stock_Management_DataAccess.Entities
     [Table("country")]
     public class CountryEntity
     {
-        [Key]
-        [Column("countryid")]
-        public int CountryId { get; set; }
-        
-        [Column("countryname")]
-        public string CountryName { get; set; } = string.Empty;
+    [Key]
+    [Column("countryid")]
+    public int CountryId { get; set; }
+
+    [Column("countryname")]
+    public string CountryName { get; set; } = string.Empty;
+
+    [Column("currency")]
+    public string Currency { get; set; } = string.Empty;
     }
 }

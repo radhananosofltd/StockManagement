@@ -115,6 +115,8 @@ namespace Stock_Management_Business.Service
                     var branchEntity = _mapper.Map<BranchEntity>(branch);
                     branchEntity.CreatedBy = branch.UserId;
                     branchEntity.CreatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+                    branchEntity.ModifiedBy = branch.UserId;
+                    branchEntity.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
                     branchEntity.IsActive = branch.IsActive;
 
                     await _repo.AddBranch(branchEntity);

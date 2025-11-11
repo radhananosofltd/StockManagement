@@ -157,6 +157,7 @@ export class BranchComponent implements OnInit{
           CreatedDate: branch.createdDate,
           IsActive: branch.isActive ? 'Active' : 'Inactive'
         }));
+        const currentDate = new Date().toISOString().split('T')[0];
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Branches');
@@ -165,7 +166,7 @@ export class BranchComponent implements OnInit{
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'branches.xlsx';
+        a.download = `branches_export_${currentDate}.xlsx`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

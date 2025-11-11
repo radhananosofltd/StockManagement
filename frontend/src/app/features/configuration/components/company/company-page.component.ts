@@ -1,12 +1,16 @@
-import { Component, inject, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, inject, signal, ViewChild, ElementRef, AfterViewInit, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { CompanyService, CreateCompanyDTO, CompanyListDTO, ApiResponse, BulkImportResponse } from '../../../../services/company.service';
+import { CompanyService, CompanyListDTO, ApiResponse, BulkImportResponse, BulkImportCompanyDTO } from '../../../../services/company.service';
 import { AuthService } from '../../../../services/auth.service';
 import * as XLSX from 'xlsx';
+import { COMPANY_ENDPOINTS, COUNTRY_ENDPOINTS, BRANCH_ENDPOINTS } from '../../../../constants/api-endpoints.constants';
+import { HttpClient } from '@angular/common/http';
 
 // Custom Validators
 export class CustomValidators {
+
+
   static companyCode(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     if (value === null || value === undefined || value === '') {
@@ -30,10 +34,11 @@ export class CustomValidators {
   templateUrl: './company-page.component.html',
   styleUrls: ['./company-page.component.css']
 })
-export class CompanyPageComponent implements AfterViewInit {
+export class CompanyPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly companyService = inject(CompanyService);
   private readonly authService = inject(AuthService);
+  constructor(private http: HttpClient) {}
 
   @ViewChild('companiesGrid', { static: false }) companiesGridRef?: ElementRef;
 
@@ -50,6 +55,22 @@ export class CompanyPageComponent implements AfterViewInit {
   public readonly isCompaniesGridExpanded = signal(true); // Companies grid panel expanded by default
   public readonly isCompaniesPanelExpanded = signal(true); // Combined companies panel expanded by default
 
+  countries = signal<any[]>([]);
+  ngOnInit(): void {
+    this.http.get<any>(COUNTRY_ENDPOINTS.GET_ALL).subscribe({
+      next: (response: any) => {
+        if (response && Array.isArray(response.data)) {
+          this.countries.set(response.data);
+        } else {
+          this.countries.set([]);
+        }
+      },
+      error: (error: any) => {
+        this.countries.set([]);
+        console.error('Error fetching countries', error);
+      }
+    });
+  }
   public readonly companyForm: FormGroup = this.fb.group({
     customerCode: ['', [
       Validators.required,
@@ -91,34 +112,37 @@ export class CompanyPageComponent implements AfterViewInit {
     ]]
   });
 
-  ngAfterViewInit(): void {
-    // Component initialized
-  }
-
+  
   public onSubmit(): void {
     if (this.companyForm.valid && !this.isSubmitting()) {
       this.isSubmitting.set(true);
       this.successMessage.set('');
       this.errorMessage.set('');
 
-      const companyData: CreateCompanyDTO = {
-        customerCode: this.companyForm.value.customerCode.trim(),
-        customerName: this.companyForm.value.customerName.trim(),
-        customerAddress: this.companyForm.value.customerAddress?.trim() || '',
-        currency: this.companyForm.value.currency || 'USD'
+      // Prepare payload for API
+      const payload = {
+        companyCode: this.companyForm.value.customerCode?.trim() || '',
+        companyName: this.companyForm.value.customerName?.trim() || '',
+        contactName: this.companyForm.value.contactName?.trim() || '',
+        contactEmail: this.companyForm.value.contactEmail?.trim() || '',
+        website: this.companyForm.value.website?.trim() || '',
+        companyLogoUrl: this.companyForm.value.companyLogoUrl?.trim() || '',
+        pan: this.companyForm.value.pan?.trim() || '',
+        taxIDNumberType: this.companyForm.value.taxIdentificationNumberType?.trim() || '',
+        taxIDNumber: this.companyForm.value.taxIdentificationNumber?.trim() || '',
+        companyAddress: this.companyForm.value.customerAddress?.trim() || '',
+        countryId: Number(this.companyForm.value.country) || 0,
+        userId: 0, // Set userId as needed
+        isActive: !!this.companyForm.value.isActive
       };
 
-      this.companyService.submitCompany(companyData).subscribe({
-        next: (response: ApiResponse) => {
+      this.http.post(COMPANY_ENDPOINTS.CREATE, payload).subscribe({
+        next: (response: any) => {
           this.isSubmitting.set(false);
-          this.successMessage.set(`Company "${companyData.customerName}" (${companyData.customerCode}) has been successfully added!`);
+          this.successMessage.set(`Company "${payload.companyName}" (${payload.companyCode}) has been successfully added!`);
           this.resetForm();
-          
-          // Show companies grid and refresh the list to include the new company
           this.showCompaniesGrid.set(true);
-          this.loadCompanies(true); // Pass true to scroll after loading
-          
-          // Scroll to the success message first
+          this.loadCompanies(true);
           setTimeout(() => {
             this.scrollToSuccessMessage();
           }, 100);
@@ -257,68 +281,27 @@ export class CompanyPageComponent implements AfterViewInit {
   private loadCompanies(shouldScrollAfterLoad: boolean = false): void {
     this.isLoadingCompanies.set(true);
     this.errorMessage.set('');
-
-    // Mock data - replace with actual API call when backend is ready
-    setTimeout(() => {
-      const mockCompanies: CompanyListDTO[] = [
-        {
-          id: 1,
-          customerCode: 'TECH001',
-          customerName: 'Tech Solutions Inc.',
-          customerAddress: '123 Technology Drive, Silicon Valley, CA 94025',
-          currency: 'USD',
-          createdDate: '2024-01-15T10:30:00',
-          isActive: true
-        },
-        {
-          id: 2,
-          customerCode: 'GLOBAL02',
-          customerName: 'Global Innovations Ltd.',
-          customerAddress: '456 Innovation Street, London, UK',
-          currency: 'GBP',
-          createdDate: '2024-02-20T14:45:00',
-          isActive: true
-        },
-        {
-          id: 3,
-          customerCode: 'NANO003',
-          customerName: 'NanoSoft Technologies',
-          customerAddress: '789 Software Park, Bangalore, India',
-          currency: 'INR',
-          createdDate: '2024-03-10T09:15:00',
-          isActive: true
-        },
-        {
-          id: 4,
-          customerCode: 'RETAIL04',
-          customerName: 'Retail Masters Corp.',
-          customerAddress: '321 Commerce Blvd, New York, NY 10001',
-          currency: 'USD',
-          createdDate: '2024-04-05T11:20:00',
-          isActive: false
-        },
-        {
-          id: 5,
-          customerCode: 'EURO005',
-          customerName: 'European Trading Co.',
-          customerAddress: '654 Trade Street, Frankfurt, Germany',
-          currency: 'EUR',
-          createdDate: '2024-05-12T16:30:00',
-          isActive: true
+    this.http.get<any>(COMPANY_ENDPOINTS.GET_ALL).subscribe({
+      next: (response: any) => {
+        // If response is an array, use it; else fallback to response.data
+        let companiesArr = Array.isArray(response) ? response : (response?.data ?? []);
+        this.companies.set(companiesArr);
+        this.isLoadingCompanies.set(false);
+        if (shouldScrollAfterLoad) {
+          setTimeout(() => {
+            this.scrollToCompaniesGrid();
+          }, 300);
         }
-      ];
-
-      this.isLoadingCompanies.set(false);
-      this.companies.set(mockCompanies);
-      
-      // If we should scroll after loading, do it with a delay to ensure DOM update
-      if (shouldScrollAfterLoad) {
-        setTimeout(() => {
-          console.log('Scrolling after companies loaded');
-          this.scrollToCompaniesGrid();
-        }, 300);
+      },
+      error: (error: any) => {
+        this.isLoadingCompanies.set(false);
+        this.errorMessage.set(
+          error.error?.message || 'Failed to load companies. Please try again.'
+        );
+        this.companies.set([]);
+        console.error('Error loading companies:', error);
       }
-    }, 800);
+    });
 
     // Uncomment this when backend API is ready:
     /*
@@ -407,113 +390,117 @@ export class CompanyPageComponent implements AfterViewInit {
       this.errorMessage.set('Excel file must contain at least one header row and one data row.');
       return;
     }
-
+    console.log('import clicked');
     const headers = data[0];
     const dataRows = data.slice(1);
 
     // Validate headers - must contain exactly 4 columns
-    if (headers.length !== 4) {
+    if (headers.length !== 12) {
       this.isImporting.set(false);
-      this.errorMessage.set('Excel file must contain exactly 4 columns: Company Code, Company Name, Company Address, Currency Value.');
+      this.errorMessage.set('Excel file must contain exactly 12 columns');
+      console.log('Excel file must contain exactly 12 columns');
       return;
     }
 
     // Expected header names (case-insensitive)
-    const expectedHeaders = ['company code', 'company name', 'company address', 'currency value'];
+    const expectedHeaders = ['company code', 'company name', 'contact name', 'contact email', 'website', 'companyLogoURL', 'pan', 'taxIDNumberType', 'taxIDNumber', 'company address', 'countryId', 'isActive'];
     const actualHeaders = headers.map((h: string) => h.toString().toLowerCase().trim());
+/*
+    const missingHeaders: string[] = [];
+    expectedHeaders.forEach((expected, index) => {
+      if (actualHeaders[index] !== expected) {
+        missingHeaders.push(expected);
+      }
+    });
 
-    const headersMatch = expectedHeaders.every((expected, index) => 
-      actualHeaders[index] === expected
-    );
-
-    if (!headersMatch) {
+    if (missingHeaders.length > 0) {
       this.isImporting.set(false);
       this.errorMessage.set(
-        `Invalid column headers. Expected: "Company Code", "Company Name", "Company Address", "Currency Value". ` +
+        `Invalid column headers. Missing: ${missingHeaders.join(', ')}. ` +
         `Found: ${headers.join(', ')}`
       );
+      console.log('Invalid column headers. Missing:', missingHeaders);
       return;
     }
-
+*/
     // Validate that there's at least one data row
     if (dataRows.length === 0) {
       this.isImporting.set(false);
       this.errorMessage.set('Excel file must contain at least one data row.');
+      console.log('Excel file must contain at least one data row.');
       return;
     }
 
     // Convert data rows to company DTOs
-    const companies: CreateCompanyDTO[] = [];
+  const companies: BulkImportCompanyDTO[] = [];
     const errors: string[] = [];
 
     dataRows.forEach((row, index) => {
       const rowNumber = index + 2; // +2 because index starts at 0 and we skip header row
 
-      if (row.length < 4) {
+      if (row.length < 12) {
         errors.push(`Row ${rowNumber}: Missing required columns.`);
+        console.log(`Row ${rowNumber}: Missing required columns.`);
         return;
       }
 
-      const [companyCode, companyName, companyAddress, currencyValue] = row;
+  const [companyCode, companyName, contactName, contactEmail, website, companyLogoURL, pan, taxIDNumberType, taxIDNumber, companyAddress, countryId, isActive, currencyValue] = row;
 
       // Validate required fields
       if (!companyCode || companyCode.toString().trim() === '') {
         errors.push(`Row ${rowNumber}: Company Code is required.`);
+        console.log(`Row ${rowNumber}: Company Code is required.`);
         return;
       }
 
       if (!companyName || companyName.toString().trim() === '') {
         errors.push(`Row ${rowNumber}: Company Name is required.`);
-        return;
-      }
-
-      if (!currencyValue || currencyValue.toString().trim() === '') {
-        errors.push(`Row ${rowNumber}: Currency Value is required.`);
+        console.log(`Row ${rowNumber}: Company Name is required.`);
         return;
       }
 
       // Validate company code format
       const codePattern = /^[A-Za-z0-9]{3,10}$/;
       const code = companyCode.toString().trim();
-      if (!codePattern.test(code)) {
-        errors.push(`Row ${rowNumber}: Company Code must be 3-10 alphanumeric characters.`);
-        return;
-      }
-
-      // Validate currency format (should be 3-letter currency code)
-      const currencyPattern = /^[A-Z]{3}$/;
-      const currency = currencyValue.toString().trim().toUpperCase();
-      if (!currencyPattern.test(currency)) {
-        errors.push(`Row ${rowNumber}: Currency Value must be a 3-letter currency code (e.g., USD, EUR).`);
-        return;
-      }
-
+    
       companies.push({
-        customerCode: code,
-        customerName: companyName.toString().trim(),
-        customerAddress: companyAddress ? companyAddress.toString().trim() : '',
-        currency: currency
+        companyCode: code,
+        companyName: companyName.toString().trim(),
+        contactName: contactName ? contactName.toString().trim() : '',
+        contactEmail: contactEmail ? contactEmail.toString().trim() : '',
+        website: website ? website.toString().trim() : '',
+        companyLogoURL: companyLogoURL ? companyLogoURL.toString().trim() : '',
+        pan: pan ? pan.toString().trim() : '',
+        taxIDNumberType: taxIDNumberType ? taxIDNumberType.toString().trim() : '',
+        taxIDNumber: taxIDNumber ? taxIDNumber.toString().trim() : '',
+        companyAddress: companyAddress ? companyAddress.toString().trim() : '',
+        countryId: countryId ? Number(countryId) : 0,
+        userId: 0,
+        isActive: isActive?.toString().toLowerCase() === 'true'
       });
     });
 
     if (errors.length > 0) {
       this.isImporting.set(false);
       this.errorMessage.set(`Validation errors found:\n${errors.join('\n')}`);
+      console.log('Validation errors found:', errors);
       return;
     }
 
     if (companies.length === 0) {
       this.isImporting.set(false);
       this.errorMessage.set('No valid company records found in the Excel file.');
+      console.log('No valid company records found in the Excel file.');
       return;
     }
 
-    // Send to backend API
-    this.importMessage.set(`Importing ${companies.length} companies...`);
-    this.sendBulkImportRequest(companies);
+  // Send to backend API
+  console.log('Importing companies:', companies);
+  this.importMessage.set(`Importing ${companies.length} companies...`);
+  this.sendBulkImportRequest(companies);
   }
 
-  private sendBulkImportRequest(companies: CreateCompanyDTO[]): void {
+  private sendBulkImportRequest(companies: BulkImportCompanyDTO[]): void {
     this.companyService.bulkImportCompanies(companies).subscribe({
       next: (response: BulkImportResponse) => {
         this.isImporting.set(false);
@@ -581,9 +568,9 @@ export class CompanyPageComponent implements AfterViewInit {
     try {
       // Prepare data for Excel export
       const exportData = companies.map(company => ({
-        'Company Code': company.customerCode,
-        'Company Name': company.customerName,
-        'Company Address': company.customerAddress || '',
+        'Company Code': company.companyCode,
+        'Company Name': company.companyName,
+        'Company Address': company.companyAddress || '',
         'Currency Value': company.currency,
         'Created Date': new Date(company.createdDate).toLocaleDateString(),
         'Status': company.isActive ? 'Active' : 'Inactive'

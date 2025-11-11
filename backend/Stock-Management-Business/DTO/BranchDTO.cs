@@ -9,25 +9,26 @@ namespace Stock_Management_Business.DTO
 {
     public class BranchDTO
     {
-        public int BranchId { get; set; }
-        public string BranchCode { get; set; } = string.Empty;
-        public string BranchName { get; set; } = string.Empty;
-        public bool HeadOffice { get; set; }
-        public string ContactPersonName { get; set; } = string.Empty;
-        public string ContactPersonEmail { get; set; } = string.Empty;
-        public string? Website { get; set; }
-        public string? PAN { get; set; }
-        public string? TaxIdentificationNumberType { get; set; }
-        public string? TaxIdentificationNumber { get; set; }
-        public string? BranchAddress { get; set; }
-        public int? BranchCountryId { get; set; }
-        public int? CompanyId { get; set; }
-        public int? HeadOfficeBranchId { get; set; }
-        public int CreatedBy { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public int? ModifiedBy { get; set; }
-        public DateTime? ModifiedDate { get; set; }
-        public bool IsActive { get; set; } = true;
+    public int BranchId { get; set; }
+    public string BranchCode { get; set; } = string.Empty;
+    public string BranchName { get; set; } = string.Empty;
+    public bool HeadOffice { get; set; }
+    public string ContactPersonName { get; set; } = string.Empty;
+    public string ContactPersonEmail { get; set; } = string.Empty;
+    public string? Website { get; set; }
+    public string? PAN { get; set; }
+    public string? TaxIdentificationNumberType { get; set; }
+    public string? TaxIdentificationNumber { get; set; }
+    public string? BranchAddress { get; set; }
+    public int? BranchCountryId { get; set; }
+    public int? CompanyId { get; set; }
+    public int? HeadOfficeBranchId { get; set; }
+    public int CreatedBy { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public int? ModifiedBy { get; set; }
+    public DateTime? ModifiedDate { get; set; }
+    public bool IsActive { get; set; } = true;
+    public string? Phone { get; set; }
     }
     
     public class CreateBranchDTO
@@ -40,7 +41,7 @@ namespace Stock_Management_Business.DTO
         [StringLength(200, ErrorMessage = "Branch Name cannot exceed 200 characters")]
         public string BranchName { get; set; } = string.Empty;
         
-    public bool HeadOffice { get; set; }
+        public bool HeadOffice { get; set; }
         
         [Required(ErrorMessage = "Contact Person Name is required")]
         [StringLength(100, ErrorMessage = "Contact Person Name cannot exceed 100 characters")]
@@ -77,20 +78,25 @@ namespace Stock_Management_Business.DTO
         public int UserId { get; set; }
         
         public bool IsActive { get; set; } = true;
+        [StringLength(15, ErrorMessage = "Phone cannot exceed 15 characters")]
+        public string? Phone { get; set; }
     }
     
     public class BranchListDTO
     {
-        public int BranchId { get; set; }
-        public string BranchCode { get; set; } = string.Empty;
-        public string BranchName { get; set; } = string.Empty;
-        public bool HeadOffice { get; set; }
-        public string ContactPersonName { get; set; } = string.Empty;
-        public string ContactPersonEmail { get; set; } = string.Empty;
-        public string? BranchAddress { get; set; }
-        public int? BranchCountryId { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public bool IsActive { get; set; }
+    public int BranchId { get; set; }
+    public string BranchCode { get; set; } = string.Empty;
+    public string BranchName { get; set; } = string.Empty;
+    public bool HeadOffice { get; set; }
+    public string ContactPersonName { get; set; } = string.Empty;
+    public string ContactPersonEmail { get; set; } = string.Empty;
+    public string? BranchAddress { get; set; }
+    public int? BranchCountryId { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public bool IsActive { get; set; }
+    public string? Phone { get; set; }
+    public string? CompanyName { get; set; }
+    public string? CountryName { get; set; }
     }
     
     public class BulkImportBranchResultDTO
