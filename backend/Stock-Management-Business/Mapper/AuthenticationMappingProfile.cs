@@ -11,6 +11,15 @@ namespace Stock_Management_Business.Mapper
             CreateMap<UserEntity, UserDTO>();
             CreateMap<UserDTO, UserEntity>();
             CreateMap<UserEntity, UserProfileDTO>();
+
+            // Existing mappings for other DTOs/entities
+           // CreateMap<AuthenticationDTO, AuthenticationEntity>().ReverseMap();
+            CreateMap<BranchDTO, BranchEntity>().ReverseMap();
+            CreateMap<CompanyDTO, CompanyEntity>().ReverseMap();
+            CreateMap<CountryDTO, CountryEntity>().ReverseMap();
+
+            // Add missing mapping for Specification
+            CreateMap<SpecificationDTO, SpecificationEntity>().ReverseMap();
         }
     }
 }

@@ -12,10 +12,11 @@ namespace Stock_Management_DataAccess
     {
         public StockManagementDBContext(DbContextOptions<StockManagementDBContext> options) : base(options) { }
 
-        public DbSet<CompanyEntity> CompanyEntity { get; set; }
-        public DbSet<UserEntity> Users { get; set; }
-        public DbSet<CountryEntity> CountryEntity { get; set; }
-        public DbSet<BranchEntity> BranchEntity { get; set; }
+    public DbSet<CompanyEntity> CompanyEntity { get; set; }
+    public DbSet<UserEntity> Users { get; set; }
+    public DbSet<CountryEntity> CountryEntity { get; set; }
+    public DbSet<BranchEntity> BranchEntity { get; set; }
+    public DbSet<SpecificationEntity> SpecificationEntity { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
