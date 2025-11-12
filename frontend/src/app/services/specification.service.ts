@@ -30,4 +30,12 @@ export class SpecificationService {
       { headers: API_CONFIG.DEFAULT_HEADERS }
     );
   }
+
+  getAllSpecifications() {
+    return this.http.get<any[]>(this.apiUrl, { headers: API_CONFIG.DEFAULT_HEADERS });
+  }
+
+  bulkImportSpecifications(payload: any[]) {
+    return this.http.post<any>(`${this.apiUrl}/bulk-import`, payload, { headers: API_CONFIG.DEFAULT_HEADERS });
+  }
 }

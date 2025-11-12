@@ -251,7 +251,7 @@
               </svg>
               <span>View All Specifications</span>
             </button>
-            <button class="action-btn" (click)="importSpecifications()" [disabled]="isImporting()">
+            <button class="action-btn" (click)="specFileInput.click()" [disabled]="isImporting()">
               @if (isImporting()) {
                 <span class="spinner"></span>
                 <span>Importing...</span>
@@ -262,6 +262,13 @@
                 <span>Import Specifications</span>
               }
             </button>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              style="display: none"
+              #specFileInput
+              (change)="onFileChange($event)"
+            />
             <button class="action-btn" (click)="exportSpecifications()" [disabled]="isExporting()">
               @if (isExporting()) {
                 <span class="spinner"></span>
@@ -326,8 +333,8 @@
                             {{ spec.isDefault ? 'Yes' : 'No' }}
                           </span>
                         </td>
-                        <td class="spec-name">{{ spec.name }}</td>
-                        <td class="spec-datatype">{{ spec.dataType }}</td>
+                        <td class="spec-name">{{ spec.specificationName }}</td>
+                        <td class="spec-datatype">{{ spec.datatype }}</td>
                         <td class="spec-case">{{ spec.nameCase }}</td>
                         <td class="spec-case">{{ spec.valueCase }}</td>
                         <td class="spec-boolean">
