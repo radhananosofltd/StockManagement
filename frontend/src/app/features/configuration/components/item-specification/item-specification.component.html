@@ -311,8 +311,8 @@
                 <table>
                   <thead>
                     <tr>
-                      <th>Default</th>
                       <th>Name</th>
+                      <th>Default</th>
                       <th>Data Type</th>
                       <th>Name Case</th>
                       <th>Value Case</th>
@@ -326,13 +326,15 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (spec of specifications(); track spec.id) {
+                    @for (spec of pagedSpecifications; track spec.id) {
                       <tr>
+                        <td class="spec-name">{{ spec.name }}</td>
                         <td class="spec-default">
-                          <span class="badge" [class.badge-default]="spec.isDefault">
-                            {{ spec.isDefault ? 'Yes' : 'No' }}
+                          <span class="boolean-indicator" [class.active]="spec.isDefault">
+                            {{ spec.isDefault ? '' : '' }}
                           </span>
                         </td>
+
                         <td class="spec-name">{{ spec.specificationName }}</td>
                         <td class="spec-datatype">{{ spec.datatype }}</td>
                         <td class="spec-case">{{ spec.nameCase }}</td>
@@ -376,6 +378,11 @@
                     }
                   </tbody>
                 </table>
+                <div class="pagination-controls" *ngIf="totalSpecificationPages > 1">
+                  <button class="pagination-btn" [disabled]="currentSpecificationPage() === 1" (click)="setSpecificationPage(currentSpecificationPage() - 1)">Prev</button>
+                  <span>Page {{ currentSpecificationPage() }} of {{ totalSpecificationPages }}</span>
+                  <button class="pagination-btn" [disabled]="currentSpecificationPage() === totalSpecificationPages" (click)="setSpecificationPage(currentSpecificationPage() + 1)">Next</button>
+                </div>
               </div>
             }
           </div>

@@ -410,7 +410,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (branch of branches(); track branch.id) {
+                    @for (branch of pagedBranches; track branch.id) {
                       <tr>
                         <td class="branch-name">{{ branch.branchName }}</td>
                         <td class="branch-address">{{ branch.branchAddress || '-' }}</td>
@@ -427,6 +427,11 @@
                     }
                   </tbody>
                 </table>
+                <div class="pagination-controls" *ngIf="totalBranchPages > 1">
+                  <button class="pagination-btn" [disabled]="currentBranchPage() === 1" (click)="setBranchPage(currentBranchPage() - 1)">Prev</button>
+                  <span>Page {{ currentBranchPage() }} of {{ totalBranchPages }}</span>
+                  <button class="pagination-btn" [disabled]="currentBranchPage() === totalBranchPages" (click)="setBranchPage(currentBranchPage() + 1)">Next</button>
+                </div>
               </div>
             }
           </div>

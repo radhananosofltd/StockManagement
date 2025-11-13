@@ -55,6 +55,11 @@ export class CompanyPageComponent implements OnInit {
   public readonly isCompaniesGridExpanded = signal(true); // Companies grid panel expanded by default
   public readonly isCompaniesPanelExpanded = signal(true); // Combined companies panel expanded by default
 
+
+  // Pagination signals for companies
+  currentCompanyPage = signal(1);
+  companiesPerPage = 10;
+
   countries = signal<any[]>([]);
   ngOnInit(): void {
     this.http.get<any>(COUNTRY_ENDPOINTS.GET_ALL).subscribe({
@@ -71,6 +76,7 @@ export class CompanyPageComponent implements OnInit {
       }
     });
   }
+  
   public readonly companyForm: FormGroup = this.fb.group({
     customerCode: ['', [
       Validators.required,
@@ -608,5 +614,19 @@ export class CompanyPageComponent implements OnInit {
     }
   }
 
+  get pagedCompanies() {
+    const page = this.currentCompanyPage();
+    const start = (page - 1) * this.companiesPerPage;
+    const end = start + this.companiesPerPage;
+    return this.companies().slice(start, end);
+  }
+
+  get totalCompanyPages() {
+    return Math.ceil(this.companies().length / this.companiesPerPage);
+  }
+
+  setCompanyPage(page: number) {
+    this.currentCompanyPage.set(page);
+  }
 
 }

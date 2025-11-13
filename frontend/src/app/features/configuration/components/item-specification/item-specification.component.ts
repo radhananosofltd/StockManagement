@@ -46,9 +46,16 @@ export class ItemSpecificationComponent {
   isLoadingSpecifications = signal(false);
   specifications = signal<Specification[]>([]);
 
+
+  // Pagination signals for specifications
+  currentSpecificationPage = signal(1);
+  specificationsPerPage = 10;
+
+
   private specificationService = inject(SpecificationService);
 
   constructor(private fb: FormBuilder, private authService: AuthService) {
+
     this.specificationForm = this.fb.group({
       isDefault: [{ value: false, disabled: true }],
       name: ['', [Validators.required]],
@@ -130,6 +137,7 @@ export class ItemSpecificationComponent {
   viewSpecifications() {
     this.showSpecificationsGrid.set(true);
     this.isLoadingSpecifications.set(true);
+
     (this.specificationService as any).getAllSpecifications().subscribe({
       next: (specs: any[]) => {
         this.specifications.set(specs);
@@ -212,5 +220,20 @@ export class ItemSpecificationComponent {
       });
     };
     reader.readAsBinaryString(file);
+  }
+
+  get pagedSpecifications() {
+    const page = this.currentSpecificationPage();
+    const start = (page - 1) * this.specificationsPerPage;
+    const end = start + this.specificationsPerPage;
+    return this.specifications().slice(start, end);
+  }
+
+  get totalSpecificationPages() {
+    return Math.ceil(this.specifications().length / this.specificationsPerPage);
+  }
+
+  setSpecificationPage(page: number) {
+    this.currentSpecificationPage.set(page);
   }
 }

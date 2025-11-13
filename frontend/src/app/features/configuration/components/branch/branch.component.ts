@@ -199,6 +199,9 @@ export class BranchComponent implements OnInit{
   isLoadingBranches = signal(false);
   branches = signal<Branch[]>([]);
 
+  currentBranchPage = signal(1);
+  branchesPerPage = 10;
+
   constructor(private fb: FormBuilder, private http: HttpClient, private authService: AuthService) {
     this.branchForm = this.fb.group({
       company: ['', [Validators.required]],
@@ -396,5 +399,20 @@ export class BranchComponent implements OnInit{
 
   hideBranchesGrid() {
     this.showBranchesGrid.set(false);
+  }
+
+  get pagedBranches() {
+    const page = this.currentBranchPage();
+    const start = (page - 1) * this.branchesPerPage;
+    const end = start + this.branchesPerPage;
+    return this.branches().slice(start, end);
+  }
+
+  get totalBranchPages() {
+    return Math.ceil(this.branches().length / this.branchesPerPage);
+  }
+
+  setBranchPage(page: number) {
+    this.currentBranchPage.set(page);
   }
 }
