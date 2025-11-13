@@ -1,12 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { SpecificationService } from '../../../../services/specification.service';
+import { AuthService } from '../../../../services/auth.service';
+import * as XLSX from 'xlsx';
 
 interface Specification {
   id: number;
   isDefault: boolean;
-  name: string;
-  dataType: string;
+  specificationName: string;
+  datatype: string;
   nameCase: string;
   valueCase: string;
   sku: boolean;
@@ -43,11 +46,16 @@ export class ItemSpecificationComponent {
   isLoadingSpecifications = signal(false);
   specifications = signal<Specification[]>([]);
 
+
   // Pagination signals for specifications
   currentSpecificationPage = signal(1);
   specificationsPerPage = 10;
 
-  constructor(private fb: FormBuilder) {
+
+  private specificationService = inject(SpecificationService);
+
+  constructor(private fb: FormBuilder, private authService: AuthService) {
+
     this.specificationForm = this.fb.group({
       isDefault: [{ value: false, disabled: true }],
       name: ['', [Validators.required]],
@@ -73,16 +81,35 @@ export class ItemSpecificationComponent {
   }
 
   onSubmit() {
+    const currentUser = this.authService.getCurrentUser();
     if (this.specificationForm.valid) {
       this.isSubmitting.set(true);
-      console.log('Specification Data:', this.specificationForm.getRawValue());
-      
-      // Simulate API call
-      setTimeout(() => {
-        this.isSubmitting.set(false);
-        console.log('Specification added successfully');
-        this.resetForm();
-      }, 1000);
+      const payload = {
+        IsDefault: this.specificationForm.get('isDefault')?.value,
+        SpecificationName: this.specificationForm.get('name')?.value,
+        Datatype: this.specificationForm.get('dataType')?.value,
+        NameCase: this.specificationForm.get('nameCase')?.value,
+        ValueCase: this.specificationForm.get('valueCase')?.value,
+        Sku: this.specificationForm.get('sku')?.value,
+        Editable: this.specificationForm.get('editable')?.value,
+        Configurable: this.specificationForm.get('configurable')?.value,
+        BulkInput: this.specificationForm.get('bulkInput')?.value,
+        Lockable: this.specificationForm.get('lockable')?.value,
+        Background: this.specificationForm.get('background')?.value,
+        IsActive: this.specificationForm.get('isActive')?.value,
+        UserId: currentUser?.id || null
+      };
+      (this.specificationService as any).addSpecification(payload).subscribe({
+        next: (response: { SpecificationId: number }) => {
+          this.isSubmitting.set(false);
+          console.log('Specification added successfully', response);
+          this.resetForm();
+        },
+        error: (err: any) => {
+          this.isSubmitting.set(false);
+          console.error('Error adding specification', err);
+        }
+      });
     } else {
       // Mark all fields as touched to show validation errors
       Object.keys(this.specificationForm.controls).forEach(key => {
@@ -108,32 +135,19 @@ export class ItemSpecificationComponent {
   }
 
   viewSpecifications() {
-    console.log('View All Specifications clicked');
     this.showSpecificationsGrid.set(true);
     this.isLoadingSpecifications.set(true);
-    
-    // Simulate API call to fetch specifications
-    setTimeout(() => {
-      const mockSpecifications: Specification[] = [
-        { id: 1, isDefault: true, name: 'Color', dataType: 'String', nameCase: 'Title', valueCase: 'Title', sku: true, editable: true, configurable: true, bulkInput: false, lockable: false, background: false, isActive: true },
-        { id: 2, isDefault: false, name: 'Size', dataType: 'String', nameCase: 'Title', valueCase: 'Upper', sku: true, editable: true, configurable: true, bulkInput: false, lockable: false, background: false, isActive: true },
-        { id: 3, isDefault: false, name: 'Weight', dataType: 'Double', nameCase: 'Title', valueCase: 'Double', sku: false, editable: true, configurable: false, bulkInput: true, lockable: false, background: false, isActive: false },
-        { id: 4, isDefault: false, name: 'Manufacturing Date', dataType: 'DateTime', nameCase: 'Title', valueCase: 'DateTime', sku: false, editable: false, configurable: false, bulkInput: true, lockable: true, background: true, isActive: true },
-        { id: 5, isDefault: false, name: 'Brand', dataType: 'String', nameCase: 'Upper', valueCase: 'Title', sku: true, editable: true, configurable: true, bulkInput: false, lockable: false, background: false, isActive: true },
-        { id: 6, isDefault: false, name: 'Material', dataType: 'String', nameCase: 'Title', valueCase: 'Upper', sku: false, editable: true, configurable: false, bulkInput: false, lockable: false, background: true, isActive: true },
-        { id: 7, isDefault: false, name: 'Length', dataType: 'Double', nameCase: 'Lower', valueCase: 'Lower', sku: true, editable: false, configurable: true, bulkInput: true, lockable: true, background: false, isActive: true },
-        { id: 8, isDefault: false, name: 'Width', dataType: 'Double', nameCase: 'Title', valueCase: 'Title', sku: false, editable: true, configurable: false, bulkInput: false, lockable: false, background: true, isActive: true },
-        { id: 9, isDefault: false, name: 'Height', dataType: 'Double', nameCase: 'Title', valueCase: 'Upper', sku: true, editable: true, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true },
-        { id: 10, isDefault: false, name: 'Volume', dataType: 'Double', nameCase: 'Lower', valueCase: 'Lower', sku: false, editable: true, configurable: false, bulkInput: false, lockable: true, background: true, isActive: true },
-        { id: 11, isDefault: false, name: 'Surface Area', dataType: 'Double', nameCase: 'Title', valueCase: 'Title', sku: true, editable: false, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true },
-        { id: 12, isDefault: false, name: 'Expiration Date', dataType: 'Date', nameCase: 'Title', valueCase: 'Upper', sku: false, editable: true, configurable: false, bulkInput: false, lockable: true, background: true, isActive: true },
-        { id: 13, isDefault: false, name: 'Batch Number', dataType: 'String', nameCase: 'Title', valueCase: 'Lower', sku: true, editable: true, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true },
-        { id: 14, isDefault: false, name: 'Supplier', dataType: 'String', nameCase: 'Lower', valueCase: 'Lower', sku: false, editable: true, configurable: false, bulkInput: false, lockable: true, background: true, isActive: true },
-        { id: 15, isDefault: false, name: 'Country of Origin', dataType: 'String', nameCase: 'Title', valueCase: 'Title', sku: true, editable: false, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true }
-      ];
-      this.specifications.set(mockSpecifications);
-      this.isLoadingSpecifications.set(false);
-    }, 800);
+
+    (this.specificationService as any).getAllSpecifications().subscribe({
+      next: (specs: any[]) => {
+        this.specifications.set(specs);
+        this.isLoadingSpecifications.set(false);
+      },
+      error: (err: any) => {
+        this.isLoadingSpecifications.set(false);
+        console.error('Error fetching specifications', err);
+      }
+    });
   }
 
   hideSpecificationsGrid() {
@@ -153,13 +167,59 @@ export class ItemSpecificationComponent {
 
   exportSpecifications() {
     this.isExporting.set(true);
-    console.log('Export Specifications clicked');
-    
-    // Simulate export process
-    setTimeout(() => {
-      this.isExporting.set(false);
-      console.log('Export completed');
-    }, 2000);
+    (this.specificationService as any).getAllSpecifications().subscribe({
+      next: (specs: any[]) => {
+        // Remove UserId column from export
+        const exportSpecs = specs.map(({ UserId, ...rest }) => rest);
+        const worksheet = XLSX.utils.json_to_sheet(exportSpecs);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Specifications');
+        // Download Excel file
+        const currentDate = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(workbook, `specifications_export_${currentDate}.xlsx`);
+        this.isExporting.set(false);
+        console.log('Export completed');
+      },
+      error: (err: any) => {
+        this.isExporting.set(false);
+        console.error('Error exporting specifications', err);
+      }
+    });
+  }
+
+  onFileChange(event: any) {
+    const target: DataTransfer = <DataTransfer>(event.target);
+    if (target.files.length !== 1) {
+      console.log('Please select a single Excel file.');
+      return;
+    }
+    const file = target.files[0];
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      console.log('Only Excel files are allowed.');
+      return;
+    }
+    this.isImporting.set(true);
+    const reader: FileReader = new FileReader();
+    reader.onload = (e: any) => {
+      const bstr: string = e.target.result;
+      const wb = XLSX.read(bstr, { type: 'binary' });
+      const wsname = wb.SheetNames[0];
+      const ws = wb.Sheets[wsname];
+      const data = XLSX.utils.sheet_to_json(ws);
+      // Call bulk-import API
+      (this.specificationService as any).bulkImportSpecifications(data).subscribe({
+        next: (response: any) => {
+          this.isImporting.set(false);
+          console.log('Bulk import completed.');
+          this.viewSpecifications();
+        },
+        error: (err: any) => {
+          this.isImporting.set(false);
+          console.error('Bulk import error', err);
+        }
+      });
+    };
+    reader.readAsBinaryString(file);
   }
 
   get pagedSpecifications() {

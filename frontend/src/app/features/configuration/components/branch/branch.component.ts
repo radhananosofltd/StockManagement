@@ -106,6 +106,7 @@ export class BranchComponent implements OnInit{
           headers: { 'Content-Type': 'application/json' }
         }).subscribe({
           next: (response: any) => {
+            this.viewBranches();
             this.isSubmitting.set(false);
             this.successMessage.set('Branches imported successfully!');
             console.log('Bulk import response:', response);
@@ -248,12 +249,30 @@ export class BranchComponent implements OnInit{
       error: (error: any) => { console.error('Error fetching countries', error); }
     });
 
-    // Fetch head offices for dropdown
-    this.http.get<any[]>(BRANCH_ENDPOINTS.HEAD_OFFICES).subscribe({
-      next: (data: any[]) => { this.headOffices.set(data); },
-      error: (error: any) => { console.error('Error fetching head offices', error); }
+    // Fetch head office branch id for selected company
+    this.branchForm.get('company')?.valueChanges.subscribe((companyId: number) => {
+      if (companyId) {
+        this.http.get<any>(`${BRANCH_ENDPOINTS.HEAD_OFFICES}/${companyId}`).subscribe({
+          next: (data: any) => {
+            if (data && data.headofficebranchid) {
+              this.headOffices.set([{ branchId: data.headofficebranchid }]);
+              this.branchForm.get('headOffice')?.setValue(data.headofficebranchid);
+            } else {
+              this.headOffices.set([]);
+              this.branchForm.get('headOffice')?.setValue('');
+            }
+          },
+          error: (error: any) => {
+            this.headOffices.set([]);
+            this.branchForm.get('headOffice')?.setValue('');
+            console.error('Error fetching head office branch id', error);
+          }
+        });
+      } else {
+        this.headOffices.set([]);
+        this.branchForm.get('headOffice')?.setValue('');
+      }
     });
-
   }
 
   toggleFormPanel() {
@@ -326,6 +345,7 @@ export class BranchComponent implements OnInit{
         this.http.post(BRANCH_ENDPOINTS.CREATE, payload).subscribe({
           next: (response: any) => {
             this.isSubmitting.set(false);
+            this.viewBranches();
             this.successMessage.set('Branch added successfully!');
             this.branchForm.reset();
           },

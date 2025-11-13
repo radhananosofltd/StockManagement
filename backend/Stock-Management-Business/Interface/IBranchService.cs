@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Stock_Management_DataAccess.Entities;
 
 namespace Stock_Management_Business.Interface
 {
@@ -16,6 +17,6 @@ namespace Stock_Management_Business.Interface
         Task<bool> DeleteBranch(int id, int userId);
         Task<BulkImportBranchResultDTO> BulkImportBranches(List<CreateBranchDTO> branches);
         Task<List<BranchListDTO>> GetBranchesByCountry(int countryId);
-        Task<List<BranchListDTO>> GetHeadOfficeBranches();
+    Task<Stock_Management_DataAccess.Entities.BranchEntity?> GetHeadOfficeBranchDetails(int companyId);
     }
 }

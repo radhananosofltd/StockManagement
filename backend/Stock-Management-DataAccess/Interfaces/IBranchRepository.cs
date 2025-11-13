@@ -16,6 +16,6 @@ namespace Stock_Management_DataAccess.Interfaces
         Task<bool> UpdateBranch(BranchEntity branch);
         Task<bool> DeleteBranch(int id, int userId);
         Task<List<BranchEntity>> GetBranchesByCountry(int countryId);
-        Task<List<BranchEntity>> GetHeadOfficeBranches();
+    Task<BranchEntity?> GetHeadOfficeBranchByCompany(int companyId);
     }
 }

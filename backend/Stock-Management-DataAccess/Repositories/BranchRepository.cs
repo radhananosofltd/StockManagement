@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Stock_Management_DataAccess.Repositories
 {
-    public class BranchRepository : IBranchRepository
+    public class BranchRepository : IBranchRepository       
     {
         private readonly StockManagementDBContext _context;
 
@@ -141,6 +141,21 @@ namespace Stock_Management_DataAccess.Repositories
             catch (Exception ex)
             {
                 throw new Exception($"Error retrieving head office branches: {ex.Message}", ex);
+            }
+        }
+
+         public async Task<BranchEntity?> GetHeadOfficeBranchByCompany(int companyId)
+        {
+            try
+            {
+                return await _context.BranchEntity
+                    .Where(b => b.HeadOffice && b.IsActive && b.CompanyID == companyId)
+                    .OrderBy(b => b.BranchName)
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving head office branch by company: {ex.Message}", ex);
             }
         }
     }

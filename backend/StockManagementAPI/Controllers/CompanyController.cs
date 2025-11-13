@@ -10,7 +10,7 @@ namespace StockManagementAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
    // [Authorize]
-    public class CompanyController : ControllerBase
+    public class CompanyController : ControllerBase        
     {
         private readonly ICompanyService _service;
 
@@ -119,6 +119,63 @@ namespace StockManagementAPI.Controllers
                     failedRecords = companies?.Count ?? 0,
                     errors = new[] { ex.Message }
                 });
+            }
+        }
+
+            [HttpDelete("{id}")]
+            public async Task<IActionResult> DeleteCompany(int id, [FromQuery] int userId = 1)
+            {
+                try
+                {
+                    _logger.LogInformation("CompanyController: Delete company: "+ id.ToString());
+                    var result = await _service.DeleteCompany(id, userId);
+                    if (!result)
+                    {
+                        _logger.LogInformation("Company not found");
+                        return NotFound(new { message = "Company not found" });
+                    }
+                _logger.LogInformation("Company deleted successfully");
+                return Ok(new { message = "Company deleted successfully" });
+                }
+                catch (InvalidOperationException ex)
+                {
+                _logger.LogInformation("Unable to delete company "+ ex.Message);
+                return BadRequest(new { message = ex.Message });
+                }
+                catch (Exception ex)
+                {
+                _logger.LogInformation("An error occurred while deleting the company " + ex.Message.ToString()); 
+                    return StatusCode(500, new { message = "An error occurred while deleting the company" });
+                }
+            }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCompany(int id, [FromBody] CreateCompanyDTO company)
+        {
+            try
+            {
+                _logger.LogInformation("CompanyController: Update company: " + id.ToString());
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var result = await _service.UpdateCompany(id, company);
+                if (!result)
+                {
+                    _logger.LogInformation("Company not found");
+                    return NotFound(new { message = "Company not found" });
+                }
+                _logger.LogInformation("Company updated successfully");
+                return Ok(new { message = "Company updated successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogInformation("Unable to delete company " + ex.Message);
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("An error occurred while updating the company " + ex.Message.ToString());
+                return StatusCode(500, new { message = "An error occurred while updating the company" });
             }
         }
     }
