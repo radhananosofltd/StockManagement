@@ -9,9 +9,11 @@ namespace Stock_Management_DataAccess.Interfaces
 {
     public interface ICompanyRepository
     {
-        Task<int> AddCompany(CompanyEntity company);
-        Task<List<CompanyEntity>> GetAllCompanies();
-        Task<CompanyEntity?> GetCompanyById(int id);
-        Task<bool> CompanyCodeExists(string companyCode);
+    Task<int> AddCompany(CompanyEntity company);
+    Task<List<CompanyEntity>> GetAllCompanies();
+    Task<CompanyEntity?> GetCompanyById(int id);
+    Task<bool> CompanyCodeExists(string companyCode);
+    Task<bool> DeleteCompany(int id, int userId);
+    Task<bool> UpdateCompany(CompanyEntity company);
     }
 }

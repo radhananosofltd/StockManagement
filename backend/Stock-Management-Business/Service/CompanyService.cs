@@ -11,7 +11,7 @@ using AutoMapper;
 
 namespace Stock_Management_Business.Service
 {
-    public class CompanyService : ICompanyService
+    public class CompanyService : ICompanyService        
     {
         private readonly ICompanyRepository _repo;
         private readonly IMapper _mapper;
@@ -103,6 +103,35 @@ namespace Stock_Management_Business.Service
                 : $"Imported {successCount} companies with {failedCount} failures.";
 
             return result;
+        }
+
+        public async Task<bool> DeleteCompany(int id, int userId)
+        {
+            var existingCompany = await _repo.GetCompanyById(id);
+            if (existingCompany == null)
+            {
+                throw new InvalidOperationException($"Company with ID '{id}' not found.");
+            }
+            return await _repo.DeleteCompany(id, userId);
+        }
+        public async Task<bool> UpdateCompany(int id, CreateCompanyDTO company)
+        {
+            var existingCompany = await _repo.GetCompanyById(id);
+            if (existingCompany == null)
+            {
+                throw new InvalidOperationException($"Company with ID '{id}' not found.");
+            }
+            // Check if company code already exists for a different company
+            var codeExists = await _repo.CompanyCodeExists(company.CompanyCode);
+            if (codeExists && existingCompany.CompanyCode != company.CompanyCode)
+            {
+                throw new InvalidOperationException($"Company with code '{company.CompanyCode}' already exists.");
+            }
+            // Update properties
+            _mapper.Map(company, existingCompany);
+            existingCompany.ModifiedBy = company.UserId;
+            existingCompany.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            return await _repo.UpdateCompany(existingCompany);
         }
     }
 }

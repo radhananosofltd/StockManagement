@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Stock_Management_Business.Interface;
 using Stock_Management_Business.DTO;
 using System.Security.Claims;
+using Microsoft.Extensions.Logging;
 
 namespace StockManagementAPI.Controllers
 {
@@ -11,10 +12,11 @@ namespace StockManagementAPI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-
-        public AuthController(IAuthService authService)
+        private readonly ILogger<AuthController> _logger;
+        public AuthController(IAuthService authService, ILogger<AuthController> logger)
         {
             _authService = authService;
+            _logger = logger;
         }
 
         [HttpPost("login")]
@@ -22,10 +24,13 @@ namespace StockManagementAPI.Controllers
         {
             try
             {
+                _logger.LogInformation("AuthController: login request for " + request.Username.ToString());
+
                 var result = await _authService.LoginAsync(request.Username, request.Password);
                 
                 if (result.Success)
                 {
+                    _logger.LogInformation("AuthController: login successful for " + request.Username.ToString());
                     return Ok(new
                     {
                         success = true,
@@ -34,7 +39,8 @@ namespace StockManagementAPI.Controllers
                         user = result.User
                     });
                 }
-                
+
+                _logger.LogInformation("Invalid user credentials. Please check your username and password");
                 return BadRequest(new
                 {
                     success = false,
@@ -43,6 +49,7 @@ namespace StockManagementAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("An error occurred during login" + ex.Message.ToString());
                 return StatusCode(500, new
                 {
                     success = false,
@@ -56,10 +63,13 @@ namespace StockManagementAPI.Controllers
         {
             try
             {
+                _logger.LogInformation("Sign up request: userName=" + request.Username.ToString() + " Email="+ request.Email.ToString() +" FirstName="+ request.FirstName.ToString() +" LastName="+ request.LastName.ToString());
+
                 var result = await _authService.SignupAsync(request.Username, request.Email, request.Password, request.FirstName, request.LastName);
                 
                 if (result.Success)
                 {
+                    _logger.LogInformation("Sign up request successful for userName = " + result.User); 
                     return Ok(new
                     {
                         success = true,
@@ -67,7 +77,7 @@ namespace StockManagementAPI.Controllers
                         user = result.User
                     });
                 }
-                
+                _logger.LogInformation("Sign up request not successful for userName = " + result.User);
                 return BadRequest(new
                 {
                     success = false,
@@ -76,6 +86,7 @@ namespace StockManagementAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("An error occurred during signup" + ex.Message.ToString());
                 return StatusCode(500, new
                 {
                     success = false,
@@ -89,7 +100,8 @@ namespace StockManagementAPI.Controllers
         {
             try
             {
-                var result = await _authService.ForgotPasswordAsync(request.Email);
+                _logger.LogInformation("Forgot-password request for user " + request.Email);
+               var result = await _authService.ForgotPasswordAsync(request.Email);
                 
                 return Ok(new
                 {
@@ -99,6 +111,7 @@ namespace StockManagementAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("An error occurred during forgot password: " + ex.Message.ToString());
                 return StatusCode(500, new
                 {
                     success = false,
@@ -112,6 +125,7 @@ namespace StockManagementAPI.Controllers
         {
             try
             {
+                _logger.LogInformation("reset-password request for user");
                 var result = await _authService.ResetPasswordAsync(request.ResetCode, request.NewPassword);
                 
                 return Ok(new
@@ -122,6 +136,7 @@ namespace StockManagementAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("An error occurred while resetting your password " +ex.Message.ToString());
                 return StatusCode(500, new
                 {
                     success = false,
@@ -136,6 +151,7 @@ namespace StockManagementAPI.Controllers
         {
             try
             {
+                _logger.LogInformation("View Profile page");
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
                 if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
                 {
@@ -146,9 +162,11 @@ namespace StockManagementAPI.Controllers
                 
                 if (userProfile != null)
                 {
+                    _logger.LogInformation("User Profile details fetched successful");
                     return Ok(userProfile);
                 }
-                
+                _logger.LogInformation("User Profile not found");
+
                 return NotFound(new
                 {
                     success = false,
@@ -157,6 +175,7 @@ namespace StockManagementAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("An error occurred while fetching user profile " + ex.Message.ToString());
                 return StatusCode(500, new
                 {
                     success = false,

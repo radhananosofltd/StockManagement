@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Stock_Management_Business.Service
 {
-    public class SpecificationService : ISpecificationService
+    public class SpecificationService : ISpecificationService     
     {
         private readonly ISpecificationRepository _repo;
         private readonly IMapper _mapper;
@@ -80,6 +80,41 @@ namespace Stock_Management_Business.Service
             }
             result.TotalImported = importedCount;
             return result;
+        }
+        public async Task<bool> UpdateSpecificationAsync(int specificationid, SpecificationDTO dto)
+        {
+            var existingSpec = await _repo.GetSpecificationByIDAsync(specificationid);
+            if (existingSpec == null)
+            {
+                throw new InvalidOperationException($"Specification with name '{specificationid}' not found.");
+            }
+            // Update properties
+            existingSpec.IsDefault = dto.IsDefault;
+            existingSpec.Datatype = dto.Datatype;
+            existingSpec.NameCase = dto.NameCase;
+            existingSpec.ValueCase = dto.ValueCase;
+            existingSpec.Sku = dto.Sku;
+            existingSpec.Editable = dto.Editable;
+            existingSpec.Configurable = dto.Configurable;
+            existingSpec.BulkInput = dto.BulkInput;
+            existingSpec.Lockable = dto.Lockable;
+            existingSpec.Background = dto.Background;
+            existingSpec.IsActive = dto.IsActive;
+            existingSpec.ModifiedBy = dto.UserId;
+            existingSpec.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            return await _repo.UpdateSpecificationAsync(existingSpec);
+        }
+        public async Task<bool> DeleteSpecificationAsync(int specificationid, int userId)
+        {
+            var existingSpec = await _repo.GetSpecificationByIDAsync(specificationid);
+            if (existingSpec == null)
+            {
+                throw new InvalidOperationException($"Specification with name '{specificationid}' not found.");
+            }
+            existingSpec.IsActive = false;
+            existingSpec.ModifiedBy = userId;
+            existingSpec.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            return await _repo.UpdateSpecificationAsync(existingSpec);
         }
     }
 }

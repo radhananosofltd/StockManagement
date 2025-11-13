@@ -145,10 +145,9 @@ namespace Stock_Management_Business.Service
             return _mapper.Map<List<BranchListDTO>>(branches);
         }
 
-        public async Task<List<BranchListDTO>> GetHeadOfficeBranches()
+        public async Task<BranchEntity?> GetHeadOfficeBranchDetails(int companyId)
         {
-            var branches = await _repo.GetHeadOfficeBranches();
-            return _mapper.Map<List<BranchListDTO>>(branches);
+            return await _repo.GetHeadOfficeBranchByCompany(companyId);
         }
     }
 }
