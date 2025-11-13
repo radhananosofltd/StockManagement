@@ -1,13 +1,17 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import * as XLSX from 'xlsx';
+import { SpecificationService } from '../../../../services/specification.service';
+import { CategoryService, SaveCategoryRequest, CategorySpecificationRequest } from '../../../../services/category.service';
+import { AuthService } from '../../../../services/auth.service';
 
 interface Specification {
-  id: number;
+  specificationId: number;
   isDefault: boolean;
-  name: string;
-  dataType: string;
+  specificationName: string;
+  datatype: string;
   nameCase: string;
   valueCase: string;
   sku: boolean;
@@ -17,6 +21,7 @@ interface Specification {
   lockable: boolean;
   background: boolean;
   isActive: boolean;
+  skuOrder?: number;
 }
 
 interface Category {
@@ -30,11 +35,12 @@ interface Category {
 @Component({
   selector: 'app-category',
   standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, DragDropModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DragDropModule],
   templateUrl: './category.component.html',
   styleUrls: ['./category.component.css']
 })
 export class CategoryComponent {
+  message: string = '';
   isLoadingCategories = signal(false);
   hideCategoriesGrid() {
     // Hide the categories grid panel
@@ -66,13 +72,16 @@ export class CategoryComponent {
       this.specifications.set(specs);
     }
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private specificationService: SpecificationService,
+    private categoryService: CategoryService, private authService: AuthService
+  ) {
     this.categoryForm = this.fb.group({
       categoryName: ['', [Validators.required]],
       isActive: [true]
     });
-    
-    // Load specifications on component initialization
+    // Load specifications from API on component initialization
     this.loadSpecifications();
   }
 
@@ -85,30 +94,25 @@ export class CategoryComponent {
   }
 
   viewAllCategories() {
-    console.log('View All Categories clicked');
     this.showAllCategoriesPanel.set(true);
     this.isViewingCategories.set(true);
-    // 15 sample categories
-    setTimeout(() => {
-      this.categories.set([
-        { category: 'Electronics', status: 'Active', createdDate: new Date('2023-01-01'), skuFields: 'model, brand, core, memory, speed, color' },
-        { category: 'Apparel', status: 'Active', createdDate: new Date('2023-01-02'), skuFields: 'brand, color, size, material' },
-        { category: 'Furniture', status: 'Inactive', createdDate: new Date('2023-01-03'), skuFields: 'model, material, color, dimensions' },
-        { category: 'Books', status: 'Active', createdDate: new Date('2023-01-04'), skuFields: 'title, author, genre, language' },
-        { category: 'Toys', status: 'Active', createdDate: new Date('2023-01-05'), skuFields: 'brand, age group, material, color' },
-        { category: 'Groceries', status: 'Inactive', createdDate: new Date('2023-01-06'), skuFields: 'brand, type, weight, expiry' },
-        { category: 'Beauty', status: 'Active', createdDate: new Date('2023-01-07'), skuFields: 'brand, type, color, size' },
-        { category: 'Automotive', status: 'Active', createdDate: new Date('2023-01-08'), skuFields: 'model, brand, engine, color' },
-        { category: 'Sports', status: 'Inactive', createdDate: new Date('2023-01-09'), skuFields: 'brand, type, size, color' },
-        { category: 'Health', status: 'Active', createdDate: new Date('2023-01-10'), skuFields: 'brand, type, dosage, expiry' },
-        { category: 'Stationery', status: 'Active', createdDate: new Date('2023-01-11'), skuFields: 'brand, type, color, size' },
-        { category: 'Garden', status: 'Inactive', createdDate: new Date('2023-01-12'), skuFields: 'type, color, size, season' },
-        { category: 'Jewelry', status: 'Active', createdDate: new Date('2023-01-13'), skuFields: 'type, material, color, brand' },
-        { category: 'Footwear', status: 'Active', createdDate: new Date('2023-01-14'), skuFields: 'brand, color, size, material' },
-        { category: 'Music', status: 'Inactive', createdDate: new Date('2023-01-15'), skuFields: 'title, artist, genre, format' }
-      ]);
-      this.isViewingCategories.set(false);
-    }, 1000);
+    this.categoryService.getAllCategories().subscribe({
+      next: (result: any[]) => {
+        const formatted = result.map(cat => ({
+          category: cat.category,
+          status: cat.status,
+          createdDate: new Date(cat.createdDate),
+          skuFields: Array.isArray(cat.specifications) ? cat.specifications.join(', ') : ''
+        }));
+        this.categories.set(formatted);
+        this.isViewingCategories.set(false);
+      },
+      error: (err) => {
+        this.isViewingCategories.set(false);
+        this.message = 'Unable to load categories.';
+        console.error(err);
+      }
+    });
   }
 
   importCategories() {
@@ -121,23 +125,61 @@ export class CategoryComponent {
   }
 
   exportCategories() {
-    console.log('Export Categories clicked');
     this.isExporting.set(true);
-    // Simulate export
-    setTimeout(() => {
-      this.isExporting.set(false);
-    }, 1500);
+    this.categoryService.getAllCategories().subscribe({
+      next: (result: any[]) => {
+        const exportData = result.map(cat => ({
+          Category: cat.category,
+          Status: cat.status,
+          CreatedDate: cat.createdDate,
+          Specifications: Array.isArray(cat.specifications) ? cat.specifications.join(', ') : ''
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Categories');
+        const currentDate = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(workbook, `categories_export_${currentDate}.xlsx`);
+        this.isExporting.set(false);
+      },
+      error: () => {
+        this.isExporting.set(false);
+        this.message = 'Unable to export categories.';
+      }
+    });
   }
   
   addCategory() {
     if (this.categoryForm.valid) {
       this.isSubmitting.set(true);
-      console.log('Adding category:', this.categoryForm.value);
-      // TODO: Implement API call
-      setTimeout(() => {
-        this.isSubmitting.set(false);
-        this.resetForm();
-      }, 1000);
+      // Collect selected specifications and SKU order from the grid
+      const selectedSpecs: CategorySpecificationRequest[] = [];
+      const specs = this.specifications();
+      for (const spec of specs) {
+        const checkbox = document.getElementById(spec.specificationId.toString()) as HTMLInputElement;
+        if (checkbox && checkbox.checked) {
+          const skuOrder = spec.skuOrder || 0;
+          selectedSpecs.push({ specificationId: spec.specificationId, skuOrder });
+        }
+      }
+      const currentUser = this.authService.getCurrentUser();
+      const payload: SaveCategoryRequest = {
+        categoryName: this.categoryForm.get('categoryName')?.value,
+        isActive: this.categoryForm.get('isActive')?.value,
+        specifications: selectedSpecs,
+        userId: currentUser.id
+      };
+      this.categoryService.saveCategory(payload).subscribe({
+        next: (response) => {
+          this.isSubmitting.set(false);
+          this.resetForm();
+          this.message = 'Category and its specifications saved successfully!';
+        },
+        error: (err) => {
+          this.isSubmitting.set(false);
+          this.message = 'Unable to save category and its specifications.';
+          console.error(err);
+        }
+      });
     } else {
       Object.keys(this.categoryForm.controls).forEach(key => {
         this.categoryForm.get(key)?.markAsTouched();
@@ -150,32 +192,33 @@ export class CategoryComponent {
       categoryName: '',
       isActive: true
     });
+    // Reset specifications grid: uncheck all, clear skuOrder
+    const specs = this.specifications();
+    for (const spec of specs) {
+      // Uncheck the checkbox
+      const checkbox = document.getElementById(spec.specificationId.toString()) as HTMLInputElement;
+      if (checkbox) {
+        checkbox.checked = false;
+      }
+      // Clear SKU order dropdown
+      spec.skuOrder = undefined;
+    }
+    this.specifications.set([...specs]);
   }
   
   loadSpecifications() {
     this.isLoadingSpecifications.set(true);
-    // 15 sample specifications
-    setTimeout(() => {
-      this.specifications.set([
-        { id: 1, isDefault: true, name: 'Color', dataType: 'String', nameCase: 'Title Case', valueCase: 'Upper Case', sku: true, editable: true, configurable: false, bulkInput: true, lockable: false, background: false, isActive: true },
-        { id: 2, isDefault: false, name: 'Size', dataType: 'String', nameCase: 'Lower Case', valueCase: 'Lower Case', sku: false, editable: true, configurable: true, bulkInput: false, lockable: true, background: true, isActive: true },
-        { id: 3, isDefault: false, name: 'Brand', dataType: 'String', nameCase: 'Title Case', valueCase: 'Title Case', sku: true, editable: false, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true },
-        { id: 4, isDefault: false, name: 'Manufacturing Date', dataType: 'Date', nameCase: 'Title Case', valueCase: 'Upper Case', sku: false, editable: true, configurable: false, bulkInput: false, lockable: true, background: true, isActive: true },
-        { id: 5, isDefault: false, name: 'Weight', dataType: 'Double', nameCase: 'Title Case', valueCase: 'Lower Case', sku: true, editable: true, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true },
-        { id: 6, isDefault: false, name: 'Material', dataType: 'String', nameCase: 'Title Case', valueCase: 'Upper Case', sku: false, editable: true, configurable: false, bulkInput: false, lockable: false, background: true, isActive: true },
-        { id: 7, isDefault: false, name: 'Length', dataType: 'Double', nameCase: 'Lower Case', valueCase: 'Lower Case', sku: true, editable: false, configurable: true, bulkInput: true, lockable: true, background: false, isActive: true },
-        { id: 8, isDefault: false, name: 'Width', dataType: 'Double', nameCase: 'Title Case', valueCase: 'Title Case', sku: false, editable: true, configurable: false, bulkInput: false, lockable: false, background: true, isActive: true },
-        { id: 9, isDefault: false, name: 'Height', dataType: 'Double', nameCase: 'Title Case', valueCase: 'Upper Case', sku: true, editable: true, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true },
-        { id: 10, isDefault: false, name: 'Volume', dataType: 'Double', nameCase: 'Lower Case', valueCase: 'Lower Case', sku: false, editable: true, configurable: false, bulkInput: false, lockable: true, background: true, isActive: true },
-        { id: 11, isDefault: false, name: 'Surface Area', dataType: 'Double', nameCase: 'Title Case', valueCase: 'Title Case', sku: true, editable: false, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true },
-        { id: 12, isDefault: false, name: 'Expiration Date', dataType: 'Date', nameCase: 'Title Case', valueCase: 'Upper Case', sku: false, editable: true, configurable: false, bulkInput: false, lockable: true, background: true, isActive: true },
-        { id: 13, isDefault: false, name: 'Batch Number', dataType: 'String', nameCase: 'Title Case', valueCase: 'Lower Case', sku: true, editable: true, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true },
-        { id: 14, isDefault: false, name: 'Supplier', dataType: 'String', nameCase: 'Lower Case', valueCase: 'Lower Case', sku: false, editable: true, configurable: false, bulkInput: false, lockable: true, background: true, isActive: true },
-        { id: 15, isDefault: false, name: 'Country of Origin', dataType: 'String', nameCase: 'Title Case', valueCase: 'Title Case', sku: true, editable: false, configurable: true, bulkInput: true, lockable: false, background: false, isActive: true }
-      ]);
-      this.isLoadingSpecifications.set(false);
-      this.isViewingCategories.set(false);
-    }, 800);
+    this.specificationService.getAllSpecifications().subscribe({
+      next: (specs: Specification[]) => {
+        console.log('Loaded specifications:', specs);
+        this.specifications.set(specs);
+        this.isLoadingSpecifications.set(false);
+      },
+      error: (err: any) => {
+        this.isLoadingSpecifications.set(false);
+        console.error('Error loading specifications', err);
+      }
+    });
   }
   
   onSpecificationAction(event: Event, specification: Specification) {
@@ -183,10 +226,10 @@ export class CategoryComponent {
     const action = selectElement.value;
     
     if (action === 'add') {
-      console.log('Adding specification to category:', specification.name);
+      console.log('Adding specification to category:', specification.specificationName);
       // TODO: Implement add specification to category logic
     } else if (action === 'remove') {
-      console.log('Removing specification from category:', specification.name);
+      console.log('Removing specification from category:', specification.specificationName);
       // TODO: Implement remove specification from category logic
     }
     
@@ -198,7 +241,7 @@ export class CategoryComponent {
     const selectElement = event.target as HTMLSelectElement;
     const order = selectElement.value;
     
-    console.log(`SKU Order changed for ${specification.name}: ${order}`);
+  console.log(`SKU Order changed for ${specification.specificationName}: ${order}`);
     // TODO: Implement SKU order logic
   }
 

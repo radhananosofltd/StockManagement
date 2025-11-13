@@ -17,6 +17,8 @@ namespace Stock_Management_DataAccess
     public DbSet<CountryEntity> CountryEntity { get; set; }
     public DbSet<BranchEntity> BranchEntity { get; set; }
     public DbSet<SpecificationEntity> SpecificationEntity { get; set; }
+    public DbSet<CategoryMasterEntity> CategoryMasters { get; set; }
+    public DbSet<CategorySpecificationsEntity> CategorySpecifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

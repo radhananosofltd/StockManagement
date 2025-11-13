@@ -163,6 +163,13 @@ export const DASHBOARD_ENDPOINTS = {
   WIDGET_DATA: (widgetId: string) => `${API_BASE_URL}/dashboard/widgets/${widgetId}/data`
 } as const;
 
+// Category API Endpoints
+export const CATEGORY_ENDPOINTS = {
+  BASE: `${API_BASE_URL}/category`,
+  SAVE: `${API_BASE_URL}/category`,
+  GET_ALL: `${API_BASE_URL}/category/GetAllCategories`
+} as const;
+
 // Utility function to build query parameters
 export const buildQueryParams = (params: Record<string, any>): string => {
   const searchParams = new URLSearchParams();
@@ -194,7 +201,8 @@ export const API_ENDPOINTS = {
   PORTFOLIO: PORTFOLIO_ENDPOINTS,
   REPORTS: REPORTS_ENDPOINTS,
   USER: USER_ENDPOINTS,
-  DASHBOARD: DASHBOARD_ENDPOINTS
+  DASHBOARD: DASHBOARD_ENDPOINTS,
+  CATEGORY: CATEGORY_ENDPOINTS
 } as const;
 
 // Type definitions for better TypeScript support
@@ -206,3 +214,4 @@ export type PortfolioEndpoint = typeof PORTFOLIO_ENDPOINTS;
 export type ReportsEndpoint = typeof REPORTS_ENDPOINTS;
 export type UserEndpoint = typeof USER_ENDPOINTS;
 export type DashboardEndpoint = typeof DASHBOARD_ENDPOINTS;
+export type CategoryEndpoint = typeof CATEGORY_ENDPOINTS;

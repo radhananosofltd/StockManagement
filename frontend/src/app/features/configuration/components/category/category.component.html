@@ -23,6 +23,9 @@
     <div class="panel-content" [class.expanded]="isAddCategoryPanelExpanded()">
       <div class="category-form-container">
         <form [formGroup]="categoryForm">
+          <div *ngIf="message" class="category-message">
+            {{ message }}
+          </div>
           <!-- Category Name and Active Checkbox in same row -->
           <div class="form-row">
             <div class="form-row-col1">
@@ -103,7 +106,7 @@
                     <thead>
                       <tr>
                         <th style="width: 40px;"></th>
-                        <th>Name</th>
+                        <th>Specification</th>
                         <th>Data Type</th>
                         <th>SKU</th>
                         <th>Editable</th>
@@ -116,14 +119,14 @@
                       </tr>
                     </thead>
                     <tbody cdkDropList (cdkDropListDropped)="dropSpecificationRow($event)">
-                      @for (spec of specifications(); track spec.id) {
+                      @for (spec of specifications(); track spec.specificationId) {
                         @if (spec.isActive) {
                           <tr cdkDrag>
                             <td class="drag-handle-cell">
                               <span cdkDragHandle class="drag-handle-icon" title="Drag to reorder">&#9776;</span>
                             </td>
-                            <td class="spec-name">{{ spec.name }}</td>
-                            <td class="spec-datatype">{{ spec.dataType }}</td>
+                            <td class="spec-name">{{ spec.specificationName }}</td>
+                            <td class="spec-datatype">{{ spec.datatype }}</td>
                             <td class="spec-boolean">
                               <span class="boolean-indicator" [class.active]="spec.sku">
                                 {{ spec.sku ? '✓' : '✗' }}
@@ -155,14 +158,10 @@
                               </span>
                             </td>
                             <td class="spec-action">
-                              <select class="action-dropdown" (change)="onSpecificationAction($event, spec)">
-                                <option value="">Select</option>
-                                <option value="add">Add</option>
-                                <option value="remove">Remove</option>
-                              </select>
+                              <input type="checkbox" [checked]="false" [id]="spec.specificationId" />
                             </td>
                             <td class="spec-sku-order">
-                              <select class="sku-order-dropdown" (change)="onSkuOrderChange($event, spec)">
+                              <select class="sku-order-dropdown" [(ngModel)]="spec.skuOrder" [ngModelOptions]="{standalone: true}" [id]="'sku-order-' + spec.specificationId">
                                 <option value=""></option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>

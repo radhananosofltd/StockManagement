@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
+
 
 namespace Stock_Management_Business.Service
 {
@@ -15,19 +17,23 @@ namespace Stock_Management_Business.Service
     {
         private readonly IBranchRepository _repo;
         private readonly IMapper _mapper;
+        private readonly ILogger<BranchService> _logger;
 
-        public BranchService(IBranchRepository repo, IMapper mapper)
+        public BranchService(IBranchRepository repo, IMapper mapper, ILogger<BranchService> logger)
         {
             _repo = repo;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<int> AddBranch(CreateBranchDTO branch)
         {
-            // Check if branch code already exists
-            var exists = await _repo.BranchCodeExists(branch.BranchCode);
+            _logger.LogInformation("Add Branch Service start");
+           // Check if branch code already exists
+           var exists = await _repo.BranchCodeExists(branch.BranchCode);
             if (exists)
             {
+                _logger.LogInformation($"Branch with code '{branch.BranchCode}' already exists.");
                 throw new InvalidOperationException($"Branch with code '{branch.BranchCode}' already exists.");
             }
 
@@ -39,6 +45,7 @@ namespace Stock_Management_Business.Service
             branchEntity.IsActive = branch.IsActive;
 
             var result = await _repo.AddBranch(branchEntity);
+            _logger.LogInformation("Add Branch Service end");
             return result;
         }
 

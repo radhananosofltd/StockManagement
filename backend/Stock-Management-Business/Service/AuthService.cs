@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.Extensions.Logging;
 
 namespace Stock_Management_Business.Service
 {
@@ -17,22 +18,27 @@ namespace Stock_Management_Business.Service
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly string _jwtSecret = "your-super-secret-jwt-key-that-should-be-at-least-32-characters-long";
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IUserRepository userRepository, IMapper mapper, IEmailService emailService)
+        public AuthService(IUserRepository userRepository, IMapper mapper, IEmailService emailService, ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _emailService = emailService;
+            _logger = logger;
         }
 
         public async Task<AuthenticationResult> LoginAsync(string username, string password)
         {
             try
             {
+                _logger.LogInformation("AuthService: Starting Login Authentication");
+
                 var user = await _userRepository.GetByUsernameAsync(username);
                 
                 if (user == null || !VerifyPassword(password, user.PasswordHash))
                 {
+                    _logger.LogInformation("Invalid user credentials. Please check your username and password");
                     return new AuthenticationResult
                     {
                         Success = false,
@@ -42,6 +48,7 @@ namespace Stock_Management_Business.Service
 
                 if (!user.IsActive)
                 {
+                    _logger.LogInformation("Your account has been deactivated. Please contact administrator.");
                     return new AuthenticationResult
                     {
                         Success = false,
@@ -57,6 +64,7 @@ namespace Stock_Management_Business.Service
                 var token = GenerateJwtToken(user);
                 var userDto = _mapper.Map<UserDTO>(user);
 
+                _logger.LogInformation("Login Successful");
                 return new AuthenticationResult
                 {
                     Success = true,
@@ -67,6 +75,7 @@ namespace Stock_Management_Business.Service
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("An error occurred during login");
                 return new AuthenticationResult
                 {
                     Success = false,
@@ -79,10 +88,12 @@ namespace Stock_Management_Business.Service
         {
             try
             {
+                _logger.LogInformation("SignUpAsync - sign up service starts UserName: " + username.ToString());
                 // Check if username already exists
                 var existingUserByUsername = await _userRepository.GetByUsernameAsync(username);
                 if (existingUserByUsername != null)
                 {
+                    _logger.LogInformation("Username already exists. Please choose a different username.");
                     return new SignupResult
                     {
                         Success = false,
@@ -94,6 +105,7 @@ namespace Stock_Management_Business.Service
                 var existingUserByEmail = await _userRepository.GetByEmailAsync(email);
                 if (existingUserByEmail != null)
                 {
+                    _logger.LogInformation("Email already exists. Please use a different email address.");
                     return new SignupResult
                     {
                         Success = false,
@@ -116,6 +128,7 @@ namespace Stock_Management_Business.Service
                 var createdUser = await _userRepository.CreateAsync(user);
                 var userDto = _mapper.Map<UserDTO>(createdUser);
 
+                _logger.LogInformation("Account created successfully for user " + username);
                 return new SignupResult
                 {
                     Success = true,
@@ -125,6 +138,7 @@ namespace Stock_Management_Business.Service
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("An error occurred during signup");
                 return new SignupResult
                 {
                     Success = false,
@@ -137,10 +151,12 @@ namespace Stock_Management_Business.Service
         {
             try
             {
+                _logger.LogInformation("ForgotPasswordAsync - request starts");
                 var user = await _userRepository.GetByEmailAsync(email);
                 
                 if (user == null)
                 {
+                    _logger.LogInformation("If an account with this email exists, a password reset code has been sent.");
                     // For security reasons, we'll return success even if email doesn't exist
                     return new ForgotPasswordResult
                     {
@@ -163,10 +179,11 @@ namespace Stock_Management_Business.Service
                 
                 if (!emailSent)
                 {
+                    _logger.LogInformation($"Email failed. Reset code for {email}: {resetCode}");
                     // Log the reset code for development purposes if email fails
                     Console.WriteLine($"Email failed. Reset code for {email}: {resetCode}");
                 }
-
+                _logger.LogInformation("A password reset code has been sent to your email address.");
                 return new ForgotPasswordResult
                 {
                     Success = true,
@@ -175,6 +192,7 @@ namespace Stock_Management_Business.Service
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("An error occurred while processing your request"); _logger.LogInformation(ex.ToString());
                 return new ForgotPasswordResult
                 {
                     Success = false,
@@ -187,10 +205,12 @@ namespace Stock_Management_Business.Service
         {
             try
             {
+                _logger.LogInformation("ResetPasswordAsync - request");
                 var user = await _userRepository.GetByResetTokenAsync(resetCode);
                 
                 if (user == null)
                 {
+                    _logger.LogInformation("Invalid reset code. Please check the code or request a new one.");
                     return new ResetPasswordResult
                     {
                         Success = false,
@@ -200,7 +220,7 @@ namespace Stock_Management_Business.Service
 
                 // Check if reset code has expired
                 if (user.ResetPasswordExpiry == null || user.ResetPasswordExpiry < DateTime.UtcNow)
-                {
+                {_logger.LogInformation("Reset code has expired. Please request a new one.");
                     return new ResetPasswordResult
                     {
                         Success = false,
@@ -222,7 +242,7 @@ namespace Stock_Management_Business.Service
                 };
             }
             catch (Exception ex)
-            {
+            {_logger.LogInformation("An error occurred while resetting your password"); 
                 return new ResetPasswordResult
                 {
                     Success = false,
@@ -233,16 +253,20 @@ namespace Stock_Management_Business.Service
 
         private string HashPassword(string password)
         {
+            _logger.LogInformation("Hash Password Start.");
             using (var sha256 = SHA256.Create())
             {
                 var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password + "salt"));
+                _logger.LogInformation("Hash Password created.");
                 return Convert.ToBase64String(hashedBytes);
-            }
+            }            
         }
 
         private bool VerifyPassword(string password, string passwordHash)
         {
+            _logger.LogInformation("Verify Password Starts.");
             var hashedPassword = HashPassword(password);
+            _logger.LogInformation("Verify Password done.");
             return hashedPassword == passwordHash;
         }
 
@@ -250,16 +274,18 @@ namespace Stock_Management_Business.Service
         {
             try
             {
+                _logger.LogInformation("Get User Profile Async starts");
                 var user = await _userRepository.GetByIdAsync(userId);
                 if (user == null)
                 {
                     return null;
                 }
-
+                _logger.LogInformation("Get User Profile Async ends");
                 return _mapper.Map<UserProfileDTO>(user);
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("exceltipn on Get User Profile " + ex.Message);
                 return null;
             }
         }
