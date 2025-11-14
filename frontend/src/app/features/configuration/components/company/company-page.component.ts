@@ -629,4 +629,13 @@ export class CompanyPageComponent implements OnInit {
     this.currentCompanyPage.set(page);
   }
 
+  deleteCompany(company: CompanyListDTO) {
+    // TODO: Implement delete logic
+    console.log('Delete company:', company);
+  }
+
+    editCompany(company: CompanyListDTO) {
+    // TODO: Implement delete logic
+    console.log('Edit company:', company);
+  }
 }

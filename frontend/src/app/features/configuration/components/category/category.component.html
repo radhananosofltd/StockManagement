@@ -271,6 +271,7 @@
                 <th>Status</th>
                 <th>Created Date</th>
                 <th>SKUFields</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -284,6 +285,10 @@
                   </td>
                   <td class="category-date">{{ cat.createdDate | date:'short' }}</td>
                   <td class="category-skuFields">{{ cat.skuFields }}</td>
+                  <td class="category-actions">
+                    <button class="action-btn edit-btn" (click)="editCategory(cat)">Edit</button>
+                    <button class="action-btn delete-btn" (click)="deleteCategory(cat)">Delete</button>
+                  </td>
                 </tr>
               }
             </tbody>

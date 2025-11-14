@@ -404,6 +404,7 @@
                 <th>Currency</th>
                 <th>Created Date</th>
                 <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -412,13 +413,16 @@
                   <td class="company-code">{{ company.companyCode }}</td>
                   <td class="company-name">{{ company.companyName }}</td>
                   <td class="company-address">{{ company.companyAddress || '-' }}</td>
-                  <td class="company-country">{{ company.countryName || '-' }}</td>
-                  <td class="company-currency">{{ company.currency || '-' }}</td>
+                  <td class="company-currency">{{ company.currency }}</td>
                   <td class="company-date">{{ company.createdDate | date:'short' }}</td>
                   <td class="company-status">
                     <span class="status-badge" [class.active]="company.isActive">
                       {{ company.isActive ? 'Active' : 'Inactive' }}
                     </span>
+                  </td>
+                  <td class="company-actions">
+                    <button class="action-btn edit-btn" (click)="editCompany(company)">Edit</button>
+                    <button class="action-btn delete-btn" (click)="deleteCompany(company)">Delete</button>
                   </td>
                 </tr>
               }

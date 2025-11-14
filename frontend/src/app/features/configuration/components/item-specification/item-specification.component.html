@@ -323,6 +323,7 @@
                       <th>Lockable</th>
                       <th>Background</th>
                       <th>Status</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -334,9 +335,7 @@
                             {{ spec.isDefault ? '' : '' }}
                           </span>
                         </td>
-
-                        <td class="spec-name">{{ spec.specificationName }}</td>
-                        <td class="spec-datatype">{{ spec.datatype }}</td>
+                        <td class="spec-type">{{ spec.datatype }}</td>
                         <td class="spec-case">{{ spec.nameCase }}</td>
                         <td class="spec-case">{{ spec.valueCase }}</td>
                         <td class="spec-boolean">
@@ -373,6 +372,10 @@
                           <span class="status-badge" [class.status-active]="spec.isActive">
                             {{ spec.isActive ? 'Active' : 'Inactive' }}
                           </span>
+                        </td>
+                        <td class="spec-actions">
+                          <button class="action-btn edit-btn" (click)="editSpecification(spec)">Edit</button>
+                          <button class="action-btn delete-btn" (click)="deleteSpecification(spec)">Delete</button>
                         </td>
                       </tr>
                     }

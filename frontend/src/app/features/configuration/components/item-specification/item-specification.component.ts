@@ -236,4 +236,14 @@ export class ItemSpecificationComponent {
   setSpecificationPage(page: number) {
     this.currentSpecificationPage.set(page);
   }
+
+  editSpecification(spec: any) {
+    // TODO: Implement edit logic
+    console.log('Edit specification:', spec);
+  }
+
+  deleteSpecification(spec: any) {
+    // TODO: Implement delete logic
+    console.log('Delete specification:', spec);
+  }
 }

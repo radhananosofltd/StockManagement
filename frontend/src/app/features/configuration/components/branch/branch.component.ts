@@ -415,4 +415,14 @@ export class BranchComponent implements OnInit{
   setBranchPage(page: number) {
     this.currentBranchPage.set(page);
   }
+
+  editBranch(branch: any) {
+    // TODO: Implement edit logic
+    console.log('Edit branch:', branch);
+  }
+
+  deleteBranch(branch: any) {
+    // TODO: Implement delete logic
+    console.log('Delete branch:', branch);
+  }
 }

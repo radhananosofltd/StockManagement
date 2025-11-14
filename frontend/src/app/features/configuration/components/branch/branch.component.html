@@ -407,6 +407,7 @@
                       <th>Phone</th>
                       <th>Created Date</th>
                       <th>Status</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -422,6 +423,10 @@
                           <span class="status-badge" [class.active]="branch.isActive">
                             {{ branch.isActive ? 'Active' : 'Inactive' }}
                           </span>
+                        </td>
+                        <td class="branch-actions">
+                          <button class="action-btn edit-btn" (click)="editBranch(branch)">Edit</button>
+                          <button class="action-btn delete-btn" (click)="deleteBranch(branch)">Delete</button>
                         </td>
                       </tr>
                     }

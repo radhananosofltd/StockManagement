@@ -263,4 +263,14 @@ export class CategoryComponent {
   setCategoryPage(page: number) {
     this.currentCategoryPage.set(page);
   }
+
+  editCategory(cat: any) {
+    // TODO: Implement edit logic
+    console.log('Edit category:', cat);
+  }
+
+  deleteCategory(cat: any) {
+    // TODO: Implement delete logic
+    console.log('Delete category:', cat);
+  }
 }
