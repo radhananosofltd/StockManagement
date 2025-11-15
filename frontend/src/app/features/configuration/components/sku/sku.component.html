@@ -17,7 +17,7 @@
     <div class="panel-content" [class.expanded]="isSpecPanelExpanded()">
       <div class="sku-form-container">
         <form class="sku-form">
-          <div class="form-row-three">
+          <div class="form-row-four">
             <div class="form-group">
               <label for="specification">Specification</label>
               <select id="specification" name="specification">
@@ -33,7 +33,11 @@
             </div>
             <div class="form-group">
               <label for="skuCode">SKU Code</label>
-              <input id="skuCode" type="text" name="skuCode" placeholder="Enter SKU code" />
+              <input id="skuCode" type="text" name="skuCode" placeholder="Enter SKU code" style="width: 400px;" />
+            </div>
+            <div class="form-group form-checkbox">
+              <input id="active" type="checkbox" name="active" />
+              <label for="active" style="margin-left: 8px;">Active</label>
             </div>
           </div>
           <div class="form-actions">

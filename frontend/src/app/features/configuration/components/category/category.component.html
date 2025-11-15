@@ -114,7 +114,7 @@
                         <th>Bulk Input</th>
                         <th>Lockable</th>
                         <th>Background</th>
-                        <th>Action</th>
+                        <th>Required</th>
                         <th>SKU Order</th>
                       </tr>
                     </thead>
@@ -161,14 +161,9 @@
                               <input type="checkbox" [checked]="false" [id]="spec.specificationId" />
                             </td>
                             <td class="spec-sku-order">
-                              <select class="sku-order-dropdown" [(ngModel)]="spec.skuOrder" [ngModelOptions]="{standalone: true}" [id]="'sku-order-' + spec.specificationId">
+                              <select class="sku-order-dropdown" [ngModel]="spec.skuOrder" (ngModelChange)="onSkuOrderChange($event, spec)" [ngModelOptions]="{standalone: true}" [id]="'sku-order-' + spec.specificationId">
                                 <option value=""></option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
+                                <option *ngFor="let order of getAvailableSkuOrders(spec)" [value]="order">{{ order }}</option>
                               </select>
                             </td>
                           </tr>

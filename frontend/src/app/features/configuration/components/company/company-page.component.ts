@@ -51,9 +51,9 @@ export class CompanyPageComponent implements OnInit {
   public readonly companies = signal<CompanyListDTO[]>([]);
   public readonly showCompaniesGrid = signal(false);
   public readonly isFormExpanded = signal(true); // Form panel expanded by default
-  public readonly isQuickActionsExpanded = signal(true); // Quick actions panel expanded by default
+  public readonly isQuickActionsExpanded = signal(false); // Quick actions panel expanded by default
   public readonly isCompaniesGridExpanded = signal(true); // Companies grid panel expanded by default
-  public readonly isCompaniesPanelExpanded = signal(true); // Combined companies panel expanded by default
+  public readonly isCompaniesPanelExpanded = signal(false); // Combined companies panel expanded by default
 
 
   // Pagination signals for companies

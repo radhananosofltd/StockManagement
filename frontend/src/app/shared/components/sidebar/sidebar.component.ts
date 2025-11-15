@@ -130,9 +130,14 @@ export class SidebarComponent implements OnInit {
           route: '/dashboard/admin/archive'
         },
         {
-          label: 'User Role and Authorization Setup',
-          icon: '🔐',
-          route: '/dashboard/admin/user-role-auth'
+          label: 'New User',
+          icon: '👤',
+          route: '/dashboard/admin/user-profile'
+        },
+        {
+          label: 'User Setup',
+          icon: '🔑',
+          route: '/dashboard/admin/user-setup'
         }
       ]
     }

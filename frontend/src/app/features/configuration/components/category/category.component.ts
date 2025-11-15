@@ -40,6 +40,15 @@ interface Category {
   styleUrls: ['./category.component.css']
 })
 export class CategoryComponent {
+  skuOrderOptions: number[] = [1, 2, 3, 4, 5, 6];
+
+  getAvailableSkuOrders(currentSpec: Specification): number[] {
+    const specs: Specification[] = this.specifications();
+    const selectedOrders = specs
+      .filter((spec: Specification) => spec.skuOrder !== undefined && spec !== currentSpec)
+      .map((spec: Specification) => spec.skuOrder);
+    return this.skuOrderOptions.filter((order: number) => !selectedOrders.includes(order) || currentSpec.skuOrder === order);
+  }
   message: string = '';
   isLoadingCategories = signal(false);
   hideCategoriesGrid() {
@@ -237,12 +246,10 @@ export class CategoryComponent {
     selectElement.value = '';
   }
   
-  onSkuOrderChange(event: Event, specification: Specification) {
-    const selectElement = event.target as HTMLSelectElement;
-    const order = selectElement.value;
-    
-  console.log(`SKU Order changed for ${specification.specificationName}: ${order}`);
-    // TODO: Implement SKU order logic
+  onSkuOrderChange(order: any, specification: Specification) {
+    specification.skuOrder = order === '' ? undefined : Number(order);
+    this.specifications.set([...this.specifications()]);
+    console.log(`SKU Order changed for ${specification.specificationName}: ${specification.skuOrder}`);
   }
 
   // Pagination signals

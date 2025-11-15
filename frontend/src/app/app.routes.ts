@@ -11,6 +11,7 @@ import { SkuComponent } from './features/configuration/components/sku/sku.compon
 import { ItemSpecificationComponent } from './features/configuration/components/item-specification/item-specification.component';
 import { LabelGenerationComponent } from './features/configuration/components/label-generation/label-generation.component';
 import { UserProfileComponent } from './features/user/components/user-profile/user-profile.component';
+import { UserSetupComponent } from './features/user/components/user-setup/user-setup.component';
 // Stock Maintenance Components
 import { InwardComponent } from './features/StockMaintenance/components/Inward/Inward.component';
 import { OutwardComponent } from './features/StockMaintenance/components/Outward/Outward.component';
@@ -128,7 +129,15 @@ export const routes: Routes = [
         component: UserRoleAuthComponent
       },
       {
+        path: 'admin/user-setup',
+        component: UserSetupComponent
+      },
+      {
         path: 'profile',
+        component: UserProfileComponent
+      },
+      {
+        path: 'admin/user-profile',
         component: UserProfileComponent
       }
     ]

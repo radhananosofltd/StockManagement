@@ -189,7 +189,7 @@ export class BranchComponent implements OnInit{
   
   // Signals for panel expansion states
   isFormExpanded = signal(true);
-  isBranchesPanelExpanded = signal(true);
+  isBranchesPanelExpanded = signal(false);
   
   // Signals for UI states
   isSubmitting = signal(false);
