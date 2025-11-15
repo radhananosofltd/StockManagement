@@ -57,11 +57,6 @@ export class SidebarComponent implements OnInit {
           label: 'Item Specification',
           icon: '📋',
           route: '/dashboard/configuration/item-specification'
-        },
-        {
-          label: 'Label Generation',
-          icon: '🏷️',
-          route: '/dashboard/configuration/label-generation'
         }
       ]
     },
@@ -70,6 +65,11 @@ export class SidebarComponent implements OnInit {
       icon: '📦',
       expanded: false,
       children: [
+        {
+          label: 'Label Generation',
+          icon: '🏷️',
+          route: '/dashboard/configuration/label-generation'
+        },
         {
           label: 'Inward (Single / Bulk / Import)',
           icon: '📥',
