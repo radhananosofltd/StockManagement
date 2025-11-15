@@ -71,7 +71,7 @@ export class SidebarComponent implements OnInit {
           route: '/dashboard/configuration/label-generation'
         },
         {
-          label: 'Inward (Single / Bulk / Import)',
+          label: 'Inward',
           icon: '📥',
           route: '/dashboard/stock-maintenance/inward'
         },
