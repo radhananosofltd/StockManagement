@@ -19,6 +19,8 @@ namespace Stock_Management_DataAccess
     public DbSet<SpecificationEntity> SpecificationEntity { get; set; }
     public DbSet<CategoryMasterEntity> CategoryMasters { get; set; }
     public DbSet<CategorySpecificationsEntity> CategorySpecifications { get; set; }
+    public DbSet<SkuEntity> SkuEntities { get; set; }
+    public DbSet<CategoryEntity> CategoryEntities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

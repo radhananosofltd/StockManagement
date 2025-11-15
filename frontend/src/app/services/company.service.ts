@@ -64,6 +64,11 @@ export interface Company {
   providedIn: 'root'
 })
 export class CompanyService {
+    deleteCompany(companyId: number, userId: number): Observable<any> {
+      return this.http.delete(`${COMPANY_ENDPOINTS.DELETE(companyId)}?userId=${userId}`, {
+        headers: this.getHeaders()
+      });
+    }
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
 

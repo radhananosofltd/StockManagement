@@ -114,6 +114,10 @@ namespace Stock_Management_Business.Service
             existingSpec.IsActive = false;
             existingSpec.ModifiedBy = userId;
             existingSpec.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            if (existingSpec.CreatedDate.Kind == DateTimeKind.Unspecified)
+                existingSpec.CreatedDate = DateTime.SpecifyKind(existingSpec.CreatedDate, DateTimeKind.Utc);
+            if (existingSpec.ModifiedDate.Kind == DateTimeKind.Unspecified)
+                existingSpec.ModifiedDate = DateTime.SpecifyKind(existingSpec.ModifiedDate, DateTimeKind.Utc);
             return await _repo.UpdateSpecificationAsync(existingSpec);
         }
     }

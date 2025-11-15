@@ -422,7 +422,18 @@ export class BranchComponent implements OnInit{
   }
 
   deleteBranch(branch: any) {
-    // TODO: Implement delete logic
-    console.log('Delete branch:', branch);
+    const branchId = branch.id ?? branch.branchId;
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.id || 0;
+    this.http.delete(`${BRANCH_ENDPOINTS.CREATE}/${branchId}?userId=${userId}`).subscribe({
+      next: (response: any) => {
+        this.successMessage.set('Branch deleted successfully.');
+        this.viewBranches();
+      },
+      error: (err: any) => {
+        this.errorMessage.set('Failed to delete branch.');
+        console.error('Delete branch error:', err);
+      }
+    });
   }
 }

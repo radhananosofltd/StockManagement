@@ -18,6 +18,9 @@ export interface SaveCategoryRequest {
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
+    deleteCategory(categoryId: number, userId: number): Observable<any> {
+      return this.http.delete(`${this.apiUrl}/DeleteCategory?categoryId=${categoryId}&userId=${userId}`, { headers: API_CONFIG.DEFAULT_HEADERS });
+    }
   private readonly apiUrl = `${API_BASE_URL}/category`;
 
   constructor(private http: HttpClient) {}

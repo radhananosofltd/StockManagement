@@ -29,6 +29,8 @@ interface Specification {
   styleUrls: ['./item-specification.component.css']
 })
 export class ItemSpecificationComponent {
+    successMessage = signal('');
+    errorMessage = signal('');
   title = 'Item Specification Configuration';
   specificationForm: FormGroup;
   
@@ -243,7 +245,18 @@ export class ItemSpecificationComponent {
   }
 
   deleteSpecification(spec: any) {
-    // TODO: Implement delete logic
-    console.log('Delete specification:', spec);
+    const specificationId = spec.id ?? spec.specificationId;
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.id || 0;
+    this.specificationService.deleteSpecification(specificationId, userId).subscribe({
+      next: (response: any) => {
+        this.successMessage.set('Specification deleted successfully.');
+        this.viewSpecifications();
+      },
+      error: (err: any) => {
+        this.errorMessage.set('Failed to delete specification.');
+        console.error('Delete specification error:', err);
+      }
+    });
   }
 }

@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StockManagementAPI.Middleware;
 using Serilog;
+using YourNamespace.Services;
 
 // Configure Serilog for logging
 Log.Logger = new LoggerConfiguration()
@@ -97,12 +98,20 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISpecificationRepository, SpecificationRepository>();
 builder.Services.AddScoped<ISpecificationService, SpecificationService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ISkuRepository, SkuRepository>();
+builder.Services.AddScoped<ISkuService, SkuService>();
 
 // Register DbContext with PostgreSQL database  
 builder.Services.AddDbContext<StockManagementDBContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(cfg => {
+    cfg.AddProfile<Stock_Management_Business.Mapper.SkuMappingProfile>();
+    cfg.AddProfile<Stock_Management_Business.Mapper.AuthenticationMappingProfile>();
+    cfg.AddProfile<Stock_Management_Business.Mapper.BranchMappingProfile>();
+    cfg.AddProfile<Stock_Management_Business.Mapper.CompanyMappingProfile>();
+    cfg.AddProfile<Stock_Management_Business.Mapper.CountryMappingProfile>();
+});
 
 var app = builder.Build();
 

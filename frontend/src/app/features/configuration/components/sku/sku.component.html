@@ -16,27 +16,27 @@
     </div>
     <div class="panel-content" [class.expanded]="isSpecPanelExpanded()">
       <div class="sku-form-container">
-        <form class="sku-form">
+        <form class="sku-form" (submit)="onAddSku($event)">
           <div class="form-row-four">
             <div class="form-group">
               <label for="specification">Specification</label>
-              <select id="specification" name="specification">
+              <select #specificationSelect id="specification" name="specification">
                 <option value="">Select Specification</option>
-                <!-- TODO: Populate options dynamically -->
-                <option value="spec1">Specification 1</option>
-                <option value="spec2">Specification 2</option>
+                <ng-container *ngFor="let spec of specifications">
+                  <option [value]="spec.specificationId">{{ spec.specificationName }}</option>
+                </ng-container>
               </select>
             </div>
             <div class="form-group">
               <label for="specValue">Value</label>
-              <input id="specValue" type="text" name="specValue" placeholder="Enter value" />
+              <input #specValueInput id="specValue" type="text" name="specValue" placeholder="Enter value" />
             </div>
             <div class="form-group">
               <label for="skuCode">SKU Code</label>
-              <input id="skuCode" type="text" name="skuCode" placeholder="Enter SKU code" style="width: 400px;" />
+              <input #skuCodeInput id="skuCode" type="text" name="skuCode" placeholder="Enter SKU code" style="width: 400px;" />
             </div>
             <div class="form-group form-checkbox">
-              <input id="active" type="checkbox" name="active" />
+              <input #activeCheckbox id="active" type="checkbox" name="active" />
               <label for="active" style="margin-left: 8px;">Active</label>
             </div>
           </div>
@@ -80,12 +80,13 @@
             </svg>
             <span>View All SKUs</span>
           </button>
-          <button class="action-btn" (click)="importSkus()">
+          <button class="action-btn" type="button" (click)="importSkus()">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
             </svg>
             <span>Import SKUs</span>
           </button>
+         <!-- <input #fileInput type="file" accept=".xlsx,.xls" style="display:none" (change)="onFileChange($event)" />-->
           <button class="action-btn" (click)="exportSkus()">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M9 10h6v6h4l-7 7-7-7h4zm-4-4h14v2H5z"/>
@@ -93,7 +94,7 @@
             <span>Export Data</span>
           </button>
         </div>
-        @if (showSkuGrid) {
+        <ng-container *ngIf="showSkuGrid">
           <div class="sku-grid-container">
             <div class="grid-header">
               <h3>All SKUs</h3>
@@ -103,7 +104,7 @@
                 </svg>
               </button>
             </div>
-            @if (isLoadingSkus) {
+        <!--    @if (isLoadingSkus) {
               <div class="loading-spinner">
                 <div class="spinner"></div>
                 <p>Loading SKUs...</p>
@@ -115,7 +116,7 @@
                 </svg>
                 <p>No SKUs found. Add your first SKU using the form above.</p>
               </div>
-            } @else {
+            } @else {  -->
               <div class="sku-table">
                 <table>
                   <thead>
@@ -123,27 +124,25 @@
                       <th>Specification Name</th>
                       <th>Value</th>
                       <th>SKU Code</th>
-                      <th>Status</th>
+                      <th>Is Active</th>
                       <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    @for (sku of pagedSkus; track sku.id) {
-                      <tr>
-                        <td class="spec-name">{{ sku.specificationName }}</td>
-                        <td class="spec-value">{{ sku.value }}</td>
-                        <td class="sku-code">{{ sku.skuCode }}</td>
-                        <td class="sku-status">
-                          <span class="status-badge" [class.active]="sku.status === 'Active'">
-                            {{ sku.status }}
-                          </span>
-                        </td>
-                        <td class="sku-actions">
-                          <button class="action-btn edit-btn" (click)="editSku(sku)">Edit</button>
-                          <button class="action-btn delete-btn" (click)="deleteSku(sku)">Delete</button>
-                        </td>
-                      </tr>
-                    }
+                    <tr *ngFor="let sku of pagedSkus">
+                      <td class="spec-name">{{ sku.specificationName }}</td>
+                      <td class="spec-value">{{ sku.value }}</td>
+                      <td class="sku-code">{{ sku.skuCode }}</td>
+                      <td class="sku-status">
+                        <span class="status-badge" [class.active]="sku.isActive">
+                          {{ sku.isActive }}
+                        </span>
+                      </td>
+                      <td class="sku-actions">
+                        <button class="action-btn edit-btn" (click)="editSku(sku)">Edit</button>
+                        <button class="action-btn delete-btn" (click)="deleteSku(sku)">Delete</button>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
                 <div class="pagination-controls" *ngIf="totalSkuPages > 1">
@@ -152,9 +151,8 @@
                   <button class="pagination-btn" [disabled]="currentSkuPage === totalSkuPages" (click)="setSkuPage(currentSkuPage + 1)">Next</button>
                 </div>
               </div>
-            }
           </div>
-        }
+        </ng-container>
       </div>
     </div>
   </div>

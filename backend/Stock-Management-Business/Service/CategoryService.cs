@@ -1,21 +1,23 @@
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Stock_Management_Business.DTO;
 using Stock_Management_Business.Interface;
 using Stock_Management_DataAccess.Entities;
-using Stock_Management_DataAccess;
+using Stock_Management_DataAccess.Interfaces;
 
 namespace Stock_Management_Business.Service
 {
-    public class CategoryService : ICategoryService
+    public class CategoryService : ICategoryService               
     {
         private readonly ILogger<CategoryService> _logger;
-        private readonly Stock_Management_DataAccess.Interfaces.ICategoryRepository _categoryRepository;
-
-        public CategoryService(Stock_Management_DataAccess.Interfaces.ICategoryRepository categoryRepository, ILogger<CategoryService> logger)
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IMapper _mapper;
+        public CategoryService(ICategoryRepository categoryRepository, ILogger<CategoryService> logger, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<int> SaveCategoryAsync(SaveCategoryRequestDTO request)
@@ -69,6 +71,7 @@ namespace Stock_Management_Business.Service
             var entities = await _categoryRepository.GetAllCategoriesWithSpecificationsAsync();
             var dtos = entities.Select(e => new CategoryListDTO
             {
+                CategoryId = e.CategoryId,
                 Category = e.Category,
                 Status = e.Status,
                 CreatedDate = e.CreatedDate,
@@ -76,5 +79,54 @@ namespace Stock_Management_Business.Service
             }).ToList();
             return dtos;
         }
+
+        public async Task<CategoryDTO> GetCategoryByIdAsync(int categoryId)
+        {
+            var entity = await _categoryRepository.GetCategoryByIdAsync(categoryId);
+            if (entity == null) return null;
+            return _mapper.Map<CategoryDTO>(entity);
+        }
+
+        public async Task<bool> UpdateCategoryAsync(int categoryId, CategoryDTO dto)
+        {
+            var entity = await _categoryRepository.GetCategoryByIdAsync(categoryId);
+            if (entity == null) return false;
+            entity.CategoryName = dto.CategoryName;
+            entity.IsActive = dto.IsActive;
+            entity.modified_by = dto.ModifiedBy;
+            entity.modified_date = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            return await _categoryRepository.UpdateCategoryAsync(new CategoryMasterEntity
+            {
+                CategoryId = categoryId,
+                CategoryName = entity.CategoryName,
+                IsActive = entity.IsActive,
+                modified_by = entity.modified_by,
+                modified_date = entity.modified_date,
+                Comment = entity.Comment,
+                created_by = entity.created_by,
+                create_date = entity.create_date
+            });
+        }
+
+        public async Task<bool> DeleteCategoryAsync(int categoryId, int userId)
+        {
+            var entity = await _categoryRepository.GetCategoryByIdAsync(categoryId);
+            if (entity == null) return false;
+            entity.IsActive = false;
+            entity.modified_by = userId;
+            entity.modified_date = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            return await _categoryRepository.UpdateCategoryAsync(new CategoryMasterEntity
+            {
+                CategoryId = categoryId,
+                CategoryName = entity.CategoryName,
+                IsActive = false,
+                modified_by = userId,
+                modified_date = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+                Comment = entity.Comment,
+                created_by = entity.created_by,
+                create_date = entity.create_date
+            });
+        }
     }
+ 
 }

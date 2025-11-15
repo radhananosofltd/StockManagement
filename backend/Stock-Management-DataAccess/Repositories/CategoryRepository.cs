@@ -1,3 +1,4 @@
+using Stock_Management_DataAccess.Entities;
  
 using System.Threading.Tasks;
 using Stock_Management_DataAccess.Entities;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Stock_Management_DataAccess.Repositories
 {
-    public class CategoryRepository : ICategoryRepository
+    public class CategoryRepository : ICategoryRepository           
     {
         private readonly StockManagementDBContext _context;
         private readonly ILogger<CategoryRepository> _logger;
@@ -68,6 +69,7 @@ namespace Stock_Management_DataAccess.Repositories
             var categories = await _context.CategoryMasters
                 .Select(cat => new CategoryListEntity
                 {
+                    CategoryId = cat.CategoryId,
                     Category = cat.CategoryName,
                     Status = cat.IsActive ? "Active" : "Inactive",
                     CreatedDate = cat.create_date,
@@ -82,5 +84,26 @@ namespace Stock_Management_DataAccess.Repositories
                 .ToListAsync();
             return categories;
         }
+        public async Task<CategoryMasterEntity> GetCategoryByIdAsync(int categoryId)
+        {
+            return await _context.CategoryMasters.FirstOrDefaultAsync(c => c.CategoryId == categoryId);
+        }
+
+        public async Task<bool> UpdateCategoryAsync(CategoryMasterEntity entity)
+        {
+            var tracked = await _context.CategoryMasters.FindAsync(entity.CategoryId);
+            if (tracked != null)
+            {
+                _context.Entry(tracked).CurrentValues.SetValues(entity);
+            }
+            else
+            {
+                _context.CategoryMasters.Update(entity);
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
+   
 }

@@ -91,6 +91,12 @@ export const PORTFOLIO_ENDPOINTS = {
   RISK_ANALYSIS: `${API_BASE_URL}/portfolio/risk-analysis`
 } as const;
 
+export const SKU_ENDPOINTS = {
+  BASE: `${API_BASE_URL}/sku`,
+  GET_ALL: `${API_BASE_URL}/sku`,
+  BULK_IMPORT: `${API_BASE_URL}/sku/bulk-import`,
+  DEACTIVATE: `${API_BASE_URL}/sku/deactivate`
+} as const;
 // Reports API Endpoints
 export const REPORTS_ENDPOINTS = {
   // Base reports endpoint
@@ -170,6 +176,12 @@ export const CATEGORY_ENDPOINTS = {
   GET_ALL: `${API_BASE_URL}/category/GetAllCategories`
 } as const;
 
+// Specification API Endpoints
+export const SPECIFICATION_ENDPOINTS = {
+  BASE: `${API_BASE_URL}/specification`,
+  GET_ALL: `${API_BASE_URL}/specification`
+} as const;
+
 // Utility function to build query parameters
 export const buildQueryParams = (params: Record<string, any>): string => {
   const searchParams = new URLSearchParams();
@@ -202,7 +214,8 @@ export const API_ENDPOINTS = {
   REPORTS: REPORTS_ENDPOINTS,
   USER: USER_ENDPOINTS,
   DASHBOARD: DASHBOARD_ENDPOINTS,
-  CATEGORY: CATEGORY_ENDPOINTS
+  CATEGORY: CATEGORY_ENDPOINTS,
+  SPECIFICATION: SPECIFICATION_ENDPOINTS
 } as const;
 
 // Type definitions for better TypeScript support
@@ -215,3 +228,4 @@ export type ReportsEndpoint = typeof REPORTS_ENDPOINTS;
 export type UserEndpoint = typeof USER_ENDPOINTS;
 export type DashboardEndpoint = typeof DASHBOARD_ENDPOINTS;
 export type CategoryEndpoint = typeof CATEGORY_ENDPOINTS;
+export type SpecificationEndpoint = typeof SPECIFICATION_ENDPOINTS;

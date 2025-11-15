@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { API_CONFIG, API_BASE_URL } from '../constants/api-endpoints.constants';
+import { API_CONFIG, SPECIFICATION_ENDPOINTS } from '../constants/api-endpoints.constants';
 
 export interface AddSpecificationPayload {
   isDefault: boolean;
@@ -19,7 +19,10 @@ export interface AddSpecificationPayload {
 
 @Injectable({ providedIn: 'root' })
 export class SpecificationService {
-  private readonly apiUrl = `${API_BASE_URL}/specification`;
+    deleteSpecification(specificationId: number, userId: number) {
+      return this.http.delete(`${SPECIFICATION_ENDPOINTS.BASE}/DeleteSpecification?specificationid=${specificationId}&userId=${userId}`, { headers: API_CONFIG.DEFAULT_HEADERS });
+    }
+  private readonly apiUrl = SPECIFICATION_ENDPOINTS.BASE;
 
   constructor(private http: HttpClient) {}
 
@@ -32,7 +35,7 @@ export class SpecificationService {
   }
 
   getAllSpecifications() {
-    return this.http.get<any[]>(this.apiUrl, { headers: API_CONFIG.DEFAULT_HEADERS });
+    return this.http.get<any[]>(SPECIFICATION_ENDPOINTS.GET_ALL, { headers: API_CONFIG.DEFAULT_HEADERS });
   }
 
   bulkImportSpecifications(payload: any[]) {

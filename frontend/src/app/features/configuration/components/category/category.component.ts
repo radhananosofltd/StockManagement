@@ -108,6 +108,7 @@ export class CategoryComponent {
     this.categoryService.getAllCategories().subscribe({
       next: (result: any[]) => {
         const formatted = result.map(cat => ({
+          categoryId: cat.categoryId,
           category: cat.category,
           status: cat.status,
           createdDate: new Date(cat.createdDate),
@@ -277,7 +278,26 @@ export class CategoryComponent {
   }
 
   deleteCategory(cat: any) {
-    // TODO: Implement delete logic
-    console.log('Delete category:', cat);
+    const categoryId = cat.categoryId ?? cat.id;
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.id || 0;
+    this.categoryService.deleteCategory(categoryId, userId).subscribe({
+      next: (response: any) => {
+        this.message = 'Category deleted successfully.';
+        this.categoryService.getAllCategories().subscribe({
+          next: (categories: any[]) => {
+            this.categories.set(categories);
+          },
+          error: (err: any) => {
+            this.message = 'Failed to load categories.';
+            console.error('Load categories error:', err);
+          }
+        });
+      },
+      error: (err: any) => {
+        this.message = 'Failed to delete category.';
+        console.error('Delete category error:', err);
+      }
+    });
   }
 }

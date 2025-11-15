@@ -630,8 +630,19 @@ export class CompanyPageComponent implements OnInit {
   }
 
   deleteCompany(company: CompanyListDTO) {
-    // TODO: Implement delete logic
-    console.log('Delete company:', company);
+    const companyId = company.id;
+    const currentUser = this.authService.getCurrentUser();
+    const userId = currentUser?.id || 0;
+    this.companyService.deleteCompany(companyId, userId).subscribe({
+      next: (response: any) => {
+        this.successMessage.set('Company deleted successfully.');
+        this.viewCompanies();
+      },
+      error: (err: any) => {
+        this.errorMessage.set('Failed to delete company.');
+        console.error('Delete company error:', err);
+      }
+    });
   }
 
     editCompany(company: CompanyListDTO) {
