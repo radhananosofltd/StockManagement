@@ -36,8 +36,8 @@
               <input #skuCodeInput id="skuCode" type="text" name="skuCode" placeholder="Enter SKU code" style="width: 400px;" />
             </div>
             <div class="form-group form-checkbox">
-              <input #activeCheckbox id="active" type="checkbox" name="active" />
-              <label for="active" style="margin-left: 8px;">Active</label>
+              <input #activeCheckbox id="active" type="checkbox" name="active" *ngIf="false" />
+              <label for="active" style="margin-left: 8px;" *ngIf="false">Active</label>
             </div>
           </div>
           <div class="form-actions">
@@ -46,7 +46,7 @@
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                 </svg>
-                Add
+                Save
               </button>
               <button type="reset" class="reset-btn">
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">

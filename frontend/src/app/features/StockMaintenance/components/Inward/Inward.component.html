@@ -15,69 +15,75 @@
     </div>
     <div class="panel-content" [class.expanded]="isStockInwardPanelExpanded()">
       <div class="inward-form-container">
-        <form class="branch-form">
-          <div class="form-row-four">
-            <div class="form-group">
-              <label for="stockType">Stock Type</label>
-              <select id="stockType" [(ngModel)]="stockType" name="stockType">
+        <form class="inward-form">
+          <div class="controls-grid-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; align-items: center;">
+            <div>
+              <label style="margin-bottom:8px; display:block;">Inward Type:</label>
+              <label style="display:block; margin-bottom:10px; margin-left:12px;"><input type="radio" name="inwardType" [(ngModel)]="inwardType" value="Single" style="margin-right:8px;" /> Single</label>
+              <label style="display:block; margin-left:12px;"><input type="radio" name="inwardType" [(ngModel)]="inwardType" value="Bulk" style="margin-right:8px;" /> Bulk</label>
+            </div>
+            <div>
+              <label for="stockType" style="margin-bottom:8px; display:block;">Stock Type:</label>
+              <select id="stockType" [(ngModel)]="stockType" name="stockType" style="margin-top:4px; width:180px;">
                 <option value="Container">Container</option>
-                <option value="Item">Item</option>
+                <option value="Single Item">Single Item</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="category">Category</label>
-              <select id="category" [(ngModel)]="category" name="category">
+            <div>
+              <label for="category" style="margin-bottom:8px; display:block;">Category:</label>
+              <select id="category" [(ngModel)]="category" name="category" style="margin-top:4px; width:180px;">
                 <option *ngFor="let cat of categories" [value]="cat.id">{{cat.name}}</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="qty">Stock Qty</label>
-              <input id="qty" type="number" [(ngModel)]="qty" name="qty" />
+            <div *ngIf="inwardType === 'Bulk'">
+              <label for="bulkQty" style="margin-bottom:8px; display:block;">Bulk Qty:</label>
+              <input id="bulkQty" type="number" [(ngModel)]="bulkQty" name="bulkQty" style="width:180px; margin-top:4px;" />
             </div>
-            <div class="form-group">
-              <label for="qtyInsideContainer">No. of items inside the container</label>
-              <input id="qtyInsideContainer" type="number" [(ngModel)]="qtyInsideContainer" name="qtyInsideContainer" />
-            </div>
+            <div *ngIf="inwardType !== 'Bulk'" style="height: 38px;"></div>
           </div>
           <div class="specification-grid">
             <table>
               <thead>
                 <tr>
-                  <th *ngFor="let col of specificationColumns">{{col}}</th>
-                  <th style="width: 60px;"></th>
+                  <th style="width:120px;">Specification</th>
+                  <th style="width:200px;">Value</th>
+                  <th style="width:50px;">Lock</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let row of specificationRows; let i = index">
-                  <td *ngFor="let col of specificationColumns">
-                    <div style="display: flex; align-items: center; gap:0">
-                      <input *ngIf="col !== 'Item ID'" type="checkbox" class="repeat-checkbox" style="margin-right:0; margin-left: 0" title="Repeat"
-                        [checked]="repeatChecked[i]?.[col] || false"
-                        (change)="onRepeatCell(i, col, $event)"  />
-                      <ng-container [ngSwitch]="col">
-                        <select *ngSwitchCase="'Container ID'" [(ngModel)]="row[col]" [name]="col + '_' + i" style="margin-right:0;">
-                          <option value="">Select Container</option>
-                          <option *ngFor="let container of containers" [value]="container.id">{{container.name}}</option>
-                        </select>
-                        <select *ngSwitchCase="'Item ID'" [(ngModel)]="row[col]" [name]="col + '_' + i">
-                          <option value="">Select Item</option>
-                          <option *ngFor="let item of items" [value]="item.id">{{item.name}}</option>
-                        </select>
-                        <input *ngSwitchDefault type="text" [(ngModel)]="row[col]" [name]="col + '_' + i" />
-                      </ng-container>
-                    </div>
+                <tr>
+                  <td>Container ID</td>
+                  <td style="text-align:left;">
+                    <select [(ngModel)]="containerId" name="containerId" class="spec-dropdown" style="width:100%;">
+                      <option *ngFor="let container of containers" [value]="container.id">{{container.name}}</option>
+                    </select>
                   </td>
-                  <td style="text-align: center;">
-                    <button type="button" class="grid-icon-btn" title="Add row" (click)="addGridRow(i)">➕</button>
-                    <button type="button" class="grid-icon-btn" title="Remove row" (click)="removeGridRow(i)" [disabled]="specificationRows.length === 1">➖</button>
+                </tr>
+                <tr>
+                  <td>Item ID</td>
+                  <td style="text-align:left;">
+                    <select [(ngModel)]="itemId" name="itemId" class="spec-dropdown" style="width:100%;">
+                      <option *ngFor="let item of items" [value]="item.id">{{item.name}}</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr *ngFor="let spec of specifications">
+                  <td>{{spec}}</td>
+                  <td >
+                      <div style="display: flex; align-items: center; gap: 8px; width:100%;">
+                        <select [(ngModel)]="specValues[spec]" name="spec_{{spec}}" class="spec-dropdown" style="flex:1; min-width:0;">
+                          <option *ngFor="let option of getSpecOptions(spec)" [value]="option.id">{{option.name}}</option>
+                        </select>
+                      </div>
+                  </td>
+                  <td >
+                      <div style="display: flex; align-items: center; gap: 8px; width:100%;">
+                        <input type="checkbox" [(ngModel)]="specChecked[spec]" name="specCheck_{{spec}}" style="width:16px; height:16px; margin-left:8px;" />
+                      </div>
                   </td>
                 </tr>
               </tbody>
             </table>
-          </div>
-          <div class="form-actions">
-            <button type="button" (click)="addStock()" class="primary-btn">Add Stock</button>
-            <button type="button" (click)="resetForm()" class="secondary-btn">Reset</button>
           </div>
         </form>
       </div>
