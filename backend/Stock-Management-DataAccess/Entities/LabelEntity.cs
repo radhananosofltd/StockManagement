@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Stock_Management_DataAccess.Entities
 {
     [Table("lable")]
-    public class LabelEntity
+    public class LabelEntity        
     {
         [Key]
         [Column("id")]
@@ -19,5 +19,8 @@ namespace Stock_Management_DataAccess.Entities
 
               [Column("status")]
         public string Status { get; set; }
+
+        [Column("is_active")]
+        public int is_active { get; set; } = 1;
     }
 }

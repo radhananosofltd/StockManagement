@@ -23,7 +23,7 @@ namespace StockManagementAPI.Controllers
 
     [ApiController]
     [Route("api/labels")]
-    public class LabelsController : ControllerBase
+    public class LabelsController : ControllerBase        
     {
         private readonly IKeyValueRepository _keyValueRepository;
         private readonly ILabelService _labelService;
@@ -34,6 +34,13 @@ namespace StockManagementAPI.Controllers
             _keyValueRepository = keyValueRepository;
             _labelService = labelService;
             _logger = logger;
+        }
+
+        [HttpGet]
+        public IActionResult GetAllLabels()
+        {
+            var labels = _labelService.GetAllLabels();
+            return Ok(labels);
         }
 
         [HttpPost("generate")]
@@ -116,9 +123,51 @@ namespace StockManagementAPI.Controllers
             switch (status.ToLower())
             {
                 case "generated": return "generated";
-                case "generate and print": return "printed";
+                case "generate_and_print": return "printed";
                 default: return "generated";
             }
         }
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateLabelStatus(int id, [FromBody] UpdateLabelStatusRequest request)
+        {
+            // Update label status (is_active)
+            var success = await _labelService.UpdateLabelStatusAsync(id, request.is_active);
+            if (success)
+                return Ok();
+            return NotFound();
+        }
+
+        public class UpdateLabelStatusRequest
+        {
+            public int is_active { get; set; }
+        }
+
+        [HttpGet("{id}/pdf")]
+            public async Task<IActionResult> GenerateLabelPdf(int id)
+            {
+                // Get label by id
+                var label = _labelService.GetLabelById(id);
+                if (label == null)
+                    return NotFound();
+
+                var barcodePairs = new List<(string Id, string Barcode)>();
+                if (!string.IsNullOrEmpty(label.ContainerId))
+                {
+                    var containerBarcode = GenerateBarcode(label.ContainerId);
+                    barcodePairs.Add((label.ContainerId, containerBarcode));
+                }
+                if (!string.IsNullOrEmpty(label.ItemId))
+                {
+                    var itemBarcode = GenerateBarcode(label.ItemId);
+                    barcodePairs.Add((label.ItemId, itemBarcode));
+                }
+                // Update label status to 'printed' before returning PDF
+                await _labelService.UpdateLabelStatusAsync(id, 1); // Set is_active to 1 (if needed)
+                // Also set Status to 'printed'
+                await _labelService.UpdateLabelStatusTextAsync(id, "printed");
+                var pdfBytes = Helpers.PdfBarcodeGenerator.GenerateBarcodesPdf(barcodePairs);
+                return File(pdfBytes, "application/pdf", $"label_{id}_barcodes.pdf");
+            }
     }
 }

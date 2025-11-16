@@ -7,7 +7,7 @@ using Stock_Management_DataAccess.Interfaces;
 
 namespace Stock_Management_DataAccess.Repositories
 {
-    public class LabelRepository : ILabelRepository
+    public class LabelRepository : ILabelRepository  
     {
         private readonly StockManagementDBContext _context;
         private readonly ILogger<LabelRepository> _logger;
@@ -18,6 +18,29 @@ namespace Stock_Management_DataAccess.Repositories
             _logger = logger;
         }
 
+        public LabelEntity GetLabelById(int id)
+        {
+            return _context.Lables.FirstOrDefault(l => l.Id == id);
+        }
+
+        public async Task<bool> UpdateLabelStatusAsync(int id, int isActive)
+        {
+            var label = await _context.Lables.FindAsync(id);
+            if (label == null)
+                return false;
+            // Add is_active property if not present
+            var prop = label.GetType().GetProperty("is_active");
+            if (prop != null)
+            {
+                prop.SetValue(label, isActive);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            // Fallback: update status to 'Inactive' if is_active not present
+            label.Status = isActive == 0 ? "Inactive" : label.Status;
+            await _context.SaveChangesAsync();
+            return true;
+        }
         public async Task SaveLabelsAsync(List<LabelEntity> labels)
         {
             try
@@ -45,6 +68,20 @@ namespace Stock_Management_DataAccess.Repositories
             {
                 _logger.LogInformation(ex.Message.ToString());
             }
+        }
+        public List<LabelEntity> GetAllLabels()
+        {
+            return _context.Lables.ToList();
+        }
+
+        public async Task<bool> UpdateLabelStatusTextAsync(int id, string status)
+        {
+            var label = await _context.Lables.FindAsync(id);
+            if (label == null)
+                return false;
+            label.Status = status;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
