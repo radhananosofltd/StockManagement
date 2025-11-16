@@ -1,14 +1,86 @@
 <div class="page-container">
   <div class="page-header">
-    <h1>Inward (Single / Bulk / Import)</h1>
+    <h2>Stock Inward</h2>
     <p>Manage inward stock transactions</p>
   </div>
   
-  <div class="page-content">
-    <!-- Inward functionality will be implemented here -->
-    <div class="placeholder-content">
-      <h3>Inward Module</h3>
-      <p>This page will contain the inward stock management functionality.</p>
+  <div class="expandable-panel">
+    <div class="panel-header" (click)="toggleStockInwardPanel()">
+      <h3>Stock Inward</h3>
+      <button class="toggle-btn" type="button">
+        <svg class="toggle-icon" [class.rotated]="isStockInwardPanelExpanded()" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="panel-content" [class.expanded]="isStockInwardPanelExpanded()">
+      <div class="inward-form-container">
+        <form class="branch-form">
+          <div class="form-row-four">
+            <div class="form-group">
+              <label for="stockType">Stock Type</label>
+              <select id="stockType" [(ngModel)]="stockType" name="stockType">
+                <option value="Container">Container</option>
+                <option value="Item">Item</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="category">Category</label>
+              <select id="category" [(ngModel)]="category" name="category">
+                <option *ngFor="let cat of categories" [value]="cat.id">{{cat.name}}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="qty">Stock Qty</label>
+              <input id="qty" type="number" [(ngModel)]="qty" name="qty" />
+            </div>
+            <div class="form-group">
+              <label for="qtyInsideContainer">No. of items inside the container</label>
+              <input id="qtyInsideContainer" type="number" [(ngModel)]="qtyInsideContainer" name="qtyInsideContainer" />
+            </div>
+          </div>
+          <div class="specification-grid">
+            <table>
+              <thead>
+                <tr>
+                  <th *ngFor="let col of specificationColumns">{{col}}</th>
+                  <th style="width: 60px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of specificationRows; let i = index">
+                  <td *ngFor="let col of specificationColumns">
+                    <div style="display: flex; align-items: center; gap:0">
+                      <input *ngIf="col !== 'Item ID'" type="checkbox" class="repeat-checkbox" style="margin-right:0; margin-left: 0" title="Repeat"
+                        [checked]="repeatChecked[i]?.[col] || false"
+                        (change)="onRepeatCell(i, col, $event)"  />
+                      <ng-container [ngSwitch]="col">
+                        <select *ngSwitchCase="'Container ID'" [(ngModel)]="row[col]" [name]="col + '_' + i" style="margin-right:0;">
+                          <option value="">Select Container</option>
+                          <option *ngFor="let container of containers" [value]="container.id">{{container.name}}</option>
+                        </select>
+                        <select *ngSwitchCase="'Item ID'" [(ngModel)]="row[col]" [name]="col + '_' + i">
+                          <option value="">Select Item</option>
+                          <option *ngFor="let item of items" [value]="item.id">{{item.name}}</option>
+                        </select>
+                        <input *ngSwitchDefault type="text" [(ngModel)]="row[col]" [name]="col + '_' + i" />
+                      </ng-container>
+                    </div>
+                  </td>
+                  <td style="text-align: center;">
+                    <button type="button" class="grid-icon-btn" title="Add row" (click)="addGridRow(i)">➕</button>
+                    <button type="button" class="grid-icon-btn" title="Remove row" (click)="removeGridRow(i)" [disabled]="specificationRows.length === 1">➖</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button type="button" (click)="addStock()" class="primary-btn">Add Stock</button>
+            <button type="button" (click)="resetForm()" class="secondary-btn">Reset</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>

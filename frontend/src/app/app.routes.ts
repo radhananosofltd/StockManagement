@@ -9,7 +9,7 @@ import { BranchComponent } from './features/configuration/components/branch/bran
 import { CategoryComponent } from './features/configuration/components/category/category.component';
 import { SkuComponent } from './features/configuration/components/sku/sku.component';
 import { ItemSpecificationComponent } from './features/configuration/components/item-specification/item-specification.component';
-import { LabelGenerationComponent } from './features/configuration/components/label-generation/label-generation.component';
+import { LabelGenerationComponent } from './features/StockMaintenance/components/label-generation/label-generation.component';
 import { UserProfileComponent } from './features/user/components/user-profile/user-profile.component';
 import { UserSetupComponent } from './features/user/components/user-setup/user-setup.component';
 // Stock Maintenance Components

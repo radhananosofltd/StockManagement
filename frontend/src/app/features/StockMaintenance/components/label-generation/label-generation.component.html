@@ -1,0 +1,166 @@
+<div class="label-generation-page">
+  <div class="expandable-panel">
+    <div class="panel-header" (click)="toggleLabelPanel()">
+      <h3>Generate &amp; Print label</h3>
+      <button class="toggle-btn" type="button">
+        <svg class="toggle-icon" [class.rotated]="isLabelPanelExpanded()" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="panel-content" [class.expanded]="isLabelPanelExpanded()">
+      <div class="label-form-container">
+        <form [formGroup]="labelForm" (ngSubmit)="onGeneratePrint()" class="label-form">
+          <div class="form-grid">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="labelType">Label Type</label>
+                <select id="labelType" formControlName="labelType" style="width: 300px;">
+                  <option value="Container">Container</option>
+                  <option value="Item">Item</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="LatestContainerNumber">Latest Container Number</label>
+                <input id="LatestContainerNumber" type="text" formControlName="LatestContainerNumber" style="width: 300px;" [disabled]="true" />
+              </div>
+              <div class="form-group">
+                <label for="latestItemNumber">Latest Item Number</label>
+                <input id="latestItemNumber" type="text" formControlName="latestItemNumber" style="width: 300px;" placeholder="Latest item number" [disabled]="true" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="containerNumbers">Container Numbers</label>
+                <input id="containerNumbers" style="width: 300px;" type="text" formControlName="containerNumbers" placeholder="Enter container numbers" />
+              </div>
+              <div class="form-group">
+                <label for="itemNumbers">Item Numbers</label>
+                <input id="itemNumbers" style="width: 300px;" type="text" formControlName="itemNumbers" placeholder="Enter item numbers" />
+              </div>
+              <div class="form-group">
+                <label for="action">Action</label>
+                <select id="action" style="width: 300px;" formControlName="action">
+                  <option value="">Select Action</option>
+                  <option value="generate">Generate</option>
+                  <option value="print">Print</option>
+                  <option value="reprint">Reprint</option>
+                  <option value="Download">Reprint</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group"></div>
+              <div class="form-group"></div>
+              <div class="form-group">
+                <div class="form-actions" style="margin-top: 0.75rem;">
+                  <button
+                    type="submit"
+                    [disabled]="labelForm.invalid"
+                    class="submit-btn"
+                  >
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Add Label
+                  </button>
+                  <button type="button" class="reset-btn" (click)="onReset()">Reset</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Removed extra form-actions div -->
+        </form>
+      </div>
+    </div>
+  </div>
+            <!-- Quick Actions Panel (below main panel) -->
+
+  <div class="expandable-panel">
+    <div class="panel-header" (click)="toggleLabelQuickActionsPanel()">
+      <h3>Quick Actions</h3>
+      <button class="toggle-btn" type="button">
+        <svg class="toggle-icon" [class.rotated]="isLabelQuickActionsPanelExpanded()" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="panel-content" [class.expanded]="isLabelQuickActionsPanelExpanded()">
+      <div class="quick-actions-card">
+        <div class="actions-grid">
+          <button class="action-btn" (click)="onViewAllLabels()">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+            <span>View All Labels</span>
+          </button>
+          <button class="action-btn" (click)="onExportLabels()">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 10h6v6h4l-7 7-7-7h4zm-4-4h14v2H5z"/>
+            </svg>
+            <span>Export Data</span>
+          </button>
+        </div>
+      </div>
+      <div *ngIf="showLabelsGrid()">
+        <div class="labels-grid-container">
+          <div class="grid-header">
+            <h3>All Labels</h3>
+            <button class="close-btn" (click)="onCloseLabelsGrid()">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          </div>
+          <div *ngIf="isLoadingLabels()" class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading labels...</p>
+          </div>
+          <div *ngIf="!isLoadingLabels() && pagedLabels.length === 0" class="no-data">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <p>No labels found. Add your first label using the form above.</p>
+          </div>
+          <div *ngIf="!isLoadingLabels() && pagedLabels.length > 0" class="labels-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Label Type</th>
+                  <th>Label Value</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let label of pagedLabels">
+                  <td>{{ label.labelType }}</td>
+                  <td>{{ label.labelValue }}</td>
+                  <td>
+                    <span class="status-badge" [class.active]="label.status === 'Active'">
+                      {{ label.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="label-action-buttons">
+                      <button class="action-btn edit-btn" (click)="onEditLabel(label)">Edit</button>
+                      <button class="action-btn delete-btn" (click)="onDeleteLabel(label)">Delete</button>
+                      <button class="action-btn print-btn" (click)="onPrintLabelRow(label)">Print</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="pagination-controls" *ngIf="totalLabelPages > 1">
+              <button class="pagination-btn" [disabled]="currentLabelPage() === 1" (click)="setLabelPage(currentLabelPage() - 1)">Prev</button>
+              <span>Page {{ currentLabelPage() }} of {{ totalLabelPages }}</span>
+              <button class="pagination-btn" [disabled]="currentLabelPage() === totalLabelPages" (click)="setLabelPage(currentLabelPage() + 1)">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
