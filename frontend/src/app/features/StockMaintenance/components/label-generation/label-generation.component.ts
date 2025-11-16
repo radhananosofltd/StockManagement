@@ -1,6 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { KeyValuesService } from '../../../../services/key-values.service';
+import { LabelsService } from '../../../../services/labels.service';
 
 interface LabelGeneration {
   id: number;
@@ -13,6 +15,7 @@ interface LabelGeneration {
   selector: 'app-label-generation',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
+  providers: [KeyValuesService],
   templateUrl: './label-generation.component.html',
   styleUrl: './label-generation.component.css'
 })
@@ -71,17 +74,34 @@ export class LabelGenerationComponent implements OnInit {
     this.currentLabelPage.set(page);
   }
   labelForm: FormGroup;
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private keyValuesService: KeyValuesService, private labelsService: LabelsService) {
     this.labelForm = this.fb.group({
       labelType: ['Container', Validators.required],
       LatestContainerNumber: [{ value: '', disabled: true }],
       latestItemNumber: [{ value: '', disabled: true }],
-      labelStatus: [{ value: 'Created', disabled: true }]
+      labelStatus: [{ value: 'Created', disabled: true }],
+      containerNumbers: [''],
+      itemNumbers: [''],
+      action: ['']
     });
+    this.labelForm.get('labelType')?.valueChanges.subscribe((value) => {
+    if (value === 'Container') {
+      this.keyValuesService.getAllContainerIds().subscribe(ids => {
+        this.labelForm.patchValue({ LatestContainerNumber: ids.length ? ids[ids.length - 1] : '', latestItemNumber: '' });
+      });
+    } else if (value === 'Item') {
+      this.keyValuesService.getAllItemIds().subscribe(ids => {
+        this.labelForm.patchValue({ latestItemNumber: ids.length ? ids[ids.length - 1] : '', LatestContainerNumber: '' });
+      });
+    }
+  });
   }
 
   ngOnInit(): void {
-    // Load initial data if needed
+    // On page load, fetch and bind latest container number
+  this.keyValuesService.getAllContainerIds().subscribe(ids => {
+    this.labelForm.patchValue({ LatestContainerNumber: ids.length ? ids[ids.length - 1] : '' });
+  });
   }
 
   labelPanelExpanded = true;
@@ -94,7 +114,41 @@ export class LabelGenerationComponent implements OnInit {
     return this.labelPanelExpanded;
   }
   onGeneratePrint() {
-    // Generate and print label logic
+    const formValue = this.labelForm.getRawValue();
+    const payload = {
+      labelType: formValue.labelType,
+      containerNumbers: Number(formValue.containerNumbers) || 0,
+      itemNumbers: Number(formValue.itemNumbers) || 0,
+      status: formValue.action,
+      userId: 1 // Replace with actual userId from auth context
+    };
+    const action = (formValue.action || '').toLowerCase();
+    if (action === 'download' || action === 'print' || action === 'generate_and_print') {
+      this.labelsService.downloadLabelsPdf(payload).subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'barcodes.pdf';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: (err) => {
+          alert('Failed to download PDF.');
+          console.error(err);
+        }
+      });
+    } else {
+      this.labelsService.generateLabels(payload).subscribe({
+        next: (result) => {
+          alert('Labels generated successfully!');
+        },
+        error: (err) => {
+          alert('Failed to generate labels.');
+          console.error(err);
+        }
+      });
+    }
   }
 
   onPrintLabel() {

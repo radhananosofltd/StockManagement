@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "jsbarcode": "^3.12.1",
     "xlsx": "^0.18.5"
   }
 }
