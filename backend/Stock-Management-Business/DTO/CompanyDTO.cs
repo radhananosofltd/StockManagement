@@ -81,6 +81,10 @@ namespace Stock_Management_Business.DTO
     public string CompanyName { get; set; } = string.Empty;
     public string ContactName { get; set; } = string.Empty;
     public string ContactEmail { get; set; } = string.Empty;
+    public string CompanyLogoURL { get; set; } = string.Empty;
+    public string PAN { get; set; }
+    public string? TaxIDNumberType { get; set; }
+    public string? TaxIDNumber { get; set; }
     public string? Website { get; set; }
     public string? CompanyAddress { get; set; }
     public int? CountryId { get; set; }
