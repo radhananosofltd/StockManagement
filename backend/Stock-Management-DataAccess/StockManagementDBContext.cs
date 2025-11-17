@@ -9,10 +9,11 @@ using Stock_Management_DataAccess.Entities;
 namespace Stock_Management_DataAccess
 {
     public class StockManagementDBContext : DbContext
+        
     {
         public StockManagementDBContext(DbContextOptions<StockManagementDBContext> options) : base(options) { }
-
-    public DbSet<CompanyEntity> CompanyEntity { get; set; }
+        public DbSet<LabelEntity> Lables { get; set; }
+        public DbSet<CompanyEntity> CompanyEntity { get; set; }
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<CountryEntity> CountryEntity { get; set; }
     public DbSet<BranchEntity> BranchEntity { get; set; }
@@ -21,10 +22,14 @@ namespace Stock_Management_DataAccess
     public DbSet<CategorySpecificationsEntity> CategorySpecifications { get; set; }
     public DbSet<SkuEntity> SkuEntities { get; set; }
     public DbSet<CategoryEntity> CategoryEntities { get; set; }
+    public DbSet<KeyValueEntity> KeyValues { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Map LabelEntity to 'lable' table explicitly
+            modelBuilder.Entity<LabelEntity>().ToTable("lable");
 
             // Configure UserEntity
             modelBuilder.Entity<UserEntity>(entity =>

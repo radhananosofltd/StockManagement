@@ -1,11 +1,14 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { KeyValuesService } from '../../../../services/key-values.service';
+import { LabelsService } from '../../../../services/labels.service';
 
 interface LabelGeneration {
   id: number;
   labelType: string;
-  labelValue: string;
+  itemId: string;
+  containerId: string;
   status: string;
 }
 
@@ -13,6 +16,7 @@ interface LabelGeneration {
   selector: 'app-label-generation',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
+  providers: [KeyValuesService],
   templateUrl: './label-generation.component.html',
   styleUrl: './label-generation.component.css'
 })
@@ -34,22 +38,52 @@ export class LabelGenerationComponent implements OnInit {
   }
 
   onExportLabels() {
-    // TODO: Implement export labels logic
-    alert('Export Labels clicked');
+    this.labelsService.getAllLabels().subscribe({
+      next: (result) => {
+        // Prepare CSV header
+        const header = ['Label Type', 'Label Value', 'Status'];
+        // Prepare rows
+        const rows = result.map(label => [
+          label.labelType,
+          label.containerId ? label.containerId : label.itemId,
+          label.status
+        ]);
+        // Convert to CSV string
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        const csvContent = [header, ...rows].map(e => e.join(',')).join('\n');
+        // Download as .csv file
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `labels_export_${currentDate}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        alert('Failed to export labels');
+        console.error(err);
+      }
+    });
   }
 
   onViewAllLabels() {
     this.showLabelsGrid.set(true);
     this.isLoadingLabels.set(true);
-    // Simulate API call
-    setTimeout(() => {
-      // Replace with actual API call
-      this.labels.set([
-        { id: 1, labelType: 'Container', labelValue: 'C-1001', status: 'Active' },
-        { id: 2, labelType: 'Item', labelValue: 'I-2002', status: 'Inactive' }
-      ]);
-      this.isLoadingLabels.set(false);
-    }, 1000);
+    this.labelsService.getAllLabels().subscribe({
+      next: (result) => {
+        console.log('Labels API response:', result);
+        this.labels.set(result);
+        this.isLoadingLabels.set(false);
+      },
+      error: (err) => {
+        this.labels.set([]);
+        this.isLoadingLabels.set(false);
+        alert('Failed to load labels');
+        console.error(err);
+      }
+    });
   }
 
   onCloseLabelsGrid() {
@@ -71,17 +105,38 @@ export class LabelGenerationComponent implements OnInit {
     this.currentLabelPage.set(page);
   }
   labelForm: FormGroup;
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private keyValuesService: KeyValuesService, private labelsService: LabelsService) {
     this.labelForm = this.fb.group({
       labelType: ['Container', Validators.required],
       LatestContainerNumber: [{ value: '', disabled: true }],
       latestItemNumber: [{ value: '', disabled: true }],
-      labelStatus: [{ value: 'Created', disabled: true }]
+      labelStatus: [{ value: 'Created', disabled: true }],
+      containerNumbers: [''],
+      itemNumbers: [''],
+      action: ['']
     });
+    this.labelForm.get('labelType')?.valueChanges.subscribe((value) => {
+    if (value === 'Container') {
+      this.labelForm.get('LatestContainerNumber')?.enable();
+      this.labelForm.get('latestItemNumber')?.enable();
+      this.keyValuesService.getAllContainerIds().subscribe(ids => {
+        this.labelForm.patchValue({ LatestContainerNumber: ids.length ? ids[ids.length - 1] : '', latestItemNumber: '' });
+      });
+    } else if (value === 'Item') {
+      this.labelForm.get('LatestContainerNumber')?.disable();
+      this.labelForm.get('latestItemNumber')?.enable();    
+      this.keyValuesService.getAllItemIds().subscribe(ids => {        
+        this.labelForm.patchValue({ latestItemNumber: ids.length ? ids[ids.length - 1] : '', LatestContainerNumber: '' });
+      });
+    }
+  });
   }
 
   ngOnInit(): void {
-    // Load initial data if needed
+    // On page load, fetch and bind latest container number
+  this.keyValuesService.getAllContainerIds().subscribe(ids => {
+    this.labelForm.patchValue({ LatestContainerNumber: ids.length ? ids[ids.length - 1] : '' });
+  });
   }
 
   labelPanelExpanded = true;
@@ -94,7 +149,41 @@ export class LabelGenerationComponent implements OnInit {
     return this.labelPanelExpanded;
   }
   onGeneratePrint() {
-    // Generate and print label logic
+    const formValue = this.labelForm.getRawValue();
+    const payload = {
+      labelType: formValue.labelType,
+      containerNumbers: Number(formValue.containerNumbers) || 0,
+      itemNumbers: Number(formValue.itemNumbers) || 0,
+      status: formValue.action,
+      userId: 1 // Replace with actual userId from auth context
+    };
+    const action = (formValue.action || '').toLowerCase();
+    if (action === 'download' || action === 'print' || action === 'generate_and_print') {
+      this.labelsService.downloadLabelsPdf(payload).subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'barcodes.pdf';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: (err) => {
+          alert('Failed to download PDF.');
+          console.error(err);
+        }
+      });
+    } else {
+      this.labelsService.generateLabels(payload).subscribe({
+        next: (result) => {
+          alert('Labels generated successfully!');
+        },
+        error: (err) => {
+          alert('Failed to generate labels.');
+          console.error(err);
+        }
+      });
+    }
   }
 
   onPrintLabel() {
@@ -111,10 +200,41 @@ export class LabelGenerationComponent implements OnInit {
   }
 
   onDeleteLabel(label: LabelGeneration) {
-    // Delete label logic
+      // Update label status to inactive (is_active = 0)
+      const updatedLabel = { ...label, status: 'Inactive' };
+      // Call backend API to update status
+      this.labelsService.updateLabelStatus(label.id, 0).subscribe({
+        next: () => {
+          // Update local grid
+          this.labels.set(
+            this.labels().map(l =>
+              l.id === label.id ? { ...l, status: 'Inactive' } : l
+            )
+          );
+          alert('Label deleted (set inactive) successfully.');
+        },
+        error: (err) => {
+          alert('Failed to delete label.');
+          console.error(err);
+        }
+      });
   }
 
   onPrintLabelRow(label: LabelGeneration) {
-    // Print label from grid logic
+    // Call backend to get PDF for this label
+    this.labelsService.downloadLabelPdf(label.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `label_${label.id}_barcodes.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        alert('Failed to download label PDF.');
+        console.error(err);
+      }
+    });
   }
 }

@@ -30,7 +30,10 @@ try
 {
     Log.Information("Starting up the application");
 
-var builder = WebApplication.CreateBuilder(args);
+    // Set QuestPDF license context for community use
+    QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
+    var builder = WebApplication.CreateBuilder(args);
 
 // Use Serilog for logging
 builder.Host.UseSerilog();
@@ -100,6 +103,14 @@ builder.Services.AddScoped<ISpecificationService, SpecificationService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ISkuRepository, SkuRepository>();
 builder.Services.AddScoped<ISkuService, SkuService>();
+    builder.Services.AddScoped<IKeyValueRepository, KeyValueRepository>();
+    builder.Services.AddScoped<IKeyValueService, KeyValueService>();
+
+    // Register LabelRepository
+    builder.Services.AddScoped<Stock_Management_DataAccess.Interfaces.ILabelRepository, Stock_Management_DataAccess.Repositories.LabelRepository>();
+
+    // Register LabelService
+    builder.Services.AddScoped<Stock_Management_Business.Service.ILabelService, Stock_Management_Business.Service.LabelService>();
 
 // Register DbContext with PostgreSQL database  
 builder.Services.AddDbContext<StockManagementDBContext>(options =>
