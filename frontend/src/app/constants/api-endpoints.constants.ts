@@ -96,7 +96,8 @@ export const SKU_ENDPOINTS = {
   BASE: `${API_BASE_URL}/sku`,
   GET_ALL: `${API_BASE_URL}/sku`,
   BULK_IMPORT: `${API_BASE_URL}/sku/bulk-import`,
-  DEACTIVATE: `${API_BASE_URL}/sku/deactivate`
+  DEACTIVATE: `${API_BASE_URL}/sku/deactivate`,
+  UPDATE: `${API_BASE_URL}/sku/update`
 } as const;
 // Reports API Endpoints
 export const REPORTS_ENDPOINTS = {
