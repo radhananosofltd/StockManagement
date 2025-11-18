@@ -87,25 +87,37 @@ namespace Stock_Management_Business.Service
             return _mapper.Map<CategoryDTO>(entity);
         }
 
-        public async Task<bool> UpdateCategoryAsync(int categoryId, CategoryDTO dto)
+        public async Task<bool> UpdateCategoryAsync(int categoryId, SaveCategoryRequestDTO dto)
         {
             var entity = await _categoryRepository.GetCategoryByIdAsync(categoryId);
             if (entity == null) return false;
             entity.CategoryName = dto.CategoryName;
             entity.IsActive = dto.IsActive;
-            entity.modified_by = dto.ModifiedBy;
+            entity.modified_by = dto.UserId;
             entity.modified_date = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
-            return await _categoryRepository.UpdateCategoryAsync(new CategoryMasterEntity
+
+            // Prepare specifications list
+            var specifications = dto.Specifications.Select(spec => new CategorySpecificationsEntity
             {
                 CategoryId = categoryId,
-                CategoryName = entity.CategoryName,
-                IsActive = entity.IsActive,
-                modified_by = entity.modified_by,
-                modified_date = entity.modified_date,
-                Comment = entity.Comment,
-                created_by = entity.created_by,
-                create_date = entity.create_date
-            });
+                SpecificationId = spec.SpecificationId,
+                SkuOrder = spec.SkuOrder
+            }).ToList();
+
+            return await _categoryRepository.UpdateCategoryAsync(
+                new CategoryMasterEntity
+                {
+                    CategoryId = categoryId,
+                    CategoryName = entity.CategoryName,
+                    IsActive = entity.IsActive,
+                    modified_by = entity.modified_by,
+                    modified_date = entity.modified_date,
+                    Comment = entity.Comment,
+                    created_by = entity.created_by,
+                    create_date = entity.create_date
+                },
+                specifications
+            );
         }
 
         public async Task<bool> DeleteCategoryAsync(int categoryId, int userId)
@@ -115,17 +127,21 @@ namespace Stock_Management_Business.Service
             entity.IsActive = false;
             entity.modified_by = userId;
             entity.modified_date = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
-            return await _categoryRepository.UpdateCategoryAsync(new CategoryMasterEntity
-            {
-                CategoryId = categoryId,
-                CategoryName = entity.CategoryName,
-                IsActive = false,
-                modified_by = userId,
-                modified_date = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-                Comment = entity.Comment,
-                created_by = entity.created_by,
-                create_date = entity.create_date
-            });
+            // Pass empty specifications list for delete
+            return await _categoryRepository.UpdateCategoryAsync(
+                new CategoryMasterEntity
+                {
+                    CategoryId = categoryId,
+                    CategoryName = entity.CategoryName,
+                    IsActive = false,
+                    modified_by = userId,
+                    modified_date = entity.modified_date,
+                    Comment = entity.Comment,
+                    created_by = entity.created_by,
+                    create_date = entity.create_date
+                },
+                new List<CategorySpecificationsEntity>()
+            );
         }
     }
  

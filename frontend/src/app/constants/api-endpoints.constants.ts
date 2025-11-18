@@ -174,7 +174,8 @@ export const DASHBOARD_ENDPOINTS = {
 export const CATEGORY_ENDPOINTS = {
   BASE: `${API_BASE_URL}/category`,
   SAVE: `${API_BASE_URL}/category`,
-  GET_ALL: `${API_BASE_URL}/category/GetAllCategories`
+  GET_ALL: `${API_BASE_URL}/category/GetAllCategories`,
+  UPDATE: (categoryId: number) => `${API_BASE_URL}/category/UpdateCategory/${categoryId}`
 } as const;
 
 // Specification API Endpoints

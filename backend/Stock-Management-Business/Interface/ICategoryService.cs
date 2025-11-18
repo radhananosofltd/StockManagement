@@ -10,6 +10,6 @@ namespace Stock_Management_Business.Interface
         Task<List<CategoryListDTO>> GetAllCategoriesAsync();
         Task<bool> DeleteCategoryAsync(int categoryId, int userId);
         Task<CategoryDTO> GetCategoryByIdAsync(int categoryId);
-        Task<bool> UpdateCategoryAsync(int categoryId, CategoryDTO dto);
+        Task<bool> UpdateCategoryAsync(int categoryId, SaveCategoryRequestDTO dto);
     }
 }

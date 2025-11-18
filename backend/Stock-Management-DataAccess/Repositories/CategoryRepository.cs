@@ -1,5 +1,4 @@
-using Stock_Management_DataAccess.Entities;
- 
+using Stock_Management_DataAccess.Entities; 
 using System.Threading.Tasks;
 using Stock_Management_DataAccess.Entities;
 using Stock_Management_DataAccess;
@@ -78,7 +77,11 @@ namespace Stock_Management_DataAccess.Repositories
                         .Join(_context.SpecificationEntity,
                               cs => cs.SpecificationId,
                               spec => spec.SpecificationId,
-                              (cs, spec) => spec.SpecificationName)
+                              (cs, spec) => new SpecificationWithOrderDTO {
+                                  SpecificationId = spec.SpecificationId,
+                                  SpecificationName = spec.SpecificationName,
+                                  SkuFieldOrder = cs.SkuOrder
+                              })
                         .ToList()
                 })
                 .ToListAsync();
@@ -86,10 +89,17 @@ namespace Stock_Management_DataAccess.Repositories
         }
         public async Task<CategoryMasterEntity> GetCategoryByIdAsync(int categoryId)
         {
-            return await _context.CategoryMasters.FirstOrDefaultAsync(c => c.CategoryId == categoryId);
+            try
+            {
+                return await _context.CategoryMasters.FirstOrDefaultAsync(c => c.CategoryId == categoryId);
+            }catch(Exception ex)
+            {   
+                string msg= ex.Message;
+                return null;
+            }
         }
 
-        public async Task<bool> UpdateCategoryAsync(CategoryMasterEntity entity)
+        public async Task<bool> UpdateCategoryAsync(CategoryMasterEntity entity, List<CategorySpecificationsEntity> specifications)
         {
             var tracked = await _context.CategoryMasters.FindAsync(entity.CategoryId);
             if (tracked != null)
@@ -101,6 +111,30 @@ namespace Stock_Management_DataAccess.Repositories
                 _context.CategoryMasters.Update(entity);
             }
             await _context.SaveChangesAsync();
+
+            // Update or add category specifications
+            if (specifications != null)
+            {
+                foreach (var spec in specifications)
+                {
+                    var existingSpec = await _context.CategorySpecifications.FirstOrDefaultAsync(cs => cs.CategoryId == entity.CategoryId && cs.SpecificationId == spec.SpecificationId);
+                    if (existingSpec != null)
+                    {
+                        existingSpec.SkuOrder = spec.SkuOrder;
+                        _context.CategorySpecifications.Update(existingSpec);
+                    }
+                    else
+                    {
+                        _context.CategorySpecifications.Add(new CategorySpecificationsEntity
+                        {
+                            CategoryId = entity.CategoryId,
+                            SpecificationId = spec.SpecificationId,
+                            SkuOrder = spec.SkuOrder
+                        });
+                    }
+                }
+                await _context.SaveChangesAsync();
+            }
             return true;
         }
 
