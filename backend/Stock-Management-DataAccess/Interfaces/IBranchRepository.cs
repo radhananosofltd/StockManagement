@@ -9,7 +9,7 @@ namespace Stock_Management_DataAccess.Interfaces
 {
     public interface IBranchRepository
     {
-        Task<int> AddBranch(BranchEntity branch);
+        Task<long> AddBranch(BranchEntity branch);
         Task<List<BranchEntity>> GetAllBranches();
         Task<BranchEntity?> GetBranchById(int id);
         Task<bool> BranchCodeExists(string branchCode);

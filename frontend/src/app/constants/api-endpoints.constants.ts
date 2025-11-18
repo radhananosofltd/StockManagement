@@ -62,6 +62,7 @@ export const BRANCH_ENDPOINTS = {
   HEAD_OFFICES: `${API_BASE_URL}/Branch/head-offices`,
   CREATE: `${API_BASE_URL}/Branch`,
   GET_ALL: `${API_BASE_URL}/Branch`,
+  UPDATE: (id: number) => `${API_BASE_URL}/Branch/${id}`,
   BULK_IMPORT: `${API_BASE_URL}/Branch/bulk-import`
 } as const;
 

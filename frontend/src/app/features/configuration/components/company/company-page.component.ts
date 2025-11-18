@@ -441,24 +441,6 @@ export class CompanyPageComponent implements OnInit {
     // Expected header names (case-insensitive)
     const expectedHeaders = ['company code', 'company name', 'contact name', 'contact email', 'website', 'companyLogoURL', 'pan', 'taxIDNumberType', 'taxIDNumber', 'company address', 'countryId', 'isActive'];
     const actualHeaders = headers.map((h: string) => h.toString().toLowerCase().trim());
-/*
-    const missingHeaders: string[] = [];
-    expectedHeaders.forEach((expected, index) => {
-      if (actualHeaders[index] !== expected) {
-        missingHeaders.push(expected);
-      }
-    });
-
-    if (missingHeaders.length > 0) {
-      this.isImporting.set(false);
-      this.errorMessage.set(
-        `Invalid column headers. Missing: ${missingHeaders.join(', ')}. ` +
-        `Found: ${headers.join(', ')}`
-      );
-      console.log('Invalid column headers. Missing:', missingHeaders);
-      return;
-    }
-*/
     // Validate that there's at least one data row
     if (dataRows.length === 0) {
       this.isImporting.set(false);

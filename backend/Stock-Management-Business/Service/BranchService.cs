@@ -26,7 +26,7 @@ namespace Stock_Management_Business.Service
             _logger = logger;
         }
 
-        public async Task<int> AddBranch(CreateBranchDTO branch)
+        public async Task<long> AddBranch(CreateBranchDTO branch)
         {
             _logger.LogInformation("Add Branch Service start");
            // Check if branch code already exists
@@ -80,6 +80,8 @@ namespace Stock_Management_Business.Service
             _mapper.Map(branch, existingBranch);
             existingBranch.ModifiedBy = branch.UserId;
             existingBranch.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            if (existingBranch.ModifiedDate.Kind != DateTimeKind.Utc)
+                existingBranch.ModifiedDate = DateTime.SpecifyKind(existingBranch.ModifiedDate, DateTimeKind.Utc);
 
             return await _repo.UpdateBranch(existingBranch);
         }
