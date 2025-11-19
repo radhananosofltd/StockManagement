@@ -18,7 +18,7 @@ namespace Stock_Management_DataAccess.Repositories
             _context = context;
         }
 
-        public async Task<int> AddBranch(BranchEntity branch)
+        public async Task<long> AddBranch(BranchEntity branch)
         {
             try
             {
@@ -149,7 +149,7 @@ namespace Stock_Management_DataAccess.Repositories
             try
             {
                 return await _context.BranchEntity
-                    .Where(b => b.HeadOffice && b.IsActive && b.CompanyID == companyId)
+                    .Where(b => b.HeadOffice && b.IsActive && b.CompanyId == companyId)
                     .OrderBy(b => b.BranchName)
                     .FirstOrDefaultAsync();
             }

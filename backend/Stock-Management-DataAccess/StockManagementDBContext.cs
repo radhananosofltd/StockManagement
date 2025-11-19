@@ -67,7 +67,7 @@ namespace Stock_Management_DataAccess
                 entity.HasIndex(e => e.BranchCode).IsUnique();
                 entity.HasIndex(e => e.IsActive);
                 entity.HasIndex(e => e.BranchCountryId);
-                entity.HasIndex(e => e.CompanyID);
+                entity.HasIndex(e => e.CompanyId);
                 
                 // Configure foreign key relationships
                 entity.HasOne(e => e.CreatedByUser)
@@ -87,7 +87,7 @@ namespace Stock_Management_DataAccess
                     
                 entity.HasOne(e => e.Company)
                     .WithMany()
-                    .HasForeignKey(e => e.CompanyID)
+                    .HasForeignKey(e => e.CompanyId)
                     .OnDelete(DeleteBehavior.Restrict);
                     
                 // Configure self-referencing relationship for head office

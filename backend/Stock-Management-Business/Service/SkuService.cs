@@ -22,7 +22,7 @@ namespace YourNamespace.Services
             _mapper = mapper;
         }
 
-public async Task<bool> UpdateSkuAsync(UpdateSkuRequest request)
+        public async Task<bool> UpdateSkuAsync(UpdateSkuRequest request)
             {
                 var sku = await _skuRepository.GetSkuByIdAsync(request.SkuId);
                 if (sku == null) return false;
@@ -32,8 +32,6 @@ public async Task<bool> UpdateSkuAsync(UpdateSkuRequest request)
                 sku.IsActive = request.IsActive;
                 sku.ModifiedBy = request.UserId;
                 sku.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
-                if (sku.CreatedDate.Kind == DateTimeKind.Unspecified)
-                    sku.CreatedDate = DateTime.SpecifyKind(sku.CreatedDate, DateTimeKind.Utc);
                 await _skuRepository.UpdateSkuAsync(sku);
                 return true;
             }

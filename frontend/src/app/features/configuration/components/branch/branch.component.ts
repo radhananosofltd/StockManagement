@@ -26,6 +26,8 @@ interface Branch {
 })
 export class BranchComponent implements OnInit{
   // Import branches: file input and handler
+  public isEditMode = false;
+  public selectedBranchId: number | null = null;
   importBranchesInput: HTMLInputElement | null = null;
 
   openImportBranchesDialog(): void {
@@ -252,10 +254,11 @@ export class BranchComponent implements OnInit{
     // Fetch head office branch id for selected company
     this.branchForm.get('company')?.valueChanges.subscribe((companyId: number) => {
       if (companyId) {
+        console.log('Calling head office API:', `${BRANCH_ENDPOINTS.HEAD_OFFICES}/${companyId}`);
         this.http.get<any>(`${BRANCH_ENDPOINTS.HEAD_OFFICES}/${companyId}`).subscribe({
           next: (data: any) => {
             if (data && data.headofficebranchid) {
-              this.headOffices.set([{ branchId: data.headofficebranchid }]);
+              this.headOffices.set([{ branchId: data.headofficebranchid, branchName: data.branchname }]);
               this.branchForm.get('headOffice')?.setValue(data.headofficebranchid);
             } else {
               this.headOffices.set([]);
@@ -318,6 +321,7 @@ export class BranchComponent implements OnInit{
         this.isSubmitting.set(true);
         this.successMessage.set('');
         this.errorMessage.set('');
+console.log('branch details:', this.branchForm.value);
 
         // Prepare payload for API
         const currentUser = this.authService.getCurrentUser();
@@ -330,10 +334,9 @@ export class BranchComponent implements OnInit{
           contactPersonName: this.branchForm.value.contactName,
           contactPersonEmail: this.branchForm.value.contactEmail,
           phone: toNull(this.branchForm.value.phone),
-          website: toNull(''),
-          pan: toNull(''),
-          taxIdentificationNumberType: toNull(''),
-          taxIdentificationNumber: toNull(''),
+          city: this.branchForm.value.city,
+          state: this.branchForm.value.state,
+          PostalCode: this.branchForm.value.postalCode,
           branchAddress: toNull(this.branchForm.value.branchAddress),
           branchCountryId: toNull(this.branchForm.value.country),
           companyId: toNull(this.branchForm.value.company),
@@ -342,19 +345,40 @@ export class BranchComponent implements OnInit{
           isActive: this.branchForm.value.isActive
         };
 
-        this.http.post(BRANCH_ENDPOINTS.CREATE, payload).subscribe({
-          next: (response: any) => {
-            this.isSubmitting.set(false);
-            this.viewBranches();
-            this.successMessage.set('Branch added successfully!');
-            this.branchForm.reset();
-          },
-          error: (error: any) => {
-            this.isSubmitting.set(false);
-            this.errorMessage.set('Failed to add branch. Please try again.');
-            console.error('Error adding branch:', error);
-          }
-        });
+        if (this.isEditMode && this.selectedBranchId) {
+          // Update branch
+          const updatePayload = { ...payload, branchId: this.selectedBranchId };
+          this.http.put(BRANCH_ENDPOINTS.UPDATE(this.selectedBranchId), updatePayload).subscribe({
+            next: (response: any) => {
+              this.isSubmitting.set(false);
+              this.viewBranches();
+              this.successMessage.set('Branch updated successfully!');
+              this.branchForm.reset();
+              this.isEditMode = false;
+              this.selectedBranchId = null;
+            },
+            error: (error: any) => {
+              this.isSubmitting.set(false);
+              this.errorMessage.set('Failed to update branch. Please try again.');
+              console.error('Error updating branch:', error);
+            }
+          });
+        } else {
+          // Add branch
+          this.http.post(BRANCH_ENDPOINTS.CREATE, payload).subscribe({
+            next: (response: any) => {
+              this.isSubmitting.set(false);
+              this.viewBranches();
+              this.successMessage.set('Branch added successfully!');
+              this.branchForm.reset();
+            },
+            error: (error: any) => {
+              this.isSubmitting.set(false);
+              this.errorMessage.set('Failed to add branch. Please try again.');
+              console.error('Error adding branch:', error);
+            }
+          });
+        }
       } else {
         this.errorMessage.set('Please fill all required fields correctly.');
       }
@@ -378,10 +402,20 @@ export class BranchComponent implements OnInit{
         // Map API response to Branch[] for grid display
         const branches = data.map(branch => ({
           id: branch.branchId,
+          branchCode: branch.branchCode,
           branchName: branch.branchName,
+          headOffice: branch.headOffice,          
           branchAddress: branch.branchAddress,
           country: branch.countryName,
           contactName: branch.contactPersonName,
+          contactPersonEmail: branch.contactPersonEmail,
+          branchcountryid: branch.branchCountryId,
+          companyid: branch.companyid,
+          headofficebranchid: branch.headOfficeBranchId,
+          countryid: branch.countryid,
+          city: branch.city,
+          state: branch.state,
+          postalcode: branch.postalcode,
           phone: branch.phone,
           createdDate: branch.createdDate ? new Date(branch.createdDate) : new Date(),
           isActive: branch.isActive
@@ -419,6 +453,26 @@ export class BranchComponent implements OnInit{
   editBranch(branch: any) {
     // TODO: Implement edit logic
     console.log('Edit branch:', branch);
+
+      this.branchForm.patchValue({
+        branchCode: branch.branchCode || '',
+        branchName: branch.branchName || '',
+        contactName: branch.contactName || '',
+        contactEmail: branch.contactPersonEmail || '',
+        phone: branch.phone || '',
+        city: branch.city || '',
+        postalCode: branch.postalcode || '',
+        branchAddress: branch.branchAddress || '',
+        country: branch.branchcountryid ? branch.branchcountryid.toString() : (branch.countryId ? branch.countryId.toString() : ''),
+        company: branch.companyid ? branch.companyid.toString() : (branch.companyId ? branch.companyId.toString() : ''),
+        isActive: branch.isActive,
+        state: branch.state || '',
+        isHeadOffice: !!branch.headOffice,
+        headOffice: branch.headOfficeBranchId ? branch.headOfficeBranchId.toString() : ''
+      });
+      this.isEditMode = true;
+      this.selectedBranchId = branch.id;
+        this.isFormExpanded.set(true);    
   }
 
   deleteBranch(branch: any) {

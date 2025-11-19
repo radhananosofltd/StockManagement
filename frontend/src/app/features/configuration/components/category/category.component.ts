@@ -74,6 +74,8 @@ export class CategoryComponent {
   isLoadingSpecifications = signal(false);
   specifications = signal<Specification[]>([]);
   showAllCategoriesPanel = signal(false);
+  isEditFlag: boolean = false;
+  editCategoryId: number | null = null;
 
     dropSpecificationRow(event: CdkDragDrop<Specification[]>) {
       const specs = [...this.specifications()];
@@ -104,6 +106,7 @@ export class CategoryComponent {
 
   viewAllCategories() {
     this.showAllCategoriesPanel.set(true);
+    this.isEditFlag = false;
     this.isViewingCategories.set(true);
     this.categoryService.getAllCategories().subscribe({
       next: (result: any[]) => {
@@ -112,7 +115,8 @@ export class CategoryComponent {
           category: cat.category,
           status: cat.status,
           createdDate: new Date(cat.createdDate),
-          skuFields: Array.isArray(cat.specifications) ? cat.specifications.join(', ') : ''
+          skuFields: Array.isArray(cat.specifications) ? cat.specifications.map((spec: any) => spec.specificationName).join(', ') : '',
+          specifications: cat.specifications
         }));
         this.categories.set(formatted);
         this.isViewingCategories.set(false);
@@ -128,6 +132,7 @@ export class CategoryComponent {
   importCategories() {
     console.log('Import Categories clicked');
     this.isImporting.set(true);
+    this.isEditFlag = false;
     // Simulate import
     setTimeout(() => {
       this.isImporting.set(false);
@@ -136,13 +141,14 @@ export class CategoryComponent {
 
   exportCategories() {
     this.isExporting.set(true);
+    this.isEditFlag = false;
     this.categoryService.getAllCategories().subscribe({
       next: (result: any[]) => {
         const exportData = result.map(cat => ({
           Category: cat.category,
           Status: cat.status,
           CreatedDate: cat.createdDate,
-          Specifications: Array.isArray(cat.specifications) ? cat.specifications.join(', ') : ''
+          skuFields: Array.isArray(cat.specifications) ? cat.specifications.map((spec: any) => spec.specificationName).join(', ') : ''
         }));
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
@@ -172,24 +178,47 @@ export class CategoryComponent {
         }
       }
       const currentUser = this.authService.getCurrentUser();
-      const payload: SaveCategoryRequest = {
+      const payload: any = {
         categoryName: this.categoryForm.get('categoryName')?.value,
         isActive: this.categoryForm.get('isActive')?.value,
         specifications: selectedSpecs,
         userId: currentUser.id
       };
-      this.categoryService.saveCategory(payload).subscribe({
-        next: (response) => {
-          this.isSubmitting.set(false);
-          this.resetForm();
-          this.message = 'Category and its specifications saved successfully!';
-        },
-        error: (err) => {
-          this.isSubmitting.set(false);
-          this.message = 'Unable to save category and its specifications.';
-          console.error(err);
-        }
-      });
+      if (this.isEditFlag && this.editCategoryId) {
+        // UpdateCategory API call
+        payload.categoryId = this.editCategoryId;
+        this.categoryService.updateCategory(payload).subscribe({
+          next: (response) => {
+            this.isSubmitting.set(false);
+            this.resetForm();
+            this.isEditFlag = false;
+            this.editCategoryId = null;
+            this.message = 'Category updated successfully!';
+          },
+          error: (err) => {
+            this.isSubmitting.set(false);
+            this.message = 'Unable to update category.';
+            this.isEditFlag = false;
+            console.error(err);
+          }
+        });
+      } else {
+        // SaveCategory API call
+        this.categoryService.saveCategory(payload).subscribe({
+          next: (response) => {
+            this.isSubmitting.set(false);
+            this.resetForm();
+            this.isEditFlag = false;
+            this.message = 'Category and its specifications saved successfully!';
+          },
+          error: (err) => {
+            this.isSubmitting.set(false);
+            this.isEditFlag = false;
+            this.message = 'Unable to save category and its specifications.';
+            console.error(err);
+          }
+        });
+      }
     } else {
       Object.keys(this.categoryForm.controls).forEach(key => {
         this.categoryForm.get(key)?.markAsTouched();
@@ -202,6 +231,7 @@ export class CategoryComponent {
       categoryName: '',
       isActive: true
     });
+    this.isEditFlag = false;
     // Reset specifications grid: uncheck all, clear skuOrder
     const specs = this.specifications();
     for (const spec of specs) {
@@ -218,6 +248,7 @@ export class CategoryComponent {
   
   loadSpecifications() {
     this.isLoadingSpecifications.set(true);
+    this.isEditFlag = false;
     this.specificationService.getAllSpecifications().subscribe({
       next: (specs: Specification[]) => {
         console.log('Loaded specifications:', specs);
@@ -234,7 +265,7 @@ export class CategoryComponent {
   onSpecificationAction(event: Event, specification: Specification) {
     const selectElement = event.target as HTMLSelectElement;
     const action = selectElement.value;
-    
+    this.isEditFlag = false;
     if (action === 'add') {
       console.log('Adding specification to category:', specification.specificationName);
       // TODO: Implement add specification to category logic
@@ -249,6 +280,7 @@ export class CategoryComponent {
   
   onSkuOrderChange(order: any, specification: Specification) {
     specification.skuOrder = order === '' ? undefined : Number(order);
+    this.isEditFlag = false;
     this.specifications.set([...this.specifications()]);
     console.log(`SKU Order changed for ${specification.specificationName}: ${specification.skuOrder}`);
   }
@@ -273,12 +305,47 @@ export class CategoryComponent {
   }
 
   editCategory(cat: any) {
-    // TODO: Implement edit logic
-    console.log('Edit category:', cat);
+    // Populate form fields with selected category data
+    this.categoryForm.patchValue({
+      categoryName: cat.category,
+      isActive: cat.status === 'Active'
+    });
+    this.isEditFlag = true;
+    this.editCategoryId = cat.categoryId;
+    // Reset all checkboxes and SKU orders first
+    const specs = this.specifications();
+    for (const spec of specs) {
+      const checkbox = document.getElementById(spec.specificationId.toString()) as HTMLInputElement;
+      if (checkbox) {
+        checkbox.checked = false;
+      }
+      spec.skuOrder = undefined;
+    }
+
+    // Set required checkbox and SKU order for specifications in the selected category
+    if (Array.isArray(cat.specifications)) {
+      cat.specifications.forEach((catSpec: any) => {
+        const spec = specs.find(s => s.specificationId === catSpec.specificationId);
+        if (spec) {
+          const checkbox = document.getElementById(spec.specificationId.toString()) as HTMLInputElement;
+          if (checkbox) {
+            checkbox.checked = true;
+          }
+          // Use SkuFieldOrder from backend response
+          spec.skuOrder = catSpec.skuOrder !== undefined ? catSpec.skuOrder : catSpec.skuFieldOrder;
+        }
+      });
+      this.specifications.set([...specs]);
+    }
+    // Optionally scroll to the form or expand the panel for editing
+    this.isAddCategoryPanelExpanded.set(true);
+    this.showAllCategoriesPanel.set(false);
+    this.message = '';
   }
 
   deleteCategory(cat: any) {
     const categoryId = cat.categoryId ?? cat.id;
+    this.isEditFlag = false;
     const currentUser = this.authService.getCurrentUser();
     const userId = currentUser?.id || 0;
     this.categoryService.deleteCategory(categoryId, userId).subscribe({

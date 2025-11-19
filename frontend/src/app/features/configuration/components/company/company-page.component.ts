@@ -35,6 +35,8 @@ export class CustomValidators {
   styleUrls: ['./company-page.component.css']
 })
 export class CompanyPageComponent implements OnInit {
+    public isEditMode = false;
+    public selectedCompanyId: number | null = null;
   private readonly fb = inject(FormBuilder);
   private readonly companyService = inject(CompanyService);
   private readonly authService = inject(AuthService);
@@ -138,30 +140,58 @@ export class CompanyPageComponent implements OnInit {
         taxIDNumber: this.companyForm.value.taxIdentificationNumber?.trim() || '',
         companyAddress: this.companyForm.value.customerAddress?.trim() || '',
         countryId: Number(this.companyForm.value.country) || 0,
-        userId: 0, // Set userId as needed
+        userId: this.authService.getCurrentUser()?.id || 0,
         isActive: !!this.companyForm.value.isActive
       };
 
-      this.http.post(COMPANY_ENDPOINTS.CREATE, payload).subscribe({
-        next: (response: any) => {
-          this.isSubmitting.set(false);
-          this.successMessage.set(`Company "${payload.companyName}" (${payload.companyCode}) has been successfully added!`);
-          this.resetForm();
-          this.showCompaniesGrid.set(true);
-          this.loadCompanies(true);
-          setTimeout(() => {
-            this.scrollToSuccessMessage();
-          }, 100);
-        },
-        error: (error: any) => {
-          this.isSubmitting.set(false);
-          this.errorMessage.set(
-            error.error?.message || 
-            'Failed to submit company data. Please check your connection and try again.'
-          );
-          console.error('Error submitting company:', error);
-        }
-      });
+      if (this.isEditMode && this.selectedCompanyId) {
+        // Edit mode: update company
+        const updatePayload = { ...payload, companyId: this.selectedCompanyId };
+        this.http.put(COMPANY_ENDPOINTS.UPDATE(this.selectedCompanyId), updatePayload).subscribe({
+          next: (response: any) => {
+            this.isSubmitting.set(false);
+            this.successMessage.set(`Company "${payload.companyName}" (${payload.companyCode}) has been successfully updated!`);
+            this.resetForm();
+            this.isEditMode = false;
+            this.selectedCompanyId = null;
+            this.showCompaniesGrid.set(true);
+            this.loadCompanies(true);
+            setTimeout(() => {
+              this.scrollToSuccessMessage();
+            }, 100);
+          },
+          error: (error: any) => {
+            this.isSubmitting.set(false);
+            this.errorMessage.set(
+              error.error?.message || 
+              'Failed to update company data. Please check your connection and try again.'
+            );
+            console.error('Error updating company:', error);
+          }
+        });
+      } else {
+        // Add mode: create company
+        this.http.post(COMPANY_ENDPOINTS.CREATE, payload).subscribe({
+          next: (response: any) => {
+            this.isSubmitting.set(false);
+            this.successMessage.set(`Company "${payload.companyName}" (${payload.companyCode}) has been successfully added!`);
+            this.resetForm();
+            this.showCompaniesGrid.set(true);
+            this.loadCompanies(true);
+            setTimeout(() => {
+              this.scrollToSuccessMessage();
+            }, 100);
+          },
+          error: (error: any) => {
+            this.isSubmitting.set(false);
+            this.errorMessage.set(
+              error.error?.message || 
+              'Failed to submit company data. Please check your connection and try again.'
+            );
+            console.error('Error submitting company:', error);
+          }
+        });
+      }
     } else {
       Object.keys(this.companyForm.controls).forEach(key => {
         this.companyForm.get(key)?.markAsTouched();
@@ -411,24 +441,6 @@ export class CompanyPageComponent implements OnInit {
     // Expected header names (case-insensitive)
     const expectedHeaders = ['company code', 'company name', 'contact name', 'contact email', 'website', 'companyLogoURL', 'pan', 'taxIDNumberType', 'taxIDNumber', 'company address', 'countryId', 'isActive'];
     const actualHeaders = headers.map((h: string) => h.toString().toLowerCase().trim());
-/*
-    const missingHeaders: string[] = [];
-    expectedHeaders.forEach((expected, index) => {
-      if (actualHeaders[index] !== expected) {
-        missingHeaders.push(expected);
-      }
-    });
-
-    if (missingHeaders.length > 0) {
-      this.isImporting.set(false);
-      this.errorMessage.set(
-        `Invalid column headers. Missing: ${missingHeaders.join(', ')}. ` +
-        `Found: ${headers.join(', ')}`
-      );
-      console.log('Invalid column headers. Missing:', missingHeaders);
-      return;
-    }
-*/
     // Validate that there's at least one data row
     if (dataRows.length === 0) {
       this.isImporting.set(false);
@@ -646,7 +658,24 @@ export class CompanyPageComponent implements OnInit {
   }
 
     editCompany(company: CompanyListDTO) {
-    // TODO: Implement delete logic
-    console.log('Edit company:', company);
+      console.log('EditCompany details:', company);
+
+      this.companyForm.patchValue({
+        customerCode: company.companyCode || '',
+        customerName: company.companyName || '',
+        contactName: company.contactName || '',
+        contactEmail: company.contactEmail || '',
+        website: company.website || '',
+        companyLogoUrl: company.companyLogoURL || '',
+        pan: company.pan || '',
+        taxIdentificationNumberType: company.taxIDNumberType || '',
+        taxIdentificationNumber: company.taxIDNumber || '',
+        customerAddress: company.companyAddress || '',
+        country: company.countryId ? company.countryId.toString() : '',
+        isActive: company.isActive
+      });
+      this.isEditMode = true;
+      this.selectedCompanyId = company.id;
+        this.isFormExpanded.set(true);    
   }
 }

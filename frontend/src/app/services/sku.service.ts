@@ -40,4 +40,8 @@ export class SkuService {
       })
     );
   }
+
+  updateSku(payload: any): Observable<any> {
+    return this.http.post<any>(SKU_ENDPOINTS.UPDATE, payload, { headers: API_CONFIG.DEFAULT_HEADERS });
+  }
 }

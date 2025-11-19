@@ -10,7 +10,7 @@ namespace Stock_Management_Business.Interface
 {
     public interface IBranchService
     {
-        Task<int> AddBranch(CreateBranchDTO branch);
+        Task<long> AddBranch(CreateBranchDTO branch);
         Task<List<BranchListDTO>> GetAllBranches();
         Task<BranchDTO?> GetBranchById(int id);
         Task<bool> UpdateBranch(int id, CreateBranchDTO branch);
