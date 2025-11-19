@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { OnInit } from '@angular/core';
+import { CategoryService } from '../../../../services/category.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -23,11 +25,24 @@ export class InwardComponent {
   bulkQty: number | null = null;
 
   // Dropdown data
-  categories = [
-    { id: 'cat1', name: 'Laptop' },
-    { id: 'cat2', name: 'Monitor' },
-    { id: 'cat3', name: 'Printer' }
-  ];
+  categories: Array<{ id: number, name: string }> = [];
+    constructor(private categoryService: CategoryService) {}
+
+    ngOnInit(): void {
+      this.categoryService.getAllCategories().subscribe({
+        next: (cats: any[]) => {
+          this.categories = cats
+            .filter(cat => cat.isActive)
+            .map(cat => ({
+              id: cat.categoryId,
+              name: cat.categoryName
+            }));
+        },
+        error: () => {
+          this.categories = [];
+        }
+      });
+    }
   containers = [
     { id: 'cont1', name: 'Generate' },
     { id: 'cont2', name: 'C0001' },

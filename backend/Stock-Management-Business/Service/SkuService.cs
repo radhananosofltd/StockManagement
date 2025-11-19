@@ -26,8 +26,41 @@ namespace YourNamespace.Services
             {
                 var sku = await _skuRepository.GetSkuByIdAsync(request.SkuId);
                 if (sku == null) return false;
+                // Fetch specification details
+                var spec = await _skuRepository.GetSpecificationByIDAsync(request.SpecificationId);
+                string transformedValue = request.Value;
+                if (spec != null)
+                {
+                    switch (spec.ValueCase?.ToLower())
+                    {
+                        case "lower":
+                            transformedValue = request.Value.ToLower();
+                            break;
+                        case "upper":
+                            transformedValue = request.Value.ToUpper();
+                            break;
+                        case "title":
+                            transformedValue = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(request.Value.ToLower());
+                            break;
+                    }
+                    switch (spec.Datatype?.ToLower())
+                    {
+                        case "wholenumber":
+                            transformedValue = int.TryParse(request.Value, out var i) ? i.ToString() : "0";
+                            break;
+                        case "double":
+                            transformedValue = double.TryParse(request.Value, out var d) ? d.ToString() : "0";
+                            break;
+                        case "date":
+                            transformedValue = DateTime.TryParse(request.Value, out var dt) ? dt.ToString("yyyy-MM-dd") : "";
+                            break;
+                        case "datetime":
+                            transformedValue = DateTime.TryParse(request.Value, out var dtm) ? dtm.ToString("yyyy-MM-dd HH:mm:ss") : "";
+                            break;
+                    }
+                }
                 sku.SpecificationId = request.SpecificationId;
-                sku.Value = request.Value;
+                sku.Value = transformedValue;
                 sku.SkuCode = request.SkuCode;
                 sku.IsActive = request.IsActive;
                 sku.ModifiedBy = request.UserId;
@@ -39,10 +72,43 @@ namespace YourNamespace.Services
         public async Task<int> SaveSkuAsync(SaveSkuRequestDTO request)
         {
             var now = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            // Fetch specification details
+            var spec = await _skuRepository.GetSpecificationByIDAsync(request.SpecificationId);
+            string transformedValue = request.Value;
+            if (spec != null)
+            {
+                switch (spec.ValueCase?.ToLower())
+                {
+                    case "lower":
+                        transformedValue = request.Value.ToLower();
+                        break;
+                    case "upper":
+                        transformedValue = request.Value.ToUpper();
+                        break;
+                    case "title":
+                        transformedValue = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(request.Value.ToLower());
+                        break;
+                }
+                switch (spec.Datatype?.ToLower())
+                {
+                    case "wholenumber":
+                        transformedValue = int.TryParse(request.Value, out var i) ? i.ToString() : "0";
+                        break;
+                    case "double":
+                        transformedValue = double.TryParse(request.Value, out var d) ? d.ToString() : "0";
+                        break;
+                    case "date":
+                        transformedValue = DateTime.TryParse(request.Value, out var dt) ? dt.ToString("yyyy-MM-dd") : "";
+                        break;
+                    case "datetime":
+                        transformedValue = DateTime.TryParse(request.Value, out var dtm) ? dtm.ToString("yyyy-MM-dd HH:mm:ss") : "";
+                        break;
+                }
+            }
             var skuEntity = new SkuEntity
             {
                 SpecificationId = request.SpecificationId,
-                Value = request.Value,
+                Value = transformedValue,
                 SkuCode = request.SkuCode,
                 IsActive = request.IsActive,
                 CreatedBy = request.UserId,
