@@ -44,9 +44,9 @@ export class SidebarComponent implements OnInit {
           route: '/dashboard/configuration/branch'
         },
         {
-          label: 'Category',
-          icon: '📂',
-          route: '/dashboard/configuration/category'
+          label: 'Item Specification',
+          icon: '📋',
+          route: '/dashboard/configuration/item-specification'
         },
         {
           label: 'SKU',
@@ -54,9 +54,9 @@ export class SidebarComponent implements OnInit {
           route: '/dashboard/configuration/sku'
         },
         {
-          label: 'Item Specification',
-          icon: '📋',
-          route: '/dashboard/configuration/item-specification'
+          label: 'Category',
+          icon: '📂',
+          route: '/dashboard/configuration/category'
         }
       ]
     },
@@ -76,7 +76,7 @@ export class SidebarComponent implements OnInit {
           route: '/dashboard/stock-maintenance/inward'
         },
         {
-          label: 'Outward (Single / Bulk / Import)',
+          label: 'Outward',
           icon: '�',
           route: '/dashboard/stock-maintenance/outward'
         },

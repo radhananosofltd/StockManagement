@@ -36,8 +36,8 @@
               <input #skuCodeInput id="skuCode" type="text" name="skuCode" placeholder="Enter SKU code" style="width: 400px;" />
             </div>
             <div class="form-group form-checkbox">
-              <input #activeCheckbox id="active" type="checkbox" name="active" />
-              <label for="active" style="margin-left: 8px;">Active</label>
+              <input #activeCheckbox id="active" type="checkbox" name="active" *ngIf="false" />
+              <label for="active" style="margin-left: 8px;" *ngIf="false">Active</label>
             </div>
           </div>
           <div class="form-actions">
