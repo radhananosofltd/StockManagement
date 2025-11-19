@@ -18,6 +18,15 @@ export interface SaveCategoryRequest {
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
+      updateCategory(request: any): Observable<any> {
+        // Pass categoryId as route parameter using endpoint from constants
+        const categoryId = request.categoryId;
+        return this.http.put(
+          `${CATEGORY_ENDPOINTS.UPDATE(categoryId)}`,
+          request,
+          { headers: API_CONFIG.DEFAULT_HEADERS }
+        );
+      }
     deleteCategory(categoryId: number, userId: number): Observable<any> {
       return this.http.delete(`${this.apiUrl}/DeleteCategory?categoryId=${categoryId}&userId=${userId}`, { headers: API_CONFIG.DEFAULT_HEADERS });
     }

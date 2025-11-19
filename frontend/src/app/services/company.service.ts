@@ -36,6 +36,14 @@ export interface CompanyListDTO {
   currency: string;
   createdDate: string;
   isActive: boolean;
+  contactName?: string;
+  contactEmail?: string;
+  companyLogoURL?: string;
+  pan?: string;
+  taxIDNumberType?: string;
+  taxIDNumber?: string;
+  website?: string;
+  countryId?: number;
 }
 
 export interface ApiResponse<T = any> {
@@ -64,6 +72,7 @@ export interface Company {
   providedIn: 'root'
 })
 export class CompanyService {
+
     deleteCompany(companyId: number, userId: number): Observable<any> {
       return this.http.delete(`${COMPANY_ENDPOINTS.DELETE(companyId)}?userId=${userId}`, {
         headers: this.getHeaders()

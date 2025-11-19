@@ -13,6 +13,6 @@ namespace Stock_Management_DataAccess.Interfaces
         Task<CategoryMasterEntity?> GetCategoryByNameAsync(string categoryName);
         Task<List<CategoryListEntity>> GetAllCategoriesWithSpecificationsAsync();
         Task<CategoryMasterEntity> GetCategoryByIdAsync(int categoryId);
-        Task<bool> UpdateCategoryAsync(CategoryMasterEntity entity);
+        Task<bool> UpdateCategoryAsync(CategoryMasterEntity entity, List<CategorySpecificationsEntity> specifications);
     }
 }

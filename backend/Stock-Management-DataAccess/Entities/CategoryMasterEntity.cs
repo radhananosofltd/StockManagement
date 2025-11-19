@@ -20,9 +20,8 @@ namespace Stock_Management_DataAccess.Entities
         [Column("comments")]
         public string? Comment { get; set; } = null;
 
-        [Required]
         [Column("created_by")]
-        public int created_by { get; set; }
+        public int? created_by { get; set; }
 
         [Required]
         [Column("create_date")]

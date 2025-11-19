@@ -62,6 +62,7 @@ export const BRANCH_ENDPOINTS = {
   HEAD_OFFICES: `${API_BASE_URL}/Branch/head-offices`,
   CREATE: `${API_BASE_URL}/Branch`,
   GET_ALL: `${API_BASE_URL}/Branch`,
+  UPDATE: (id: number) => `${API_BASE_URL}/Branch/${id}`,
   BULK_IMPORT: `${API_BASE_URL}/Branch/bulk-import`
 } as const;
 
@@ -95,7 +96,8 @@ export const SKU_ENDPOINTS = {
   BASE: `${API_BASE_URL}/sku`,
   GET_ALL: `${API_BASE_URL}/sku`,
   BULK_IMPORT: `${API_BASE_URL}/sku/bulk-import`,
-  DEACTIVATE: `${API_BASE_URL}/sku/deactivate`
+  DEACTIVATE: `${API_BASE_URL}/sku/deactivate`,
+  UPDATE: `${API_BASE_URL}/sku/update`
 } as const;
 // Reports API Endpoints
 export const REPORTS_ENDPOINTS = {
@@ -173,7 +175,8 @@ export const DASHBOARD_ENDPOINTS = {
 export const CATEGORY_ENDPOINTS = {
   BASE: `${API_BASE_URL}/category`,
   SAVE: `${API_BASE_URL}/category`,
-  GET_ALL: `${API_BASE_URL}/category/GetAllCategories`
+  GET_ALL: `${API_BASE_URL}/category/GetAllCategories`,
+  UPDATE: (categoryId: number) => `${API_BASE_URL}/category/UpdateCategory/${categoryId}`
 } as const;
 
 // Specification API Endpoints

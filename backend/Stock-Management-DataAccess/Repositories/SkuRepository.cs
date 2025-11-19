@@ -81,8 +81,21 @@ namespace Stock_Management_DataAccess.Repositories
 
         public async Task UpdateSkuAsync(SkuEntity sku)
         {
-            _context.Set<SkuEntity>().Update(sku);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (sku.CreatedDate.Kind != DateTimeKind.Utc)
+                    sku.CreatedDate = DateTime.SpecifyKind(sku.CreatedDate, DateTimeKind.Utc);
+                if (sku.ModifiedDate.HasValue && sku.ModifiedDate.Value.Kind != DateTimeKind.Utc)
+                    sku.ModifiedDate = DateTime.SpecifyKind(sku.ModifiedDate.Value, DateTimeKind.Utc);
+
+                _context.Set<SkuEntity>().Update(sku);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving bulk SKUs.");
+                throw;
+            }
         }
     }
 }

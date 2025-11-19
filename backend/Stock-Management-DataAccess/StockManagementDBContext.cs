@@ -9,10 +9,11 @@ using Stock_Management_DataAccess.Entities;
 namespace Stock_Management_DataAccess
 {
     public class StockManagementDBContext : DbContext
+        
     {
         public StockManagementDBContext(DbContextOptions<StockManagementDBContext> options) : base(options) { }
-
-    public DbSet<CompanyEntity> CompanyEntity { get; set; }
+        public DbSet<LabelEntity> Lables { get; set; }
+        public DbSet<CompanyEntity> CompanyEntity { get; set; }
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<CountryEntity> CountryEntity { get; set; }
     public DbSet<BranchEntity> BranchEntity { get; set; }
@@ -21,10 +22,14 @@ namespace Stock_Management_DataAccess
     public DbSet<CategorySpecificationsEntity> CategorySpecifications { get; set; }
     public DbSet<SkuEntity> SkuEntities { get; set; }
     public DbSet<CategoryEntity> CategoryEntities { get; set; }
+    public DbSet<KeyValueEntity> KeyValues { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Map LabelEntity to 'lable' table explicitly
+            modelBuilder.Entity<LabelEntity>().ToTable("lable");
 
             // Configure UserEntity
             modelBuilder.Entity<UserEntity>(entity =>
@@ -62,7 +67,7 @@ namespace Stock_Management_DataAccess
                 entity.HasIndex(e => e.BranchCode).IsUnique();
                 entity.HasIndex(e => e.IsActive);
                 entity.HasIndex(e => e.BranchCountryId);
-                entity.HasIndex(e => e.CompanyID);
+                entity.HasIndex(e => e.CompanyId);
                 
                 // Configure foreign key relationships
                 entity.HasOne(e => e.CreatedByUser)
@@ -82,7 +87,7 @@ namespace Stock_Management_DataAccess
                     
                 entity.HasOne(e => e.Company)
                     .WithMany()
-                    .HasForeignKey(e => e.CompanyID)
+                    .HasForeignKey(e => e.CompanyId)
                     .OnDelete(DeleteBehavior.Restrict);
                     
                 // Configure self-referencing relationship for head office

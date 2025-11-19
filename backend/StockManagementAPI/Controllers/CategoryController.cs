@@ -58,7 +58,7 @@ namespace StockManagementAPI.Controllers
             }
 
             [HttpPut("UpdateCategory/{categoryId}")]
-            public async Task<IActionResult> UpdateCategory(int categoryId, [FromBody] CategoryDTO dto)
+            public async Task<IActionResult> UpdateCategory(int categoryId, [FromBody] SaveCategoryRequestDTO dto)
             {
                 var result = await _categoryService.UpdateCategoryAsync(categoryId, dto);
                 if (!result)

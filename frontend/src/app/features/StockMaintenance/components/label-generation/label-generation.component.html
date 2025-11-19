@@ -22,7 +22,7 @@
               </div>
               <div class="form-group">
                 <label for="LatestContainerNumber">Latest Container Number</label>
-                <input id="LatestContainerNumber" type="text" formControlName="LatestContainerNumber" style="width: 300px;" [disabled]="true" />
+                <input id="LatestContainerNumber" type="text" formControlName="LatestContainerNumber" style="width: 300px;" [disabled]="true" placeholder="Latest Container number"  />
               </div>
               <div class="form-group">
                 <label for="latestItemNumber">Latest Item Number</label>
@@ -44,9 +44,7 @@
                 <select id="action" style="width: 300px;" formControlName="action">
                   <option value="">Select Action</option>
                   <option value="generate">Generate</option>
-                  <option value="print">Print</option>
-                  <option value="reprint">Reprint</option>
-                  <option value="Download">Reprint</option>
+                  <option value="generate_and_print">Generate and Print</option>
                 </select>
               </div>
             </div>
@@ -137,7 +135,7 @@
               <tbody>
                 <tr *ngFor="let label of pagedLabels">
                   <td>{{ label.labelType }}</td>
-                  <td>{{ label.labelValue }}</td>
+                  <td>{{ label.containerId ? label.containerId : label.itemId }}</td>
                   <td>
                     <span class="status-badge" [class.active]="label.status === 'Active'">
                       {{ label.status }}
@@ -145,7 +143,6 @@
                   </td>
                   <td>
                     <div class="label-action-buttons">
-                      <button class="action-btn edit-btn" (click)="onEditLabel(label)">Edit</button>
                       <button class="action-btn delete-btn" (click)="onDeleteLabel(label)">Delete</button>
                       <button class="action-btn print-btn" (click)="onPrintLabelRow(label)">Print</button>
                     </div>

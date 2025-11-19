@@ -15,6 +15,8 @@ import { BulkImportResponse } from '../../../../models/bulk-import-response.mode
   styleUrls: ['./sku.component.css']
 })
 export class SkuComponent implements OnInit {
+      isEditFlag: boolean = false;
+      editSkuId: number | null = null;
     specifications: Array<{ specificationId: number, specificationName: string }> = [];
   @ViewChild('specificationSelect') specificationSelect!: ElementRef;
   @ViewChild('specValueInput') specValueInput!: ElementRef;
@@ -93,8 +95,7 @@ export class SkuComponent implements OnInit {
   viewSkus() {
   this.isLoadingSkus = true;
   this.skuService.getAllSkus().subscribe({
-    next: (skus: any[]) => {
-      console.log('API SKUs:', skus); // <-- Add this line
+    next: (skus: any[]) => {    
       this.skus = skus;
       this.isLoadingSkus = false;
       this.showSkuGrid = true;
@@ -169,7 +170,21 @@ export class SkuComponent implements OnInit {
   }
 
   editSku(sku: any) {
-    // TODO: Implement edit SKU logic
+      this.isEditFlag = true;
+      this.editSkuId = sku.skuId;
+    // Populate form fields for editing
+    if (this.specificationSelect && this.specificationSelect.nativeElement) {
+      this.specificationSelect.nativeElement.value = sku.specificationId || '';
+    }
+    if (this.specValueInput && this.specValueInput.nativeElement) {
+      this.specValueInput.nativeElement.value = sku.value || '';
+    }
+    if (this.skuCodeInput && this.skuCodeInput.nativeElement) {
+      this.skuCodeInput.nativeElement.value = sku.skuCode || '';
+    }
+    if (this.activeCheckbox && this.activeCheckbox.nativeElement) {
+      this.activeCheckbox.nativeElement.checked = !!sku.isActive;
+    }
   }
   deleteSku(sku: any) {
     const skuId = typeof sku === 'object' ? sku.skuId : sku;
@@ -198,25 +213,41 @@ export class SkuComponent implements OnInit {
     const userId = currentUser?.id || 0;
 
     // Prepare payload
-    const payload = {
+    const payload: any = {
       specificationId,
       value,
       skuCode,
       isActive,
       userId
     };
-
-    // Call saveSku API
-    this.skuService.saveSku(payload).subscribe({
-      next: (response) => {
-        // Handle success (show message, reset form, etc.)
-        console.log('SKU saved:', response);
-      },
-      error: (err) => {
-        // Handle error (show error message)
-        console.error('Error saving SKU:', err);
-      }
-    });
+    if (this.isEditFlag && this.editSkuId) {
+      payload.skuId = this.editSkuId;
+      // Call updateSku API
+      this.skuService.updateSku(payload).subscribe({
+        next: (response) => {
+          // Handle success (show message, reset form, etc.)
+          console.log('SKU updated:', response);
+          this.isEditFlag = false;
+          this.editSkuId = null;
+        },
+        error: (err) => {
+          // Handle error (show error message)
+          console.error('Error updating SKU:', err);
+        }
+      });
+    } else {
+      // Call saveSku API
+      this.skuService.saveSku(payload).subscribe({
+        next: (response) => {
+          // Handle success (show message, reset form, etc.)
+          console.log('SKU saved:', response);
+        },
+        error: (err) => {
+          // Handle error (show error message)
+          console.error('Error saving SKU:', err);
+        }
+      });
+    }
   }
 
    public importSkus(): void {
