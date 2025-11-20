@@ -11,5 +11,6 @@ namespace Stock_Management_DataAccess.Interfaces
         Task<bool> UpdateLabelStatusAsync(int id, int isActive);
         LabelEntity GetLabelById(int id);
         Task<bool> UpdateLabelStatusTextAsync(int id, string status);
+        List<LabelEntity> GetDistinctActiveContainers();
     }
 }

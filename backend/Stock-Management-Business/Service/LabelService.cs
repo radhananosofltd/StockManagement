@@ -15,7 +15,8 @@ namespace Stock_Management_Business.Service
         List<LabelDTO> GetAllLabels();
         Task<bool> UpdateLabelStatusAsync(int id, int isActive);
         LabelDTO GetLabelById(int id);
-         Task<bool> UpdateLabelStatusTextAsync(int id, string status);
+        Task<bool> UpdateLabelStatusTextAsync(int id, string status);
+        List<LabelDTO> GetDistinctActiveContainers();
     }
 
     public class LabelService : ILabelService    
@@ -30,7 +31,7 @@ namespace Stock_Management_Business.Service
             _logger = logger;
         }
 
-        public LabelDTO GetLabelById(int id)
+        public LabelDTO GetLabelById(int id)      
         {
             var entity = _labelRepository.GetLabelById(id);
             if (entity == null) return null;
@@ -70,6 +71,18 @@ namespace Stock_Management_Business.Service
         public async Task<bool> UpdateLabelStatusTextAsync(int id, string status)
         {
             return await _labelRepository.UpdateLabelStatusTextAsync(id, status);
+        }
+
+        // Service method for distinct active containers
+        public List<LabelDTO> GetDistinctActiveContainers()
+        {
+            var entities = _labelRepository.GetDistinctActiveContainers();
+            return entities.Select(e => new LabelDTO
+            {
+                ContainerId = e.container_id,
+                ItemId = e.item_id,
+                Status = e.Status
+            }).ToList();
         }
     }
 }

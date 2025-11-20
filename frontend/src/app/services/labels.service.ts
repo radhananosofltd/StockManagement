@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../constants/api-endpoints.constants';
+import { LABELS_ENDPOINTS } from '../constants/api-endpoints.constants';
 
 export interface GenerateLabelRequest {
   labelType: string;
@@ -13,6 +14,10 @@ export interface GenerateLabelRequest {
 
 @Injectable({ providedIn: 'root' })
 export class LabelsService {
+    // Get distinct active containers
+    getDistinctActiveContainers(): Observable<any[]> {
+      return this.http.get<any[]>(LABELS_ENDPOINTS.DISTINCT_ACTIVE_CONTAINERS);
+    }
   private readonly baseUrl = `${API_BASE_URL}/labels`;
 
   constructor(private http: HttpClient) {}

@@ -1,3 +1,4 @@
+
 /**
  * API Endpoints Constants
  * Centralized configuration for all API endpoints used in the Stock Management application
@@ -16,6 +17,11 @@ export const API_CONFIG = {
 
 // Construct full API base URL using environment configuration
 export const API_BASE_URL = `${environment.apiBaseUrl}/api`;
+
+// Labels API Endpoints
+export const LABELS_ENDPOINTS = {
+  DISTINCT_ACTIVE_CONTAINERS: `${API_BASE_URL}/labels/distinct-active-containers`
+} as const;
 
 // Company API Endpoints
 export const COMPANY_ENDPOINTS = {
@@ -218,7 +224,8 @@ export const API_ENDPOINTS = {
   USER: USER_ENDPOINTS,
   DASHBOARD: DASHBOARD_ENDPOINTS,
   CATEGORY: CATEGORY_ENDPOINTS,
-  SPECIFICATION: SPECIFICATION_ENDPOINTS
+  SPECIFICATION: SPECIFICATION_ENDPOINTS,
+  LABELS: LABELS_ENDPOINTS
 } as const;
 
 // Type definitions for better TypeScript support

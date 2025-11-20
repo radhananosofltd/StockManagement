@@ -32,7 +32,8 @@
             <div>
               <label for="category" style="margin-bottom:8px; display:block;">Category:</label>
               <select id="category" [(ngModel)]="category" name="category" style="margin-top:4px; width:180px;">
-                <option *ngFor="let cat of categories" [value]="cat.id">{{cat.name}}</option>
+                <option value="">Select Category</option>
+                <option *ngFor="let cat of categories; trackBy: trackById" [value]="cat.id">{{cat.name}}</option>
               </select>
             </div>
             <div *ngIf="inwardType === 'Bulk'">
@@ -54,7 +55,8 @@
                 <tr>
                   <td>Container ID</td>
                   <td style="text-align:left;">
-                    <select [(ngModel)]="containerId" name="containerId" class="spec-dropdown" style="width:100%;">
+                    <select [(ngModel)]="containerId" name="containerId" class="spec-dropdown" style="width:100%;" [disabled]="stockType !== 'Container'">
+                      <option>Generate</option>
                       <option *ngFor="let container of containers" [value]="container.id">{{container.name}}</option>
                     </select>
                   </td>
@@ -67,19 +69,19 @@
                     </select>
                   </td>
                 </tr>
-                <tr *ngFor="let spec of specifications">
-                  <td>{{spec}}</td>
-                  <td >
+                <tr *ngFor="let spec of filteredSpecifications">
+                  <td>{{spec.specificationName}}</td>
+                  <td>
                       <div style="display: flex; align-items: center; gap: 8px; width:100%;">
-                        <select [(ngModel)]="specValues[spec]" name="spec_{{spec}}" class="spec-dropdown" style="flex:1; min-width:0;">
-                          <option *ngFor="let option of getSpecOptions(spec)" [value]="option.id">{{option.name}}</option>
+                        <select [(ngModel)]="specValues[spec.specificationName]" name="spec_{{spec.specificationName}}" class="spec-dropdown" style="flex:1; min-width:0;">
+                          <option *ngFor="let option of getSpecOptions(spec.specificationName)" [value]="option.id">{{option.name}}</option>
                         </select>
                       </div>
                   </td>
-                  <td >
-                      <div style="display: flex; align-items: center; gap: 8px; width:100%;">
-                        <input type="checkbox" [(ngModel)]="specChecked[spec]" name="specCheck_{{spec}}" style="width:16px; height:16px; margin-left:8px;" />
-                      </div>
+                  <td>
+                    <div *ngIf="spec.lockable === true" style="display: flex; align-items: center; gap: 8px; width:100%;">
+                      <input type="checkbox" [(ngModel)]="specChecked[spec.specificationName]" name="specCheck_{{spec.specificationName}}" style="width:16px; height:16px; margin-left:8px;" />
+                    </div>
                   </td>
                 </tr>
               </tbody>
