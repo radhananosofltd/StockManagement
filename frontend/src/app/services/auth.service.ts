@@ -30,6 +30,7 @@ export interface UserProfile {
   firstName?: string;
   lastName?: string;
   createdAt?: string;
+  isActive?: boolean;
 }
 
 export interface SignupRequest {
@@ -191,5 +192,16 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.userKey);
     }
+  }
+
+    updateUser(user: any): Observable<any> {
+    const token = this.getToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    // Use the UserController endpoint directly
+    const url = `/api/User/update`;
+    return this.http.put<any>(url, user, { headers });
   }
 }

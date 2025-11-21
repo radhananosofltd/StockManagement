@@ -20,7 +20,13 @@ namespace Stock_Management_DataAccess.Repositories
 
         public async Task<UserEntity?> GetByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+            try
+            {
+                return await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+            }catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<UserEntity?> GetByEmailAsync(string email)
@@ -30,7 +36,8 @@ namespace Stock_Management_DataAccess.Repositories
 
         public async Task<UserEntity?> GetByResetTokenAsync(string resetToken)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.ResetPasswordToken == resetToken);
+            // Property ResetPasswordToken no longer exists
+            return null;
         }
 
         public async Task<UserEntity> CreateAsync(UserEntity user)
@@ -45,17 +52,8 @@ namespace Stock_Management_DataAccess.Repositories
             try
             {
                 // Ensure DateTime values have proper UTC kind for PostgreSQL
-                if (user.LastLoginAt.HasValue)
-                {
-                    user.LastLoginAt = DateTime.SpecifyKind(user.LastLoginAt.Value, DateTimeKind.Utc);
-                }
-                
-                if (user.ResetPasswordExpiry.HasValue)
-                {
-                    user.ResetPasswordExpiry = DateTime.SpecifyKind(user.ResetPasswordExpiry.Value, DateTimeKind.Utc);
-                }
-                
-                user.CreatedAt = DateTime.SpecifyKind(user.CreatedAt, DateTimeKind.Utc);
+                user.CreatedDate = DateTime.SpecifyKind(user.CreatedDate, DateTimeKind.Utc);
+                user.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
 
                 // Find the existing entity to update specific properties
                 var existingUser = await _context.Users.FindAsync(user.Id);
@@ -70,10 +68,12 @@ namespace Stock_Management_DataAccess.Repositories
                 existingUser.PasswordHash = user.PasswordHash;
                 existingUser.FirstName = user.FirstName;
                 existingUser.LastName = user.LastName;
-                existingUser.LastLoginAt = user.LastLoginAt;
+                existingUser.DefaultCompanyId = user.DefaultCompanyId;
+                existingUser.DefaultBranchId = user.DefaultBranchId;
+                existingUser.RoleId = user.RoleId;
                 existingUser.IsActive = user.IsActive;
-                existingUser.ResetPasswordToken = user.ResetPasswordToken;
-                existingUser.ResetPasswordExpiry = user.ResetPasswordExpiry;
+                existingUser.CreatedDate = user.CreatedDate;
+                existingUser.ModifiedDate = user.ModifiedDate;
 
                 await _context.SaveChangesAsync();
                 return existingUser;
