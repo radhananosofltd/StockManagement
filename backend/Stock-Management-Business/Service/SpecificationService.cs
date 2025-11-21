@@ -101,7 +101,10 @@ namespace Stock_Management_Business.Service
             existingSpec.Background = dto.Background;
             existingSpec.IsActive = dto.IsActive;
             existingSpec.ModifiedBy = dto.UserId;
-            existingSpec.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+         //   existingSpec.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            if (existingSpec.ModifiedDate.Kind != DateTimeKind.Utc)
+                existingSpec.ModifiedDate = DateTime.SpecifyKind(existingSpec.ModifiedDate, DateTimeKind.Utc);
+
             return await _repo.UpdateSpecificationAsync(existingSpec);
         }
         public async Task<bool> DeleteSpecificationAsync(int specificationid, int userId)

@@ -51,7 +51,14 @@ export class InwardComponent implements OnInit, OnChanges {
   isStockInwardPanelExpanded() { return this.panelExpanded; }
 
   // Controls
-  inwardType: string = 'Single';
+  private _inwardType: string = 'Single';
+  get inwardType(): string {
+    return this._inwardType;
+  }
+  set inwardType(value: string) {
+    this._inwardType = value;
+    this.updateFinalSku();
+  }
   stockType: string = 'Container';
   category: string = '';
   bulkQty: number | null = null;
@@ -122,6 +129,7 @@ export class InwardComponent implements OnInit, OnChanges {
         const uniqueIds = Array.from(new Set((containers || []).map((l: any) => l.containerId || l.container_id)));
         this.containers = uniqueIds.map(id => ({ id, name: id }));
         this.isLoading = false;
+        this.updateFinalSku();
         console.log('Loader should now hide (success)');
         this.cdr.detectChanges();
       }, err => {
@@ -136,6 +144,7 @@ export class InwardComponent implements OnInit, OnChanges {
   // Watch for containerId changes and update items dropdown
   ngOnChanges(): void {
     this.updateItemsForContainer();
+    this.updateFinalSku();
   }
 
   updateItemsForContainer(): void {

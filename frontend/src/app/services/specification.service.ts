@@ -19,6 +19,14 @@ export interface AddSpecificationPayload {
 
 @Injectable({ providedIn: 'root' })
 export class SpecificationService {
+        updateSpecification(id: number, payload: any) {
+          // Ensure specificationId is included in the payload
+          const fullPayload = { ...payload, SpecificationId: id };
+          return this.http.put<any>(`${SPECIFICATION_ENDPOINTS.BASE}/UpdateSpecification?specificationid=${id}`, fullPayload, { headers: API_CONFIG.DEFAULT_HEADERS });
+        }
+      getSpecificationById(id: number) {
+        return this.http.get<any>(`${SPECIFICATION_ENDPOINTS.BASE}/${id}`, { headers: API_CONFIG.DEFAULT_HEADERS });
+      }
     deleteSpecification(specificationId: number, userId: number) {
       return this.http.delete(`${SPECIFICATION_ENDPOINTS.BASE}/DeleteSpecification?specificationid=${specificationId}&userId=${userId}`, { headers: API_CONFIG.DEFAULT_HEADERS });
     }
