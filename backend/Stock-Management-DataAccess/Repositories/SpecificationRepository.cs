@@ -60,6 +60,15 @@ namespace Stock_Management_DataAccess.Repositories
         {
             try
             {
+                // Always set ModifiedDate to UTC now
+                entity.ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+
+                // Ensure CreatedDate is also UTC Kind
+                if (entity.CreatedDate.Kind == DateTimeKind.Unspecified)
+                    entity.CreatedDate = DateTime.SpecifyKind(entity.CreatedDate, DateTimeKind.Utc);
+                else
+                    entity.CreatedDate = entity.CreatedDate.ToUniversalTime();
+
                 _context.SpecificationEntity.Update(entity);
                 var result = await _context.SaveChangesAsync();
                 return result > 0;

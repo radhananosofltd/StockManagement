@@ -29,6 +29,8 @@ interface Specification {
   styleUrls: ['./item-specification.component.css']
 })
 export class ItemSpecificationComponent {
+      isEdit: boolean = false;
+      editingSpecificationId: number | null = null;
     successMessage = signal('');
     errorMessage = signal('');
   title = 'Item Specification Configuration';
@@ -101,17 +103,35 @@ export class ItemSpecificationComponent {
         IsActive: this.specificationForm.get('isActive')?.value,
         UserId: currentUser?.id || null
       };
-      (this.specificationService as any).addSpecification(payload).subscribe({
-        next: (response: { SpecificationId: number }) => {
-          this.isSubmitting.set(false);
-          console.log('Specification added successfully', response);
-          this.resetForm();
-        },
-        error: (err: any) => {
-          this.isSubmitting.set(false);
-          console.error('Error adding specification', err);
-        }
-      });
+      if (this.isEdit && this.editingSpecificationId) {
+        // Update mode
+        (this.specificationService as any).updateSpecification(this.editingSpecificationId, payload).subscribe({
+          next: (response: any) => {
+            this.isSubmitting.set(false);
+            console.log('Specification updated successfully', response);
+            this.isEdit = false;
+            this.editingSpecificationId = null;
+            this.resetForm();
+          },
+          error: (err: any) => {
+            this.isSubmitting.set(false);
+            console.error('Error updating specification', err);
+          }
+        });
+      } else {
+        // Add mode
+        (this.specificationService as any).addSpecification(payload).subscribe({
+          next: (response: { SpecificationId: number }) => {
+            this.isSubmitting.set(false);
+            console.log('Specification added successfully', response);
+            this.resetForm();
+          },
+          error: (err: any) => {
+            this.isSubmitting.set(false);
+            console.error('Error adding specification', err);
+          }
+        });
+      }
     } else {
       // Mark all fields as touched to show validation errors
       Object.keys(this.specificationForm.controls).forEach(key => {
@@ -240,8 +260,63 @@ export class ItemSpecificationComponent {
   }
 
   editSpecification(spec: any) {
-    // TODO: Implement edit logic
-    console.log('Edit specification:', spec);
+    // Fetch the latest specification data from the API and patch the form
+    const specificationId = spec.id ?? spec.specificationId;
+    this.isEdit = true;
+    this.editingSpecificationId = specificationId;
+    this.isLoadingSpecifications.set(true);
+    (this.specificationService as any).getSpecificationById(specificationId).subscribe({
+      next: (fetched: any) => {
+        this.isLoadingSpecifications.set(false);
+        // Patch the form with the correct mapping to form control names
+        this.specificationForm.patchValue({
+          isDefault: fetched.isDefault ?? false,
+          name: fetched.specificationName ?? '',
+          dataType: fetched.datatype ?? 'Double',
+          nameCase: fetched.nameCase ?? 'Title',
+          valueCase: fetched.valueCase ?? 'Title',
+          sku: fetched.sku ?? false,
+          editable: fetched.editable ?? false,
+          configurable: fetched.configurable ?? false,
+          bulkInput: fetched.bulkInput ?? false,
+          lockable: fetched.lockable ?? false,
+          background: fetched.background ?? false,
+          isActive: fetched.isActive ?? true
+        });
+        // Mark all fields as touched to update UI
+        Object.keys(this.specificationForm.controls).forEach(key => {
+          this.specificationForm.get(key)?.markAsTouched();
+        });
+        this.isFormExpanded.set(true);
+      },
+      error: (err: any) => {
+        this.isLoadingSpecifications.set(false);
+        // If 404, fallback to patching with the selected spec's values
+        if (err.status === 404) {
+          this.specificationForm.patchValue({
+            isDefault: spec.isDefault ?? false,
+            name: spec.specificationName ?? '',
+            dataType: spec.datatype ?? 'Double',
+            nameCase: spec.nameCase ?? 'Title',
+            valueCase: spec.valueCase ?? 'Title',
+            sku: spec.sku ?? false,
+            editable: spec.editable ?? false,
+            configurable: spec.configurable ?? false,
+            bulkInput: spec.bulkInput ?? false,
+            lockable: spec.lockable ?? false,
+            background: spec.background ?? false,
+            isActive: spec.isActive ?? true
+          });
+          Object.keys(this.specificationForm.controls).forEach(key => {
+            this.specificationForm.get(key)?.markAsTouched();
+          });
+          this.isFormExpanded.set(true);
+        } else {
+          this.errorMessage.set('Failed to fetch specification for editing.');
+          console.error('Error fetching specification:', err);
+        }
+      }
+    });
   }
 
   deleteSpecification(spec: any) {

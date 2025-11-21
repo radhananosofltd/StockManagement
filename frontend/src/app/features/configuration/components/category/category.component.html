@@ -131,10 +131,12 @@
                               <input type="checkbox" [checked]="false" [id]="spec.specificationId" />
                             </td>
                             <td class="spec-sku-order">
-                              <select class="sku-order-dropdown" [ngModel]="spec.skuOrder" (ngModelChange)="onSkuOrderChange($event, spec)" [ngModelOptions]="{standalone: true}" [id]="'sku-order-' + spec.specificationId">
-                                <option value=""></option>
-                                <option *ngFor="let order of getAvailableSkuOrders(spec)" [value]="order">{{ order }}</option>
-                              </select>
+                              <ng-container *ngIf="spec.sku">
+                                <select class="sku-order-dropdown" [ngModel]="spec.skuOrder" (ngModelChange)="onSkuOrderChange($event, spec)" [ngModelOptions]="{standalone: true}" [id]="'sku-order-' + spec.specificationId">
+                                  <option value=""></option>
+                                  <option *ngFor="let order of getAvailableSkuOrders(spec)" [value]="order">{{ order }}</option>
+                                </select>
+                              </ng-container>
                             </td>
                           </tr>
                         }

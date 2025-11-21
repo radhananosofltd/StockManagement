@@ -1,13 +1,14 @@
 <div class="user-profile">
   <div class="page-header">
-    <h2>User Profile</h2>
-    <p>View and manage user details</p>
+    <h2>{{ headerTitle }}</h2>
+    <p *ngIf="headerTitle === 'User Details'">View and manage user details</p>
+    <p *ngIf="headerTitle === 'New User'">Create a new user</p>
   </div>
 
   <!-- New User Panel -->
   <div class="expandable-panel">
     <div class="panel-header" (click)="toggleNewUserPanel()">
-      <h3>New user</h3>
+      <h3>{{ headerTitle }}</h3>
       <button class="toggle-btn" type="button">
         <svg 
           class="toggle-icon" 
@@ -21,25 +22,25 @@
     </div>
     <div class="panel-content" [class.expanded]="isNewUserPanelExpanded">
       <div class="branch-form-container">
-        <form class="branch-form">
+        <form class="branch-form" #userForm="ngForm" (ngSubmit)="onSubmit(userForm)">
           <div class="form-row-three">
             <div class="form-group">
               <label for="username">Username</label>
-              <input id="username" type="text" class="field-value" placeholder="Enter username" />
+              <input id="username" name="username" type="text" class="field-value" placeholder="Enter username" [value]="userProfile?.username || ''" readonly />
             </div>
             <div class="form-group">
               <label for="email">Email</label>
-              <input id="email" type="email" class="field-value" placeholder="Enter email" />
+              <input id="email" name="email" type="email" class="field-value" placeholder="Enter email" [value]="userProfile?.email || ''" readonly />
             </div>
             <div class="form-group" style="padding: 0;">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div style="display: flex; flex-direction: column;">
                   <label for="password">Password</label>
-                  <input id="password" type="password" class="field-value" placeholder="Enter password" />
+                  <input id="password" name="password" type="password" class="field-value" placeholder="Enter password" />
                 </div>
                 <div style="display: flex; flex-direction: column;">
                   <label for="confirmPassword">Confirm Password</label>
-                  <input id="confirmPassword" type="password" class="field-value" placeholder="Confirm password" />
+                  <input id="confirmPassword" name="confirmPassword" type="password" class="field-value" placeholder="Confirm password" />
                 </div>
               </div>
             </div>
@@ -47,31 +48,31 @@
           <div class="form-row-three">
             <div class="form-group">
               <label for="firstName">First Name</label>
-              <input id="firstName" type="text" class="field-value" placeholder="Enter first name" />
+              <input id="firstName" name="firstName" type="text" class="field-value" placeholder="Enter first name" [value]="userProfile?.firstName || ''" readonly />
             </div>
             <div class="form-group">
               <label for="lastName">Last Name</label>
-              <input id="lastName" type="text" class="field-value" placeholder="Enter last name" />
+              <input id="lastName" name="lastName" type="text" class="field-value" placeholder="Enter last name" [value]="userProfile?.lastName || ''" readonly />
             </div>
             <div class="form-group">
               <label for="defaultCompany">Default Company</label>
-              <select id="defaultCompany" class="field-value">
+              <select id="defaultCompany" name="defaultCompany" class="field-value">
                 <option value="">Select Company</option>
-                <!-- Add company options dynamically -->
+                <option *ngFor="let company of companies" [value]="company.id">{{ company.companyName }}</option>
               </select>
             </div>
           </div>
           <div class="form-row-three">
             <div class="form-group">
               <label for="defaultBranch">Default Branch</label>
-              <select id="defaultBranch" class="field-value">
+              <select id="defaultBranch" name="defaultBranch" class="field-value">
                 <option value="">Select Branch</option>
-                <!-- Add branch options dynamically -->
+                <option *ngFor="let branch of branches" [value]="branch.id">{{ branch.branchName }}</option>
               </select>
             </div>
             <div class="form-group">
               <label for="role">Role</label>
-              <select id="role" class="field-value">
+              <select id="role" name="role" class="field-value">
                 <option value="">Select Role</option>
                 <option value="admin">Admin</option>
                 <option value="manager">Manager</option>
@@ -83,8 +84,10 @@
               <label for="isActive" class="checkbox-label" style="margin-top: 1.5rem;">
                 <input
                   id="isActive"
+                  name="isActive"
                   type="checkbox"
                   class="checkbox-input"
+                  [(ngModel)]="isActive"
                 />
                 <span class="checkbox-text">Active</span>
               </label>
@@ -95,7 +98,7 @@
               <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
               </svg>
-              Create User
+              {{ headerTitle === 'User Details' ? 'Save' : 'Create User' }}
             </button>
             <button type="reset" class="reset-btn">
               <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -110,7 +113,7 @@
   </div>
 
   <!-- Users Panel -->
-  <div class="expandable-panel">
+  <div class="expandable-panel" *ngIf="showUsersPanel">
     <div class="panel-header" (click)="toggleUsersPanel()">
       <h3>Users</h3>
       <button class="toggle-btn" type="button">

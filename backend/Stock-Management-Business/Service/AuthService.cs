@@ -121,7 +121,7 @@ namespace Stock_Management_Business.Service
                     PasswordHash = HashPassword(password),
                     FirstName = firstName,
                     LastName = lastName,
-                    CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+                    CreatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
                     IsActive = true
                 };
 

@@ -47,8 +47,7 @@ namespace Stock_Management_DataAccess.Repositories
             {
                 _logger.LogInformation($"Saving {labels.Count} labels to Lables table.");
                 await _context.Lables.AddRangeAsync(labels);
-                await _context.SaveChangesAsync();
-
+                await _context.SaveChangesAsync();                    
                 // Update last container_id in keyvalues table
                 if (labels != null && labels.Count > 0)
                 {
@@ -82,6 +81,15 @@ namespace Stock_Management_DataAccess.Repositories
             label.Status = status;
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        // Get distinct active container_id, item_id, and status
+        public List<LabelEntity> GetDistinctActiveContainers()
+        {
+            // Return all item_ids for each container_id with status 'printed' and is_active=1
+            return _context.Lables
+                .Where(l => l.Status != null && l.Status.ToLower() == "printed" && l.is_active == 1)
+                .ToList();
         }
     }
 }

@@ -59,6 +59,19 @@ namespace Stock_Management_DataAccess.Repositories
             }
         }
 
+        public async Task<SpecificationEntity?> GetSpecificationByIDAsync(int specificationId)
+        {
+            try
+            {
+                return await _context.Set<SpecificationEntity>().FirstOrDefaultAsync(s => s.SpecificationId == specificationId && s.IsActive);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching Specification by ID.");
+                throw;
+            }
+        }
+
         public async Task SaveBulkSkusAsync(List<SkuEntity> skus)
         {
             try

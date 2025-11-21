@@ -29,7 +29,7 @@ namespace StockManagementAPI.Controllers
         private readonly ILabelService _labelService;
         private readonly ILogger<LabelsController> _logger;
 
-        public LabelsController(IKeyValueRepository keyValueRepository, ILabelService labelService, ILogger<LabelsController> logger)
+        public LabelsController(IKeyValueRepository keyValueRepository, ILabelService labelService, ILogger<LabelsController> logger)       
         {
             _keyValueRepository = keyValueRepository;
             _labelService = labelService;
@@ -169,5 +169,12 @@ namespace StockManagementAPI.Controllers
                 var pdfBytes = Helpers.PdfBarcodeGenerator.GenerateBarcodesPdf(barcodePairs);
                 return File(pdfBytes, "application/pdf", $"label_{id}_barcodes.pdf");
             }
+
+        [HttpGet("distinct-active-containers")]
+        public IActionResult GetDistinctActiveContainers()
+        {
+            var result = _labelService.GetDistinctActiveContainers();
+            return Ok(result);
+        }
     }
 }

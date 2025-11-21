@@ -14,6 +14,11 @@
       </button>
     </div>
     <div class="panel-content" [class.expanded]="isStockInwardPanelExpanded()">
+            <div *ngIf="isLoading" class="loader-overlay">
+              <div class="loader-spinner"></div>
+              <div class="loader-text">Loading...</div>
+            </div>
+      
       <div class="inward-form-container">
         <form class="inward-form">
           <div class="controls-grid-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; align-items: center;">
@@ -32,12 +37,19 @@
             <div>
               <label for="category" style="margin-bottom:8px; display:block;">Category:</label>
               <select id="category" [(ngModel)]="category" name="category" style="margin-top:4px; width:180px;">
-                <option *ngFor="let cat of categories" [value]="cat.id">{{cat.name}}</option>
+                <option value="">Select Category</option>
+                <option *ngFor="let cat of categories; trackBy: trackById" [value]="cat.id">{{cat.name}}</option>
               </select>
             </div>
-            <div *ngIf="inwardType === 'Bulk'">
-              <label for="bulkQty" style="margin-bottom:8px; display:block;">Bulk Qty:</label>
-              <input id="bulkQty" type="number" [(ngModel)]="bulkQty" name="bulkQty" style="width:180px; margin-top:4px;" />
+            <div style="display: flex; flex-direction: column;">
+                <label for="finalSku" style="margin-bottom:8px; display:block;">SKU:</label>
+                <input id="finalSku" type="text" [(ngModel)]="finalSku" name="finalSku" style="width:120px; margin-top:4px;" readonly />
+            </div>
+            <div *ngIf="inwardType === 'Bulk'" style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;">
+              <div style="display: flex; flex-direction: column;">
+                <label for="bulkQty" style="margin-bottom:8px; display:block;">Bulk Qty:</label>
+                <input id="bulkQty" type="number" [(ngModel)]="bulkQty" name="bulkQty" style="width:120px; margin-top:4px;" />
+              </div>              
             </div>
             <div *ngIf="inwardType !== 'Bulk'" style="height: 38px;"></div>
           </div>
@@ -48,6 +60,7 @@
                   <th style="width:120px;">Specification</th>
                   <th style="width:200px;">Value</th>
                   <th style="width:50px;">Lock</th>
+                  <th style="width:100px;">SKU Code</th>
                 </tr>
               </thead>
               <tbody>
@@ -55,6 +68,7 @@
                   <td>Container ID</td>
                   <td style="text-align:left;">
                     <select [(ngModel)]="containerId" name="containerId" class="spec-dropdown" style="width:100%;">
+                      <option>Generate</option>
                       <option *ngFor="let container of containers" [value]="container.id">{{container.name}}</option>
                     </select>
                   </td>
@@ -62,24 +76,36 @@
                 <tr>
                   <td>Item ID</td>
                   <td style="text-align:left;">
-                    <select [(ngModel)]="itemId" name="itemId" class="spec-dropdown" style="width:100%;">
+                    <select [(ngModel)]="itemId" name="itemId" class="spec-dropdown" style="width:100%;" [disabled]="stockType == 'Container'">
                       <option *ngFor="let item of items" [value]="item.id">{{item.name}}</option>
                     </select>
                   </td>
                 </tr>
-                <tr *ngFor="let spec of specifications">
-                  <td>{{spec}}</td>
-                  <td >
+                <tr *ngFor="let spec of filteredSpecifications">
+                  <td>{{spec.specificationName}}</td>
+                  <td>
                       <div style="display: flex; align-items: center; gap: 8px; width:100%;">
-                        <select [(ngModel)]="specValues[spec]" name="spec_{{spec}}" class="spec-dropdown" style="flex:1; min-width:0;">
-                          <option *ngFor="let option of getSpecOptions(spec)" [value]="option.id">{{option.name}}</option>
-                        </select>
+                        <ng-select
+                          [items]="getSpecOptions(spec.specificationName)"
+                          bindLabel="skuvalue"
+                          bindValue="skuvalue"
+                          [(ngModel)]="specValues[spec.specificationName]"
+                          (change)="onSpecValueChange(spec, $event)"
+                          [searchable]="true"
+                          name="spec_{{spec.specificationName}}"
+                          class="spec-dropdown"
+                          style="flex:1; min-width:0;"
+                        >
+                        </ng-select>
                       </div>
                   </td>
-                  <td >
-                      <div style="display: flex; align-items: center; gap: 8px; width:100%;">
-                        <input type="checkbox" [(ngModel)]="specChecked[spec]" name="specCheck_{{spec}}" style="width:16px; height:16px; margin-left:8px;" />
-                      </div>
+                  <td>
+                    <div *ngIf="spec.lockable === true" style="display: flex; align-items: center; gap: 8px; width:100%;">
+                      <input type="checkbox" [(ngModel)]="specChecked[spec.specificationName]" name="specCheck_{{spec.specificationName}}" style="width:16px; height:16px; margin-left:8px;" />
+                    </div>
+                  </td>
+                  <td>
+                    <input type="text" [(ngModel)]="spec.sku_code" name="skuCode_{{spec.specificationName}}" class="sku-input" style="width:100%;" placeholder="SKU Code" />
                   </td>
                 </tr>
               </tbody>

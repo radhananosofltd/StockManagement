@@ -12,6 +12,7 @@ namespace Stock_Management_DataAccess.Interfaces
         Task<int> SaveSkuAsync(SkuEntity sku);
         Task<List<SkuEntity>> GetAllSkusAsync();
         Task<List<SpecificationEntity>> GetAllSpecificationsAsync();
+        Task<SpecificationEntity?> GetSpecificationByIDAsync(int specificationId);
         Task SaveBulkSkusAsync(List<SkuEntity> skus);
         Task<SkuEntity> GetSkuByIdAsync(int skuId);
         Task UpdateSkuAsync(SkuEntity sku);
