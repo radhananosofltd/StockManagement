@@ -41,7 +41,8 @@ interface Category {
 })
 export class CategoryComponent {
   skuOrderOptions: number[] = [1, 2, 3, 4, 5, 6];
-
+ showAddSpecPopup = false;
+  addSpecForm: FormGroup;
   getAvailableSkuOrders(currentSpec: Specification): number[] {
     const specs: Specification[] = this.specifications();
     const selectedOrders = specs
@@ -94,6 +95,20 @@ export class CategoryComponent {
     });
     // Load specifications from API on component initialization
     this.loadSpecifications();
+
+    this.addSpecForm = this.fb.group({
+        isDefault: [false],
+        name: ['', [Validators.required]],
+        dataType: ['Double', [Validators.required]],
+        nameCase: ['Title'],
+        valueCase: ['Title'],
+        sku: [false],
+        editable: [false],
+        configurable: [false],
+        bulkInput: [false],
+        lockable: [false],
+        background: [false]
+      });
   }
 
   toggleAddCategoryPanel() {
@@ -367,4 +382,63 @@ export class CategoryComponent {
       }
     });
   }
+
+  
+    openAddSpecPopup() {
+      this.showAddSpecPopup = true;
+    }
+
+    closeAddSpecPopup() {
+      this.showAddSpecPopup = false;
+      this.addSpecForm.reset({
+        isDefault: false,
+        name: '',
+        dataType: 'Double',
+        nameCase: 'Title',
+        valueCase: 'Title',
+        sku: false,
+        editable: false,
+        configurable: false,
+        bulkInput: false,
+        lockable: false,
+        background: false
+      });
+    }
+  submitAddSpecForm() {
+    const currentUser = this.authService.getCurrentUser();
+    if (this.addSpecForm && this.addSpecForm.valid) {
+      this.isSubmitting.set(true);
+      const payload = {
+        isDefault: this.addSpecForm.get('isDefault')?.value,
+        specificationName: this.addSpecForm.get('name')?.value,
+        datatype: this.addSpecForm.get('dataType')?.value,
+        nameCase: this.addSpecForm.get('nameCase')?.value,
+        valueCase: this.addSpecForm.get('valueCase')?.value,
+        sku: this.addSpecForm.get('sku')?.value,
+        editable: this.addSpecForm.get('editable')?.value,
+        configurable: this.addSpecForm.get('configurable')?.value,
+        bulkInput: this.addSpecForm.get('bulkInput')?.value,
+        lockable: this.addSpecForm.get('lockable')?.value,
+        background: this.addSpecForm.get('background')?.value,
+        isActive: true,
+        userId: currentUser?.id || null
+      };
+      this.specificationService.addSpecification(payload).subscribe({
+        next: (response: { SpecificationId: number }) => {
+          this.isSubmitting.set(false);
+          this.closeAddSpecPopup();
+          this.loadSpecifications();
+        },
+        error: (err: any) => {
+          this.isSubmitting.set(false);
+          console.error('Error adding specification', err);
+        }
+      });
+    } else if (this.addSpecForm) {
+      Object.keys(this.addSpecForm.controls).forEach(key => {
+        this.addSpecForm.get(key)?.markAsTouched();
+      });
+    }
+  }
+  
 }

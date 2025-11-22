@@ -1,3 +1,79 @@
+  <div class="modal-overlay" *ngIf="showAddSpecPopup">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span>Add Specification</span>
+        <button class="close-btn" (click)="closeAddSpecPopup()">&times;</button>
+      </div>
+      <form [formGroup]="addSpecForm" class="specification-form">
+        <div class="form-row-four">
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label for="name" style="margin: 0;">Name</label>
+              <label for="isDefault" style="display: flex; align-items: center; gap: 0.25rem; margin: 0; white-space: nowrap;">
+                <input id="isDefault" type="checkbox" formControlName="isDefault" class="checkbox-input" />
+                <span style="font-size: 0.75rem; color: #64748b;">Default</span>
+              </label>
+            </div>
+            <input id="name" type="text" formControlName="name" placeholder="Enter name" />
+          </div>
+          <div class="form-group">
+            <label for="dataType">DataType</label>
+            <select id="dataType" formControlName="dataType">
+              <option value="Double">Double</option>
+              <option value="String">String</option>
+              <option value="DateTime">DateTime</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="nameCase">Name Case</label>
+            <select id="nameCase" formControlName="nameCase">
+              <option value="Title">Title</option>
+              <option value="Lower">Lower</option>
+              <option value="Upper">Upper</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="valueCase">Value Case</label>
+            <select id="valueCase" formControlName="valueCase">
+              <option value="Title">Title</option>
+              <option value="Lower">Lower</option>
+              <option value="Upper">Upper</option>
+              <option value="WholeNumber">Whole Number</option>
+              <option value="Double">Double</option>
+              <option value="Date">Date</option>
+              <option value="DateTime">DateTime</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row-four">
+          <div class="form-group">
+            <label class="checkbox-label"><input type="checkbox" formControlName="sku" class="checkbox-input" /> SKU</label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label"><input type="checkbox" formControlName="editable" class="checkbox-input" /> Editable</label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label"><input type="checkbox" formControlName="configurable" class="checkbox-input" /> Configurable</label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label"><input type="checkbox" formControlName="bulkInput" class="checkbox-input" /> Bulk Input</label>
+          </div>
+        </div>
+        <div class="form-row-four">
+          <div class="form-group">
+            <label class="checkbox-label"><input type="checkbox" formControlName="lockable" class="checkbox-input" /> Lockable</label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label"><input type="checkbox" formControlName="background" class="checkbox-input" /> Background</label>
+          </div>
+        </div>
+        <div class="form-actions" style="margin-top: 1rem;">
+          <button type="button" class="submit-btn" [disabled]="addSpecForm.invalid" (click)="submitAddSpecForm()">Save</button>
+          <button type="button" class="reset-btn" (click)="closeAddSpecPopup()">Reset</button>
+        </div>
+      </form>
+    </div>
+  </div>
 <div class="category-page">
   <div class="page-header">
     <h2>Category Management</h2>
@@ -19,7 +95,6 @@
         </svg>
       </button>
     </div>
-
     <div class="panel-content" [class.expanded]="isAddCategoryPanelExpanded()">
       <div class="category-form-container">
         <form [formGroup]="categoryForm">
@@ -29,18 +104,23 @@
           <!-- Category Name and Active Checkbox in same row -->
           <div class="form-row">
             <div class="form-row-col1">
-              <div class="form-field category-name-field">
-                <label for="categoryName">Category <span class="required">*</span></label>
-                <input 
-                  type="text" 
-                  id="categoryName"
-                  formControlName="categoryName"
-                  placeholder="Enter category name"
-                  [class.error]="categoryForm.get('categoryName')?.invalid && categoryForm.get('categoryName')?.touched"
-                />
-                @if (categoryForm.get('categoryName')?.invalid && categoryForm.get('categoryName')?.touched) {
-                  <span class="error-message">Category name is required</span>
-                }
+              <div class="form-field category-name-field" style="flex-direction: row; align-items: flex-end; gap: 1rem;">
+                <div style="flex: 1 1 0; display: flex; flex-direction: column;">
+                  <label for="categoryName">Category <span class="required">*</span></label>
+                  <input 
+                    type="text" 
+                    id="categoryName"
+                    formControlName="categoryName"
+                    placeholder="Enter category name"
+                    [class.error]="categoryForm.get('categoryName')?.invalid && categoryForm.get('categoryName')?.touched"
+                  />
+                  @if (categoryForm.get('categoryName')?.invalid && categoryForm.get('categoryName')?.touched) {
+                    <span class="error-message">Category name is required</span>
+                  }
+                </div>
+                <button class="submit-btn" type="button" (click)="openAddSpecPopup()" style="margin-bottom: 0.1rem; min-width: 160px;">
+                  <span style="font-size: 1.2em; margin-right: 0.5em;">+</span> Add Specification
+                </button>
               </div>
               <div class="form-field checkbox-field-inline">
                 <label>
